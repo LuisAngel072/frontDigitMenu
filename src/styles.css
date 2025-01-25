@@ -1,10 +1,40 @@
 :root {
-    --color-boton: #F28C0F;
+    --color-botonP: #F28C0F;
+    --color-botonPH: #f0a952;
+    --color-botonPA: #d47500;
+}
+.btn-prim {
+    background-color: var(--color-botonP);
+    color: white;
+    border-color: var(--color-botonP);
+    transition: transform 0.2s ease, background-color 0.2s ease, border-color 0.2s ease;
+    font-family: 'cocogoose',sans-serif;
+}
+input {
+    font-family: 'cocogoose',sans-serif;
+}
+.btn.btn-prim:hover {
+    background-color: var(--color-botonPH);
+    color: white;
+    border-color: var(--color-botonPH);
+    transform: scale(1.05); /* Aumenta el tamaño en un 5% */
+}
+.btn.btn-prim:active{
+    background-color: var(--color-botonPA);
+    color: white;
+    border-color: var(--color-botonPA);
+    transform: scale(0.95); /* Reduce el tamaño en un 5% para efecto de presionado */
+    
 }
 @font-face {
     font-family: 'cocogoose-letter';
-    src: url('/assets/fonts/CocogooseProLetterpressTrial-Regular.woff2') format('woff2'),
-         url('/assets/fonts/CocogooseProLetterpressTrial-Regular.woff') format('woff');
+    src: url('/assets/fonts/CocogooseProLetterpressTrial-Regular.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+}
+@font-face {
+    font-family: 'cocogoose';
+    src: url('assets/fonts/Cocogoose_trial.otf') format('otf');
     font-weight: normal;
     font-style: normal;
 }

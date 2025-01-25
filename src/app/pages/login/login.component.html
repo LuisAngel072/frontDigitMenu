@@ -3,34 +3,33 @@
     <div class="text-center">
       <img src="assets/logo.png" alt="Logo" class="mb-3" style="max-width: 50%; height: auto;">
     </div>
-    <form>
+    <form (ngSubmit)="onSubmit()">
       <div class="mb-3">
-        <label for="usuario" class="form-label">Usuario</label>
+        <label for="codigo" class="form-label">Usuario</label>
         <input
           type="text"
-          id="usuario"
+          id="codigo"
+          name="codigo"
           class="form-control"
           placeholder="Ingrese su usuario"
+          [(ngModel)]="codigo"
         />
       </div>
       <div class="mb-3">
-        <label for="password" class="form-label">Contraseña</label>
+        <label for="contrasena" class="form-label">Contraseña</label>
         <input
           type="password"
-          id="password"
+          id="contrasena"
+          name="contrasena"
           class="form-control"
+          [(ngModel)]="contrasena"
           placeholder="Ingrese su contraseña"
         />
       </div>
       <div class="d-flex justify-content-center">
         <button
           type="submit"
-          class="btn btn-warning w-50"
-          style="
-            background-color: var(--color-boton);
-            color: white;
-            font-size: 1rem;
-          "
+          class="btn btn-prim w-50 text-center"
         >
           Ingresar
         </button>

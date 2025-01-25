@@ -12,7 +12,7 @@ export class AuthService {
   constructor(
     private http: HttpClient,
     private jwtHelper: JwtHelperService,
-    private readonly router: Router) { }
+    ) { }
 
     /**
      * 
@@ -22,8 +22,11 @@ export class AuthService {
     async autenticar(data: any): Promise<boolean> {
       try {
         const response = await this.http.post<any>(environment.ApiIP + environment.ApiLogin, data).toPromise();
+        console.log('Hola desde auth')
         console.log(response);
-        const token = response.token;
+        console.log('Fin del response')
+        const token = response.access_token;
+        console.log(token)
         if (token) {
           localStorage.setItem('tok', token);
           return true;
@@ -58,7 +61,7 @@ export class AuthService {
       let token: any = localStorage.getItem('tok')?.toString()
       return token
     }
-
+    
     getInfo() {
       var token: any = localStorage.getItem('tok'),
         decodificado = this.jwtHelper.decodeToken(token);
@@ -74,3 +77,8 @@ export class AuthService {
       window.location.replace("/");
     }
 }
+
+export function tokenGetter() {
+  return localStorage.getItem('tok');
+}
+

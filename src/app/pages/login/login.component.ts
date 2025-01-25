@@ -1,12 +1,63 @@
 import { Component } from '@angular/core';
+import { FormsModule } from '@angular/forms';
+import { AuthService } from '../../services/auth.service';
+import { SHA256 } from 'crypto-js';
+import Swal from 'sweetalert2';
+import { Router } from '@angular/router';
+import { JwtHelperService } from '@auth0/angular-jwt';
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [],
+  imports: [FormsModule],
   templateUrl: './login.component.html',
-  styleUrl: './login.component.css'
+  styleUrl: './login.component.css',
+  
 })
 export class LoginComponent {
+  codigo: string = '';
+  contrasena: string = '';
+  falloAuth: Boolean = false;
 
+  constructor(
+    private readonly authService: AuthService,
+    private readonly router: Router,
+  ){}
+
+  async onSubmit() {
+    
+    const data = {
+      codigo: this.codigo,
+      contrasena: this.contrasena,
+    };
+
+    this.authService
+      .autenticar(data)
+      .then((isSuccessful: boolean) => {
+        console.log(isSuccessful)
+        if (!isSuccessful) {
+          Swal.fire({
+            title: 'Uy algo salió mal...',
+            text: 'Credenciales inválidas o usuario desactivado',
+            icon: 'warning',
+          });
+        } else {
+          Swal.fire({
+            title: 'Credenciales válidas',
+            text: 'Iniciando sesión',
+            icon: 'success',
+            showConfirmButton: false,
+            timer: 1500,
+          });
+          this.authService.getInfo();
+          
+          
+        }
+      })
+      .catch((error) => {
+        if (error.status == 401) {
+        }
+      });
+  }
 }
+
