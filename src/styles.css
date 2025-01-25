@@ -1,1 +1,10 @@
-/* You can add global styles to this file, and also import other style files */
+:root {
+    --color-boton: #F28C0F;
+}
+@font-face {
+    font-family: 'cocogoose-letter';
+    src: url('/assets/fonts/CocogooseProLetterpressTrial-Regular.woff2') format('woff2'),
+         url('/assets/fonts/CocogooseProLetterpressTrial-Regular.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+}

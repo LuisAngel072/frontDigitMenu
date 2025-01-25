@@ -40,3 +40,10 @@ testem.log
 # System files
 .DS_Store
 Thumbs.db
+
+
+# Archivos de compilación
+build/
+
+# Archivos de configuración de IDE
+*.log

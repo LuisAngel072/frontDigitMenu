@@ -1,0 +1,12 @@
+.container-fluid {
+  background-image: url('/assets/Pizza-3007395.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  font-family: 'cocogoose-letter', sans-serif;
+}
+
+.card {
+  background-color: white;
+  border-radius: 10px;
+}
