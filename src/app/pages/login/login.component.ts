@@ -34,7 +34,6 @@ export class LoginComponent {
     this.authService
       .autenticar(data)
       .then((isSuccessful: boolean) => {
-        console.log(isSuccessful)
         if (!isSuccessful) {
           Swal.fire({
             title: 'Uy algo salió mal...',
@@ -50,8 +49,7 @@ export class LoginComponent {
             timer: 1500,
           });
           this.authService.getInfo();
-          
-          
+          this.router.navigateByUrl('/'+this.authService.getRol());
         }
       })
       .catch((error) => {

@@ -46,8 +46,8 @@ export class AuthService {
     getRol() {
       var token: any = localStorage.getItem('tok'),
         decodificado = this.jwtHelper.decodeToken(token);
-      localStorage.setItem('rol', decodificado.id_rol);
-      return decodificado.id_rol;
+      localStorage.setItem('rol', decodificado.rol);
+      return decodificado.rol;
   
     }
   
@@ -68,6 +68,7 @@ export class AuthService {
       localStorage.setItem('name', decodificado.nombres);
       localStorage.setItem('secondname', decodificado.primer_apellido);
       localStorage.setItem('codigo', decodificado.codigo);
+      localStorage.setItem('rol', decodificado.rol);
       return
     }
     

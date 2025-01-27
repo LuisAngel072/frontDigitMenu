@@ -2,7 +2,22 @@
     --color-botonP: #F28C0F;
     --color-botonPH: #f0a952;
     --color-botonPA: #d47500;
+    --color-secundario: #F2A413;
+    --color-terciario: #79b4d9;
+    --color-nrosc: #d96b0b;
+    --color-eliminar: #F26113;
+    --color-peligro: #a60505;
 }
+.btn {
+    transition: transform 0.2s ease, background-color 0.2s ease, border-color 0.2s ease;
+}
+.btn:hover {
+    transform: scale(1.05);
+}
+.btn:active {
+    transform: scale(0.95);
+}
+
 .btn.btn-prim {
     background-color: var(--color-botonP);
     color: white;
@@ -10,6 +25,7 @@
     transition: transform 0.2s ease, background-color 0.2s ease, border-color 0.2s ease;
     font-family: 'cocogoose',sans-serif;
 }
+
 input {
     font-family: 'cocogoose',sans-serif;
 }
@@ -39,10 +55,3 @@ input {
     font-style: normal;
 }
 
-@font-face {
-    font-family: 'cocogoose-regular';
-    src: url('/assets/fonts/CocogooseProTrial-Regular.woff2') format('woff2'),
-         url('/assets/fonts/CocogooseProTrial-Regular.woff') format('woff');
-    font-weight: normal;
-    font-style: normal;
-}

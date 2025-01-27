@@ -1,0 +1,20 @@
+#logo {
+    max-width: 20%; 
+    height: auto;
+    margin-left: 20px;
+    transition: transform 0.2s ease;
+}
+#logo:hover {
+    transform: scale(1.05); /* Aumenta el tamaño en un 5% */
+}
+#logo:active {
+    transform: scale(0.95); /* Aumenta el tamaño en un 5% */
+}
+.navbar {
+    border: none;
+}
+/* Establece la altura de la barra de navegación */
+.navbar {
+    height: 14%;
+    min-height: 14%;
+}
