@@ -3,7 +3,7 @@
     --color-botonPH: #f0a952;
     --color-botonPA: #d47500;
 }
-.btn-prim {
+.btn.btn-prim {
     background-color: var(--color-botonP);
     color: white;
     border-color: var(--color-botonP);
