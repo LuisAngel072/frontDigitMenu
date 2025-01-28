@@ -22,11 +22,7 @@ export class AuthService {
     async autenticar(data: any): Promise<boolean> {
       try {
         const response = await this.http.post<any>(environment.ApiIP + environment.ApiLogin, data).toPromise();
-        console.log('Hola desde auth')
-        console.log(response);
-        console.log('Fin del response')
         const token = response.access_token;
-        console.log(token)
         if (token) {
           localStorage.setItem('tok', token);
           return true;
@@ -65,8 +61,8 @@ export class AuthService {
     getInfo() {
       var token: any = localStorage.getItem('tok'),
         decodificado = this.jwtHelper.decodeToken(token);
-      localStorage.setItem('name', decodificado.nombres);
-      localStorage.setItem('secondname', decodificado.primer_apellido);
+      localStorage.setItem('nombres', decodificado.nombres);
+      localStorage.setItem('primer_apellido', decodificado.primer_apellido);
       localStorage.setItem('codigo', decodificado.codigo);
       localStorage.setItem('rol', decodificado.rol);
       return

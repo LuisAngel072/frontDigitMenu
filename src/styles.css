@@ -4,9 +4,14 @@
     --color-botonPA: #d47500;
     --color-secundario: #F2A413;
     --color-terciario: #79b4d9;
+    --color-terciarioH: #99d3f7;
+    --color-terciarioA: #5fafe0;
     --color-nrosc: #d96b0b;
     --color-eliminar: #F26113;
     --color-peligro: #a60505;
+}
+input div body section header nav h1 h2 h3 h4 h5 {
+    font-family: 'cocogoose',sans-serif;
 }
 .btn {
     transition: transform 0.2s ease, background-color 0.2s ease, border-color 0.2s ease;
@@ -22,13 +27,23 @@
     background-color: var(--color-botonP);
     color: white;
     border-color: var(--color-botonP);
-    transition: transform 0.2s ease, background-color 0.2s ease, border-color 0.2s ease;
+    font-family: 'cocogoose',sans-serif;
+}
+.btn.btn-terc {
+    background-color: var(--color-terciario);
+    color: white;
+    border-color: var(--color-terciario);
     font-family: 'cocogoose',sans-serif;
 }
 
-input {
-    font-family: 'cocogoose',sans-serif;
-}
+.swal2-title {
+    font-family: 'cocogoose-letter', sans-serif;
+  }
+  
+  .swal2-html-container {
+    font-family: 'cocogoose', sans-serif;
+  }
+  
 .btn.btn-prim:hover {
     background-color: var(--color-botonPH);
     color: white;
@@ -40,7 +55,18 @@ input {
     color: white;
     border-color: var(--color-botonPA);
     transform: scale(0.95); /* Reduce el tamaño en un 5% para efecto de presionado */
-    
+}
+.btn.btn-terc:hover {
+    background-color: var(--color-terciarioH);
+    color: white;
+    border-color: var(--color-terciarioH);
+    transform: scale(1.05); /* Aumenta el tamaño en un 5% */
+}
+.btn.btn-terc:active{
+    background-color: var(--color-terciarioA);
+    color: white;
+    border-color: var(--color-terciarioA);
+    transform: scale(0.95); /* Reduce el tamaño en un 5% para efecto de presionado */
 }
 @font-face {
     font-family: 'cocogoose-letter';

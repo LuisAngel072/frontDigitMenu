@@ -1,0 +1,43 @@
+<nav class="navbar navbar-expand-sm fixed-top shadow">
+ <div class="container-fluid nav">
+    <a class="navbar-brand" href="">
+        <img id="logo" src="assets/logo.png" alt="logo digitmenu" class="mb-3">
+    </a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#collapsibleNavbar">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="d-block justify-content-right">
+        <button
+          class="btn btn-danger d-xs-flex d-lg-none justify-content-end align-items-end"
+          (click)="cerrarSesion()"
+          style="width: 12vw"
+        >
+          <span class="material-symbols-outlined">logout</span>
+        </button>
+      </div>
+      <button
+        class="btn d-xs-flex d-lg-none justify-content-center align-items-center"
+        type="button"
+        data-bs-toggle="offcanvas"
+        data-bs-target="#offcanvasRight"
+        aria-controls="offcanvasRight"
+      >
+        <span class="material-symbols-outlined"> more_vert </span>
+      </button>
+  
+      <div class="col text-center d-none d-lg-block">
+        <h3 class="navbar-text text-center text-lg-end" style="color: #fff">
+          {{ pagina }}
+        </h3>
+      </div>
+  
+      <div class="collapse navbar-collapse" id="navbarContent">
+        <ng-content select="[slot=titulo]"> </ng-content>
+  
+        <div class="dropdown">
+          <h5 style="padding-top: 2vh;">{{ username }} {{ usercode }}</h5>
+          <ng-content select="[slot=start]"> </ng-content>
+        </div>
+      </div>
+ </div>
+</nav>

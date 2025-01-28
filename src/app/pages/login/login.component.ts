@@ -39,6 +39,7 @@ export class LoginComponent {
             title: 'Uy algo salió mal...',
             text: 'Credenciales inválidas o usuario desactivado',
             icon: 'warning',
+            customClass: { confirmButton: 'btn btn-terc',}
           });
         } else {
           Swal.fire({
