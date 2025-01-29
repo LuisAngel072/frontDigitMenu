@@ -12,9 +12,13 @@
 }
 .navbar {
     border: none;
+    display: block;
 }
 /* Establece la altura de la barra de navegación */
 .navbar {
     height: 14%;
     min-height: 14%;
+}
+.material-symbols-outlined {
+    margin-right: 2vw;
 }

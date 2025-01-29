@@ -1,1 +1,62 @@
-<p>crud-empleados works!</p>
+<div class="main-container">
+    <app-header></app-header>
+    
+    <main>
+        <h1 class="mb-4">Empleados</h1>
+        <div class="row mb-3">
+        <div class="col-auto">
+            <button class="btn boton-agregar">Agregar empleado</button>
+            </div>
+            <div class="col">
+                <input type="search" class="form-control" placeholder="Buscar empleado">
+            </div>
+            <div class="col-auto">
+                <select class="form-select btn">
+                    <option selected>Filtrar por rol</option>
+                    <option>Mesero</option>
+                    <option>Cocinero</option>
+                    <option>Administrador</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="table-responsive">
+        <table class="table table-hover">
+            <thead class="bg-primary text-white">
+                <tr>
+                    <th>Código</th>
+                    <th>Nombres</th>
+                    <th>Apellidos</th>
+                    <th>Rol</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>5341</td>
+                    <td>Mesero 1</td>
+                    <td>del restaurante</td>
+                    <td>Mesero</td>
+                    <td>
+                        <button class="btn btn-sm btn-link text-warning"><i class="bi bi-eye"></i></button>
+                        <button class="btn btn-sm btn-link text-primary"><i class="bi bi-pencil"></i></button>
+                        <button class="btn btn-sm btn-link text-danger"><i class="bi bi-trash"></i></button>
+                    </td>
+                </tr>
+                <tr>
+                    <td>5342</td>
+                    <td>Mesero 2</td>
+                    <td>del restaurante</td>
+                    <td>Mesero</td>
+                    <td>
+                        <button class="btn btn-sm btn-link text-warning"><i class="bi bi-eye"></i></button>
+                        <button class="btn btn-sm btn-link text-primary"><i class="bi bi-pencil"></i></button>
+                        <button class="btn btn-sm btn-link text-danger"><i class="bi bi-trash"></i></button>
+                    </td>
+                </tr>
+                <!-- More rows following the same pattern... -->
+            </tbody>
+        </table>
+        </div>
+    </main>
+</div>

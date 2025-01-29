@@ -1,0 +1,18 @@
+.main-container {
+    display: flex;
+    flex-direction: column;
+    padding-top: 15vh;
+    margin: 0 15vw 0 15vw;
+}
+.mb-4 {
+    text-align: center;
+}
+.form-select {
+    width: 180px;
+    border: 1px solid #dee2e6;
+}
+
+.boton-agregar {
+    background-color: var(--color-botonP);
+    color: white;
+}
