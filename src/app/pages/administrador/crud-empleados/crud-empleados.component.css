@@ -10,9 +10,26 @@
 .form-select {
     width: 180px;
     border: 1px solid #dee2e6;
-}
+}       
 
 .boton-agregar {
     background-color: var(--color-botonP);
     color: white;
+}
+.icons-space{
+display: flex;
+justify-content: space-evenly;
+}
+.material-symbols-outlined {
+    background: none;
+    border: none;
+}
+.icon-trash {
+    color: var(--color-peligro);
+}
+.icon-eye {
+    color: var(--color-botonPA);
+}
+.icon-edit {
+    color: var(--color-terciarioA);
 }
