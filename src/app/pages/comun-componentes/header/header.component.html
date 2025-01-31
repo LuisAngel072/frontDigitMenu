@@ -1,10 +1,15 @@
 <nav class="navbar navbar-expand-sm fixed-top shadow">
- <div class="container-fluid nav">
-    <a class="navbar-brand" href="">
-        <img id="logo-desktop" src="assets/images/logo.png" alt="logo digitmenu" class="mb-3">
+  <div class="container-fluid nav">
+    <a class="navbar-brand">
+      <img
+        id="logo-desktop"
+        src="assets/images/logo.png"
+        alt="logo digitmenu"
+        class="mb-3"
+      />
     </a>
     <!-- Isotipo para pantallas pequeñas -->
-    <a class="navbar-brand d-block d-md-none" href="#">
+    <a class="navbar-brand d-block d-md-none">
       <img
         id="logo-mobile"
         src="assets/images/isotipo.png"
@@ -12,6 +17,11 @@
         class="mb-3"
       />
     </a>
+
+    <div class="headerMenuButtonsContainer">
+      <ng-content class="toggleHeaderMenuButtons" select="[slot=buttons]">
+      </ng-content>
+    </div>
 
     <!-- Botón de toggler para menú colapsable en dispositivos móviles -->
     <button

@@ -3,6 +3,7 @@
     max-width: 150px;
     height: auto;
     transition: transform 0.2s ease;
+    margin-bottom: 100px;
   }
   
   #logo-desktop:hover {
@@ -49,6 +50,7 @@
   /* Alineación de elementos en la barra de navegación */
   .headerMenuButtonsContainer {
     transition: width 0.5s;
+    margin-left: 20px;
   }
   
   /* Estilos para el botón de cerrar sesión en dispositivos pequeños */
