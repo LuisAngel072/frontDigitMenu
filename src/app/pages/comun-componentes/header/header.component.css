@@ -1,16 +1,37 @@
-#logo {
-    max-width: 20%; 
+/* Estilos para el logo en pantallas grandes */
+#logo-desktop {
+    max-width: 150px;
     height: auto;
-    margin-left: 20px;
     transition: transform 0.2s ease;
-}
-#logo:hover {
-    transform: scale(1.05); /* Aumenta el tamaño en un 5% */
-}
-#logo:active {
-    transform: scale(0.95); /* Aumenta el tamaño en un 5% */
-}
-.navbar {
+  }
+  
+  #logo-desktop:hover {
+    transform: scale(1.05);
+  }
+  
+  #logo-desktop:active {
+    transform: scale(0.95);
+  }
+  
+  /* Estilos para el isotipo en pantallas pequeñas */
+  #logo-mobile {
+    max-width: 22%;
+    height: auto;
+    transition: transform 0.2s ease;
+  }
+  
+  #logo-mobile:hover {
+    transform: scale(1.05);
+  }
+  
+  #logo-mobile:active {
+    transform: scale(0.95);
+  }
+  #userDropdown {
+    font-family: 'cocogoose',sans-serif;
+  }
+  /* Estilo para la barra de navegación */
+  .navbar {
     border: none;
     display: block;
 }
@@ -21,4 +42,24 @@
 }
 .material-symbols-outlined {
     margin-right: 2vw;
-}
+    height: 14%;
+    min-height: 14%;
+  }
+  
+  /* Alineación de elementos en la barra de navegación */
+  .headerMenuButtonsContainer {
+    transition: width 0.5s;
+  }
+  
+  /* Estilos para el botón de cerrar sesión en dispositivos pequeños */
+  .btn-logout {
+    width: 12vw;
+  }
+
+  .navbar-brand {
+    margin-left: 15px;
+  }
+  .dropdown-item {
+    font-family: 'cocogoose',sans-serif;
+  }
+  

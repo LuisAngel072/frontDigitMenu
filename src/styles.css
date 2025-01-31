@@ -3,15 +3,33 @@
     --color-botonPH: #f0a952;
     --color-botonPA: #d47500;
     --color-secundario: #F2A413;
+    --color-secundarioH: #ffbd44;
+    --color-secundarioA: #d89009;
     --color-terciario: #79b4d9;
     --color-terciarioH: #99d3f7;
     --color-terciarioA: #5fafe0;
     --color-nrosc: #d96b0b;
     --color-eliminar: #F26113;
+    --color-eliminarH: #ff823f;
+    --color-eliminarA: #e24f00;
     --color-peligro: #a60505;
 }
-input div body section header nav h1 h2 h3 h4 h5 {
-    font-family: 'cocogoose',sans-serif;
+input {
+    font-family: 'cocogoose', sans-serif;
+}
+.nav-link {
+    font-family: 'cocogoose-letter', sans-serif;
+    transition: transform 0.2s ease, background-color 0.2s ease, border-color 0.2s ease;
+    color: #000;
+    cursor: pointer; /* Cambia el cursor a una mano al pasar sobre el enlace */
+}
+.nav-link:hover {
+    color: var(--color-secundarioH);
+    transform: scale(1.05);
+}
+.nav-link:active {
+    color: var(--color-secundarioA);
+    transform: scale(0.95);
 }
 .btn {
     transition: transform 0.2s ease, background-color 0.2s ease, border-color 0.2s ease;

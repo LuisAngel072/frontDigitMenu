@@ -3,44 +3,62 @@
     <a class="navbar-brand" href="">
         <img id="logo" src="assets/images/logo.png" alt="logo digitmenu" class="mb-3">
     </a>
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#collapsibleNavbar">
-        <span class="navbar-toggler-icon"></span>
+    <!-- Isotipo para pantallas pequeñas -->
+    <a class="navbar-brand d-block d-md-none" href="#">
+      <img
+        id="logo-mobile"
+        src="assets/images/isotipo.png"
+        alt="isotipo digitmenu"
+        class="mb-3"
+      />
+    </a>
+
+    <!-- Botón de toggler para menú colapsable en dispositivos móviles -->
+    <button
+      class="navbar-toggler"
+      type="button"
+      data-bs-toggle="collapse"
+      data-bs-target="#navbarContent"
+      aria-controls="navbarContent"
+      aria-expanded="false"
+      aria-label="Toggle navigation"
+    >
+      <span class="navbar-toggler-icon"></span>
     </button>
-    <div class="d-block justify-content-right">
-        <button
-          class="btn btn-danger d-xs-flex d-lg-none justify-content-end align-items-end"
-          (click)="cerrarSesion()"
-          style="width: 12vw"
-        >
-          <span class="material-symbols-outlined">logout</span>
-        </button>
+
+    <!-- Contenido del menú -->
+    <div class="collapse navbar-collapse" id="navbarContent">
+      <!-- Contenedor para botones adicionales -->
+      <div class="headerMenuButtonsContainer ms-auto">
+        <ng-content select="[slot=buttons]"></ng-content>
       </div>
-      <button
-        class="btn d-xs-flex d-lg-none justify-content-center align-items-center"
-        type="button"
-        data-bs-toggle="offcanvas"
-        data-bs-target="#offcanvasRight"
-        aria-controls="offcanvasRight"
-      >
-        <span class="material-symbols-outlined"> more_vert </span>
-      </button>
-  
-      <div class="col text-center d-none d-lg-block">
-        <h3 class="navbar-text text-center text-lg-end" style="color: #fff">
-          {{ pagina }}
-        </h3>
-      </div>
-  
-      <div class="collapse navbar-collapse" id="navbarContent">
-        <ng-content select="[slot=titulo]"> </ng-content>
-  
-        <div class="dropdown">
-          <h5 style="padding-top: 2vh;">{{ username }} {{ usercode }}</h5>
-          <ng-content select="[slot=start]"> </ng-content>
-        </div>
-      </div>
-      <span class="material-symbols-outlined">
-        menu
-        </span>
- </div>
+
+      <!-- Información del usuario y opciones -->
+      <ul class="navbar-nav ms-auto">
+        <li class="nav-item dropdown">
+          <a
+            class="nav-link dropdown-toggle"
+            href="#"
+            id="userDropdown"
+            role="button"
+            data-bs-toggle="dropdown"
+            aria-expanded="false"
+          >
+            {{ username }} {{ usercode }}
+          </a>
+          <ul
+            class="dropdown-menu dropdown-menu-end"
+            aria-labelledby="userDropdown"
+          >
+            <li>
+              <a class="dropdown-item" href="#" (click)="cerrarSesion()"
+                >Cerrar Sesión</a
+              >
+            </li>
+            <!-- Otras opciones del usuario pueden añadirse aquí -->
+          </ul>
+        </li>
+      </ul>
+    </div>
+  </div>
 </nav>
