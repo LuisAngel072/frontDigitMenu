@@ -9,7 +9,7 @@ export const routes: Routes = [
         component: LoginComponent
     },
     {
-        path: "administrador",
+        path: "Administrador",
         component: AdministradorComponent
     },
     {

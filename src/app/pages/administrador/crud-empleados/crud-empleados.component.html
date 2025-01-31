@@ -5,7 +5,7 @@
         <h1 class="mb-4">Empleados</h1>
         <div class="row mb-3">
         <div class="col-auto">
-            <button class="btn boton-agregar" (click)="agregarEmpleados()">Agregar empleado</button>
+            <button class="btn-prim btn" (click)="agregarEmpleados()">Agregar empleado</button>
             </div>
             <div class="col">
                 <input type="search" class="form-control" placeholder="Buscar empleado">
@@ -37,21 +37,24 @@
                 <td>{{ employee.email }}</td>
                 <td>{{ employee.role }}</td>
                 <td class="icons-space">
-                    <button class="material-symbols-outlined icon-eye">
-                        visibility
+                    <button class="btn">
+                        <span class="material-symbols-outlined icon-eye">
+                            visibility
+                        </span>
                     </button>
-                    <button class="material-symbols-outlined icon-edit">
-                        edit_square
+                    <button class="btn">
+                        <span class="material-symbols-outlined icon-edit">
+                            edit_square
+                        </span>
                     </button>
-                    <button class="material-symbols-outlined icon-trash">
-                        delete
+                    <button class="btn">
+                        <span class="material-symbols-outlined icon-trash">
+                            delete
+                        </span>
                     </button>
                 </td>
               </tr>
             </tbody>
           </table>
-          
-          
-        
     </main>
 </div>
