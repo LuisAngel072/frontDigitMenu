@@ -63,6 +63,9 @@ h1 {
 .swal2-title {
     font-family: 'cocogoose-letter', sans-serif;
   }
+  .swal2-confirm {
+    background-color: var(--color-botonP);
+  }
   
   .swal2-html-container {
     font-family: 'cocogoose', sans-serif;

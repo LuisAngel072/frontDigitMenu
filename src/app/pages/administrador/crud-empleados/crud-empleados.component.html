@@ -3,7 +3,7 @@
         <h1 class="mb-4">Empleados</h1>
         <div class="row mb-3">
         <div class="col-auto">
-            <button class="btn btn-prim" (click)="agregarEmpleados()">Agregar empleado</button>
+            <button class="btn btn-prim" (click)="agregarEmpleadosBoton()">Agregar empleado</button>
             </div>
             <div class="col">
                 <input type="search" class="form-control" placeholder="Buscar empleado">
@@ -31,9 +31,9 @@
             <tbody>
               <tr *ngFor="let employee of employees">
                 <td>{{ employee.id }}</td>
-                <td>{{ employee.name }}</td>
-                <td>{{ employee.email }}</td>
-                <td>{{ employee.role }}</td>
+                <td>{{ employee.nombres }}</td>
+                <td>{{ employee.apellidos }}</td>
+                <td>{{ employee.rol }}</td>
                 <td class="icons-space">
                     <button class="btn">
                         <span class="material-symbols-outlined icon-eye">
@@ -56,3 +56,5 @@
           </table>
     </main>
 </div>
+
+<form ></form>
