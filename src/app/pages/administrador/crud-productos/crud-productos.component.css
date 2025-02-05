@@ -1,0 +1,64 @@
+.main-container {
+    display: flex;
+    flex-direction: column;
+    padding-top: 20vh;
+    margin: 0 15vw 0 15vw;
+}
+.mb-4 {
+    text-align: center;
+}
+.form-select {
+    width: 180px;
+    border: 1px solid #dee2e6;
+}       
+
+.boton-agregar {
+    background-color: var(--color-botonP);
+    color: white;
+}
+.icons-space{
+display: flex;
+justify-content: space-evenly;
+}
+.material-symbols-outlined {
+    background: none;
+    border: none;
+}
+
+/* normal */
+.icon-trash {
+    color: var(--color-eliminar);
+}
+.icon-eye {
+    color: var(--color-secundario);
+}
+.icon-edit {
+    color: var(--color-terciario);
+}
+/* hover */
+.icon-trash:hover {
+    color: var(color-eliminarH);
+}
+.icon-eye:hover {
+    color: var(--color-secundarioH);
+}
+.icon-edit:hover {
+    color: var(--color-terciarioH);
+}
+/* active */
+.icon-trash:active {
+    color: var(--color-eliminarA);
+}
+.icon-eye:active {
+    color: var(--color-secundarioA);
+}
+.icon-edit:active {
+    color: var(--color-terciarioA);
+}
+th {
+    background-color: var(--color-terciarioA);
+    color: white;
+}
+.table-striped {
+    table-layout: fixed;
+}

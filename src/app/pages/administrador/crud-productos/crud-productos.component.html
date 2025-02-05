@@ -1,1 +1,59 @@
-<p>crud-productos works!</p>
+<div class="main-container">    
+    <main>
+        <h1 class="mb-4">Productos</h1>
+        <div class="row mb-3">
+        <div class="col-auto">
+            <button class="btn btn-prim" (click)="agregarProductosBoton()">Agregar productos</button>
+            </div>
+            <div class="col">
+                <input type="search" class="form-control" placeholder="Buscar productos">
+            </div>
+            <div class="col-auto">
+                <select class="form-select btn">
+                    <option selected>Filtrar por categoria</option>
+                    <option>Cortes finos</option>
+                    <option>Especialidad</option>
+                    <option>Comida de mar</option>
+                </select>
+            </div>
+        </div>
+
+        <table class="table table-striped">
+            <thead>
+              <tr>
+                <th>Nombre</th>
+                <th>Categoria</th>
+                <th>Precio</th>
+                <th>Descripcion</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let product of products">
+                <!-- <td>{{ product.id }}</td> -->
+                <td>{{ product.nombre }}</td>
+                <td>{{ product.categoria }}</td>
+                <td>{{ product.precio }}</td>
+                <td>{{ product.descripcion }}</td>
+                <td class="icons-space">
+                    <button class="btn">
+                        <span class="material-symbols-outlined icon-eye">
+                            visibility
+                        </span>
+                    </button>
+                    <button class="btn">
+                        <span class="material-symbols-outlined icon-edit">
+                            edit_square
+                        </span>
+                    </button>
+                    <button class="btn">
+                        <span class="material-symbols-outlined icon-trash">
+                            delete
+                        </span>
+                    </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+    </main>
+</div>
