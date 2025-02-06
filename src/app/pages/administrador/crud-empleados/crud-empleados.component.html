@@ -1,58 +1,66 @@
-<div class="main-container">    
-    <main>
-        <h1 class="mb-4">Empleados</h1>
-        <div class="row mb-3">
-        <div class="col-auto">
-            <button class="btn btn-prim" (click)="agregarEmpleadosBoton()">Agregar empleado</button>
-            </div>
-            <div class="col">
-                <input type="search" class="form-control" placeholder="Buscar empleado">
-            </div>
-            <div class="col-auto">
-                <select class="form-select btn">
-                    <option selected>Filtrar por rol</option>
-                    <option>Mesero</option>
-                    <option>Cocinero</option>
-                    <option>Administrador</option>
-                </select>
-            </div>
-        </div>
+<div class="main-container">
+  <main>
+    <h1 class="mb-4">Empleados</h1>
+    <div class="row mb-3">
+      <div class="col-auto">
+        <button class="btn btn-prim" (click)="agregarEmpleadosBoton()">
+          Agregar empleado
+        </button>
+      </div>
+      <div class="col">
+        <input
+          type="search"
+          class="form-control"
+          placeholder="Buscar empleado"
+        />
+      </div>
+      <div class="col-auto">
+        <select class="form-select btn">
+          <option selected>Filtrar por rol</option>
+          <option>Mesero</option>
+          <option>Cocinero</option>
+          <option>Administrador</option>
+        </select>
+      </div>
+    </div>
 
-        <table class="table table-striped">
-            <thead>
-              <tr>
-                <th>Codigo</th>
-                <th>Nombres</th>
-                <th>Apellidos</th>
-                <th>Rol</th>
-                <th>Acciones</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr *ngFor="let employee of employees">
-                <td>{{ employee.id }}</td>
-                <td>{{ employee.nombres }}</td>
-                <td>{{ employee.apellidos }}</td>
-                <td>{{ employee.rol }}</td>
-                <td class="icons-space">
-                    <button class="btn">
-                        <span class="material-symbols-outlined icon-eye">
-                            visibility
-                        </span>
-                    </button>
-                    <button class="btn">
-                        <span class="material-symbols-outlined icon-edit">
-                            edit_square
-                        </span>
-                    </button>
-                    <button class="btn">
-                        <span class="material-symbols-outlined icon-trash">
-                            delete
-                        </span>
-                    </button>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-    </main>
+    <table class="table table-striped">
+      <thead>
+        <tr>
+          <th>Codigo</th>
+          <th>Nombres</th>
+          <th>Apellidos</th>
+          <th>Rol</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let usuario of usuarios">
+          <td>{{ usuario.usuario_id.codigo }}</td>
+          <td>{{ usuario.usuario_id.nombres }}</td>
+          <td>
+            {{
+              usuario.usuario_id.primer_apellido +
+                " " +
+                usuario.usuario_id.segundo_apellido
+            }}
+          </td>
+          <td>{{ usuario.rol_id.rol }}</td>
+          <td class="icons-space text-center">
+            <span class="material-symbols-outlined icon icon-eye">
+              visibility
+            </span>
+            <span (click)="editarEmpleado(usuario.usuario_id.id_usuario)"class="material-symbols-outlined icon icon-edit">
+              edit_square
+            </span>
+            <span class="material-symbols-outlined icon icon-trash">
+              delete
+            </span>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </main>
 </div>
+
+<form></form>

@@ -11,6 +11,10 @@ export const environment = {
      * Administrador
      */
     ApiEncontrarUsuario: "usuarios", //Get
-    ApiCrearUsuario:"usuarios/registro" //Post
+    ApiCrearUsuario:"usuarios/registro", //Post
+    ApiEncontrarUnUsuario: "usuarios/:codigo",
+    ApiEncontrarRolesYUsuario: "roles/getUsuarios",
+    ApiActualizarUsuario: "usuarios/actualizar/",
+
 
 }

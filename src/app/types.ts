@@ -1,15 +1,17 @@
 export type Usuarios = {
-	id: number,
+	id_usuario: number,
 	codigo: string,
 	nombres: string,
 	primer_apellido: string,
 	segundo_apellido: string,
-	telefono: Telefonos
-	email: Email,
-	Sexo: string, // Pienso en un ENUM: Masc, Fem, Otro
-	RFC: RFC,
-	NSS: NSS,
+	telefono_id: Telefonos
+	email_id: Email,
+	sexo: string, // Pienso en un ENUM: Masc, Fem, Otro
+	rfc: RFC,
+	nss: NSS,
 	domicilio: Domicilios,
+    img_perfil: Img_us,
+    constrasena: string;
     activo: number, //El valor es entre 1 y 0. 1 activo, 0 inactivo
 }	
 
@@ -38,7 +40,7 @@ export type RFC = {
 }
 
 export type Email = {
-    id_emal: number,
+    id_email: number,
     email: string,
 }
 
@@ -48,7 +50,7 @@ export type Roles = {
     descripcion: string,
 }
 
-export type img_us = {
+export type Img_us = {
     id_img: number,
     img_ruta: string, //Ruta de la imagen de no mas de 255 caracteres
 }

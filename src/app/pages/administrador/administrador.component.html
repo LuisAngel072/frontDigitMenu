@@ -39,7 +39,7 @@
 
 <div class="col-12 main">
   <div *ngIf="selectedSection==='seccion1'">
-    <app-crud-empleados></app-crud-empleados>
+    <app-crud-empleados [usuarios]="usuarios"></app-crud-empleados>
   </div>
   <div *ngIf="selectedSection==='seccion2'">
     <app-crud-productos></app-crud-productos>
