@@ -19,8 +19,19 @@
 input, td, option {
     font-family: 'cocogoose', sans-serif;
 }
-h1, th, select {
+h1, h2, h3, th, select {
     font-family: 'cocogoose-letter', sans-serif;
+}
+
+select.form-select {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    font-family: 'cocogoose-letter', sans-serif;
+  }
+
+  option.form-select:hover {
+    background-color: var(--color-secundario);
 }
 .icon {
     transition: transform 0.2s ease, background-color 0.2s ease, border-color 0.2s ease;
@@ -58,6 +69,44 @@ h1, th, select {
 .btn:active {
     transform: scale(0.95);
 }
+.material-symbols-outlined {
+    background: none;
+    border: none;
+}
+
+/* normal */
+.icon-trash {
+    color: var(--color-eliminar);
+}
+.icon-eye {
+    color: var(--color-secundario);
+}
+.icon-edit {
+    color: var(--color-terciario);
+}
+/* hover */
+.icon-trash:hover {
+    color: var(color-eliminarH);
+}
+.icon-eye:hover {
+    color: var(--color-secundarioH);
+}
+.icon-edit:hover {
+    color: var(--color-terciarioH);
+}
+/* active */
+.icon-trash:active {
+    color: var(--color-eliminarA);
+}
+.icon-eye:active {
+    color: var(--color-secundarioA);
+}
+.icon-edit:active {
+    color: var(--color-terciarioA);
+}
+.table-striped {
+    table-layout: fixed;
+}
 
 .btn.btn-prim {
     background-color: var(--color-botonP);
@@ -76,6 +125,10 @@ h1, th, select {
     color: white;
     border-color: var(--color-peligro);
     font-family: 'cocogoose',sans-serif;
+}
+
+.search:focus {
+    border-color: var(--color-secundario);
 }
 
 .swal2-title {

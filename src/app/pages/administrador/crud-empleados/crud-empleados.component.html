@@ -10,16 +10,18 @@
       <div class="col">
         <input
           type="search"
-          class="form-control"
+          class="form-control search"
           placeholder="Buscar empleado"
         />
       </div>
       <div class="col-auto">
-        <select class="form-select btn">
-          <option selected>Filtrar por rol</option>
-          <option>Mesero</option>
-          <option>Cocinero</option>
-          <option>Administrador</option>
+        <select class="form-select text-start">
+          <option class="opt" [value]="0" selected>Filtrar por rol</option>
+          <option class="opt" [value]="0">Todos</option>
+          <option class="opt" [value]="1">Administrador</option>
+          <option class="opt" [value]="2">Cocinero</option>
+          <option class="opt" [value]="3">Mesero</option>
+          <option class="opt" [value]="4">Cajero</option>
         </select>
       </div>
     </div>
@@ -47,19 +49,24 @@
           </td>
           <td>{{ usuario.rol_id.rol }}</td>
           <td class="icons-space text-center">
-            <span class="material-symbols-outlined icon icon-eye">
+            <span (click)="verEmpleado(usuario.usuario_id.id_usuario)"class="material-symbols-outlined icon icon-eye">
               visibility
             </span>
-            <span (click)="editarEmpleado(usuario.usuario_id.id_usuario)"class="material-symbols-outlined icon icon-edit">
+            <span
+              (click)="editarEmpleado(usuario.usuario_id.id_usuario)"
+              class="material-symbols-outlined icon icon-edit"
+            >
               edit_square
             </span>
-            <span class="material-symbols-outlined icon icon-trash">
+            <span (click)="desactivarEmpleado(usuario.usuario_id.id_usuario)" class="material-symbols-outlined icon icon-trash">
               delete
             </span>
           </td>
         </tr>
       </tbody>
+      
     </table>
+    <h3 class="text-center" *ngIf="usuarios.length === 0">¡Vaya! No existen empleados registrados o están inactivos</h3>
   </main>
 </div>
 

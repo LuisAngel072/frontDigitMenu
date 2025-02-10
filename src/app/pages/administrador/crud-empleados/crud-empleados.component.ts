@@ -34,7 +34,11 @@ export class CrudEmpleadosComponent {
  */
   async ngOnInit() {
     this.usuarios = this.adminComponente.usuarios;
+    this.filtrarUsuariosActivos()
     console.log(this.usuarios);
+  }
+  filtrarUsuariosActivos() {
+    this.usuarios = this.usuarios.filter((usuario) => usuario.usuario_id.activo === true);
   }
   agregarEmpleadosBoton() {
     Swal.fire({
@@ -85,7 +89,7 @@ export class CrudEmpleadosComponent {
       },
     });
   }
-  editarEmpleado(id_usuario: number) {
+  async verEmpleado(id_usuario: number) {
     try {
       const usF = this.usuarios.find(
         (us) => us.usuario_id.id_usuario === id_usuario
@@ -95,6 +99,148 @@ export class CrudEmpleadosComponent {
           icon: 'error',
           title: 'Oops...',
           text: 'No se encontro el usuario en la base de datos, intenta más tarde.',
+          timer:2000,
+        });
+        return;
+      }
+      console.log(usF);
+      Swal.fire({
+        title: 'Ver empleado',
+        html: `
+          <div class="input-group mt-2 mb-3 center-content me-3">
+            <span class="input-group-text border-secondary">Código</span>
+            <input type="text" class="form-control border-secondary" value="${
+              usF?.usuario_id.codigo
+            }" id="codigo" disabled>
+          </div>
+      
+          <div class="input-group mt-2 mb-3 center-content me-3">
+            <span class="input-group-text border-secondary">Nombre(s)</span>
+            <input type="text" class="form-control border-secondary" value="${
+              usF?.usuario_id.nombres
+            }" id="nombres" disabled>
+          </div>
+      
+          <div class="input-group mt-2 mb-3 center-content me-3">
+            <span class="input-group-text border-secondary">Primer apellido</span>
+            <input type="text" class="form-control border-secondary" value="${
+              usF?.usuario_id.primer_apellido
+            }" id="primer_apellido" disabled>
+          </div>
+      
+          <div class="input-group mb-3">
+            <span class="input-group-text border-secondary">Segundo apellido</span>
+            <input type="text" class="form-control border-secondary" value="${
+              usF?.usuario_id.segundo_apellido
+            }" id="segundo_apellido" disabled>
+          </div>
+      
+          <div class="input-group mt-2 mb-3 center-content me-3">
+            <span class="input-group-text border-secondary">Teléfono</span>
+            <input type="tel" class="form-control border-secondary" value="${
+              usF?.usuario_id.telefono_id.telefono
+            }" id="telefono_id" disabled>
+          </div>
+      
+          <div class="input-group mt-2 mb-3 center-content me-3">
+            <span class="input-group-text border-secondary">Email</span>
+            <input type="email" class="form-control border-secondary" value="${
+              usF?.usuario_id.email_id.email
+            }" id="email_id" disabled>
+          </div>
+      
+          <!-- Select para Sexo -->
+          <div class="input-group mb-3">
+            <span class="input-group-text border-secondary">Sexo</span>
+            <input type="text" class="form-control border-secondary" value="${
+              usF?.usuario_id.sexo
+            }" id="sexo" disabled>
+          </div>
+      
+          <!-- Select para Rol -->
+          <div class="input-group mb-3">
+            <span class="input-group-text border-secondary">Rol</span>
+            <input type="text" class="form-control border-secondary" value="${
+              usF?.rol_id.rol
+            }" id="rol" disabled>
+          </div>
+              
+          <div class="input-group mt-2 mb-3 center-content me-3">
+            <span class="input-group-text border-secondary">RFC</span>
+            <input type="text" class="form-control border-secondary" value="${
+              usF?.usuario_id.rfc.rfc
+            }" id="rfc" disabled>
+          </div>
+      
+          <div class="input-group mt-2 mb-3 center-content me-3">
+            <span class="input-group-text border-secondary">NSS</span>
+            <input type="text" class="form-control border-secondary" value="${
+              usF?.usuario_id.nss.nss
+            }" id="nss" disabled>
+          </div>
+      
+          <div class="input-group mt-2 mb-3 center-content me-3">
+            <span class="input-group-text border-secondary">Calle</span>
+            <input type="text" class="form-control border-secondary" value="${
+              usF?.usuario_id.domicilio.calle
+            }" id="calle" disabled>
+          </div>
+      
+          <div class="input-group mt-2 mb-3 center-content me-3">
+            <span class="input-group-text border-secondary">Colonia</span>
+            <input type="text" class="form-control border-secondary" value="${
+              usF?.usuario_id.domicilio.colonia
+            }" id="colonia" disabled>
+          </div>
+      
+          <div class="input-group mt-2 mb-3 center-content me-3">
+            <span class="input-group-text border-secondary">No. exterior</span>
+            <input type="text" class="form-control border-secondary" value="${
+              usF?.usuario_id.domicilio.no_ext
+            }" id="no_ext" disabled>
+          </div>
+      
+          <div class="input-group mt-2 mb-3 center-content me-3">
+            <span class="input-group-text border-secondary">No. interior</span>
+            <input type="text" class="form-control border-secondary" value="${
+              usF?.usuario_id.domicilio.no_int !== null
+                ? usF?.usuario_id.domicilio.no_int
+                : ''
+            }" id="no_int" disabled>
+          </div>
+      
+          <div class="input-group mt-2 mb-3 center-content me-3">
+            <span class="input-group-text border-secondary">Municipio</span>
+            <input type="text" class="form-control border-secondary" value="${
+              usF?.usuario_id.domicilio.municipio
+            }" id="municipio" disabled>
+          </div>
+      
+        `,
+        confirmButtonText: 'Continuar',
+        customClass: {
+          confirmButton:'btn btn-prim'
+        }
+      });
+    } catch (error) {
+      console.error(
+        'Error al obtener al usuario.',
+        error
+      );
+      throw error;
+    }
+  }
+  async editarEmpleado(id_usuario: number) {
+    try {
+      const usF = this.usuarios.find(
+        (us) => us.usuario_id.id_usuario === id_usuario
+      );
+      if (!usF) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Oops...',
+          text: 'No se encontro el usuario en la base de datos, intenta más tarde.',
+          timer: 2000,
         });
         return;
       }
@@ -241,6 +387,10 @@ export class CrudEmpleadosComponent {
         showCancelButton: true,
         confirmButtonText: 'Continuar',
         cancelButtonText: 'Cancelar',
+        customClass: {
+          confirmButton: 'btn btn-prim',
+          cancelButton: 'btn btn-peligro',
+        },
         preConfirm: () => {
           // Para cada relación, usamos el valor del input y agregamos el id original del objeto (si se requiere actualización)
           return {
@@ -339,9 +489,11 @@ export class CrudEmpleadosComponent {
                   
                 });
                 this.usuarios = await this.usuariosService.obtenerUsuariosYRoles();
+                this.filtrarUsuariosActivos()
                 this.adminComponente.usuarios = this.usuarios;
              } catch (error) {
               this.usuarios = await this.usuariosService.obtenerUsuariosYRoles();
+              this.filtrarUsuariosActivos()
               this.adminComponente.usuarios = this.usuarios;
               Swal.close();
               Swal.fire({
@@ -361,17 +513,73 @@ export class CrudEmpleadosComponent {
       throw error;
     }
   }
-  /** 
-  employees = [
-    {
-      id: 1,
-      nombres: 'Juan Pérez',
-      apellidos: 'felucioano',
-      rol: 'Administrador',
-    },
-    { id: 2, nombres: 'María López', apellidos: 'carnaza', rol: 'Cocinero' },
-    { id: 3, nombres: 'Carlos Ruiz', apellidos: 'macias', rol: 'Mesero' },
-    { id: 4, nombres: 'Ana Torres', apellidos: 'chicho', rol: 'Cajero' },
-  ];
-  */
+
+  async desactivarEmpleado(id_usuario: number) {
+    try {
+      const usF = this.usuarios.find(
+        (us) => us.usuario_id.id_usuario === id_usuario
+      );
+      if (!usF) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Oops...',
+          text: 'No se encontró el usuario en la base de datos, intenta más tarde.',
+          timer: 2000,
+        });
+        return;
+      }
+      console.log(usF);
+      Swal.fire({
+        icon: 'warning',
+        title: 'Desactivar empleado',
+        text: '¿Estás seguro de desactivar el empleado?',
+        showDenyButton: true,
+        confirmButtonText: 'Continuar',
+        cancelButtonText: 'Cancelar',
+        customClass: {
+          confirmButton: 'btn btn-peligro',
+          denyButton: 'btn btn-terc',
+        },
+      }).then(async (result) => {
+        if (result.isConfirmed) {
+          try {
+            Swal.fire({
+              title: 'Cargando...',
+              html: 'Por favor, espere mientras se procesa la información.',
+              allowOutsideClick: false,  // Evita que se pueda cerrar
+            });
+            await this.usuariosService.desactivarUsuario(id_usuario);
+            Swal.close();
+            Swal.fire({
+              title: 'Empleado desactivado correctamente',
+              icon: 'success',
+              timer: 2000,
+            });
+            this.usuarios = await this.usuariosService.obtenerUsuariosYRoles();
+            this.filtrarUsuariosActivos()
+            this.adminComponente.usuarios = this.usuarios;
+          } catch (error) {
+            this.usuarios = await this.usuariosService.obtenerUsuariosYRoles();
+            this.filtrarUsuariosActivos()
+            this.adminComponente.usuarios = this.usuarios;
+            Swal.close();
+            Swal.fire({
+              icon: 'error',
+              title: 'Error',
+              text: 'No se pudo desactivar el empleado.',
+            });
+          }
+        } else {
+          return;
+        }
+      });
+    } catch (error) {
+      console.error(
+        'Error al desactivar al usuario. ERROR -> usuarios.service.ts -> desactivarUsuario()',
+        error
+      );
+      throw error;
+    }
+  }
+  
 }

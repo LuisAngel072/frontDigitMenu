@@ -81,4 +81,17 @@ export class UsuariosService {
       throw error;
     }
   }
+  async desactivarUsuario(id_usuario: number) {
+    try {
+      const response = await this.http.patch<any>(environment.ApiIP + environment.ApiDesactivarUsuario + id_usuario,{},
+        { headers: { 'Authorization': `Bearer ${this.authService.getToken()}` } }
+      ).toPromise();
+      if (response!== null || response!==undefined) {
+        return response;    
+      }else return undefined;
+    } catch (error) {
+      console.error('Error al desactivar al usuario. ERROR -> usuarios.service.ts -> desactivarUsuario()', error);
+      throw error;
+    }
+  }
 }

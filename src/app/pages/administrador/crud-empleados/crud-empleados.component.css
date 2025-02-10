@@ -10,51 +10,19 @@
 .form-select {
     width: 180px;
     border: 1px solid #dee2e6;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    font-family: 'cocogoose-letter', sans-serif;
 }       
 
-.boton-agregar {
-    background-color: var(--color-botonP);
-    color: white;
+option:focus {
+    background-color: var(--color-secundario);
+}
+.opt:hover{
+    background-color: var(--color-secundario);
 }
 .icons-space{
 display: flex;
 justify-content: space-evenly;
-}
-.material-symbols-outlined {
-    background: none;
-    border: none;
-}
-
-/* normal */
-.icon-trash {
-    color: var(--color-eliminar);
-}
-.icon-eye {
-    color: var(--color-secundario);
-}
-.icon-edit {
-    color: var(--color-terciario);
-}
-/* hover */
-.icon-trash:hover {
-    color: var(color-eliminarH);
-}
-.icon-eye:hover {
-    color: var(--color-secundarioH);
-}
-.icon-edit:hover {
-    color: var(--color-terciarioH);
-}
-/* active */
-.icon-trash:active {
-    color: var(--color-eliminarA);
-}
-.icon-eye:active {
-    color: var(--color-secundarioA);
-}
-.icon-edit:active {
-    color: var(--color-terciarioA);
-}
-.table-striped {
-    table-layout: fixed;
 }

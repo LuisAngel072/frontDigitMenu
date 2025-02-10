@@ -15,6 +15,7 @@ export const environment = {
     ApiEncontrarUnUsuario: "usuarios/:codigo",
     ApiEncontrarRolesYUsuario: "roles/getUsuarios",
     ApiActualizarUsuario: "usuarios/actualizar/",
+    ApiDesactivarUsuario: "usuarios/desactivar/",
 
 
 }

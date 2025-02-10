@@ -33,9 +33,13 @@ export class AdministradorComponent {
   constructor(private readonly usuariosService: UsuariosService) {
     
   }
+  filtrarUsuariosActivos() {
+    this.usuarios = this.usuarios.filter((usuario) => usuario.usuario_id.activo === true);
+  }
 
   async ngOnInit() {
     this.usuarios = await this.usuariosService.obtenerUsuariosYRoles();
+    this.filtrarUsuariosActivos()
   }
   selectSection(section: string): void {
     this.selectedSection = section;

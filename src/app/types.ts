@@ -12,7 +12,7 @@ export type Usuarios = {
 	domicilio: Domicilios,
     img_perfil: Img_us,
     constrasena: string;
-    activo: number, //El valor es entre 1 y 0. 1 activo, 0 inactivo
+    activo: boolean, //El valor es entre 1 y 0. 1 activo, 0 inactivo
 }	
 
 export type Telefonos = {
