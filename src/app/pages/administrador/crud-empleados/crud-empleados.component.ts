@@ -392,66 +392,75 @@ export class CrudEmpleadosComponent {
           cancelButton: 'btn btn-peligro',
         },
         preConfirm: () => {
-          // Para cada relación, usamos el valor del input y agregamos el id original del objeto (si se requiere actualización)
-          return {
-            codigo: (document.getElementById('codigo') as HTMLInputElement)
-              .value,
-            nombres: (document.getElementById('nombres') as HTMLInputElement)
-              .value,
-            primer_apellido: (
-              document.getElementById('primer_apellido') as HTMLInputElement
-            ).value,
-            segundo_apellido: (
-              document.getElementById('segundo_apellido') as HTMLInputElement
-            ).value,
-            // Para teléfono, email, etc. construir objetos
+          // Obtener y limpiar los valores de los campos obligatorios
+          const codigo = (document.getElementById('codigo') as HTMLInputElement).value.trim();
+          const nombres = (document.getElementById('nombres') as HTMLInputElement).value.trim();
+          const primer_apellido = (document.getElementById('primer_apellido') as HTMLInputElement).value.trim();
+          const telefono = (document.getElementById('telefono_id') as HTMLInputElement).value.trim();
+          const email = (document.getElementById('email_id') as HTMLInputElement).value.trim();
+          const sexo = (document.getElementById('sexo') as HTMLSelectElement).value;
+          const calle = (document.getElementById('calle') as HTMLInputElement).value.trim();
+          const colonia = (document.getElementById('colonia') as HTMLInputElement).value.trim();
+          const no_ext = (document.getElementById('no_ext') as HTMLInputElement).value.trim();
+          const municipio = (document.getElementById('municipio') as HTMLInputElement).value.trim();
+        
+          // Opcionales
+          const segundo_apellido = (document.getElementById('segundo_apellido') as HTMLInputElement).value.trim();
+          const no_int = (document.getElementById('no_int') as HTMLInputElement).value.trim();
+          const contrasena = (document.getElementById('contrasena') as HTMLInputElement).value;
+        
+          // Validar que los campos obligatorios no estén vacíos (excepto contraseña)
+          if (!codigo || !nombres || !primer_apellido || !telefono || !email || !sexo || !calle || !colonia || !no_ext || !municipio) {
+            Swal.showValidationMessage('Por favor, complete todos los campos obligatorios.');
+            return;
+          }
+        
+          // Construir el objeto de datos con la estructura esperada
+          const data: any = {
+            codigo,
+            nombres,
+            primer_apellido,
+            segundo_apellido,
             telefono_id: {
-              id_telefono: usF?.usuario_id.telefono_id?.id_telefono, // Mantener el ID original
-              telefono: (
-                document.getElementById('telefono_id') as HTMLInputElement
-              ).value,
+              id_telefono: usF?.usuario_id.telefono_id?.id_telefono, // mantiene el ID original
+              telefono,
             },
             email_id: {
               id_email: usF?.usuario_id.email_id?.id_email,
-              email: (document.getElementById('email_id') as HTMLInputElement)
-                .value,
+              email,
             },
-            sexo: (document.getElementById('sexo') as HTMLSelectElement).value,
-            // Para rol, si solo se envía un string y se maneja por separado, puede quedarse así o construir un objeto:
+            sexo,
+            // En este ejemplo, el select de rol se usa para seleccionar un solo rol.
             rol: [
               {
-                rol: (document.getElementById('rol') as HTMLSelectElement)
-                  .value,
+                rol: (document.getElementById('rol') as HTMLSelectElement).value,
               },
             ],
             rfc: {
               id_rfc: usF?.usuario_id.rfc?.id_rfc,
-              rfc: (document.getElementById('rfc') as HTMLInputElement).value,
+              rfc: (document.getElementById('rfc') as HTMLInputElement).value.trim(),
             },
             nss: {
               id_nss: usF?.usuario_id.nss?.id_nss,
-              nss: (document.getElementById('nss') as HTMLInputElement).value,
+              nss: (document.getElementById('nss') as HTMLInputElement).value.trim(),
             },
             domicilio: {
               id_dom: usF?.usuario_id.domicilio?.id_dom,
-              calle: (document.getElementById('calle') as HTMLInputElement)
-                .value,
-              colonia: (document.getElementById('colonia') as HTMLInputElement)
-                .value,
-              no_ext: (document.getElementById('no_ext') as HTMLInputElement)
-                .value,
-              no_int: (document.getElementById('no_int') as HTMLInputElement)
-                .value,
-              municipio: (
-                document.getElementById('municipio') as HTMLInputElement
-              ).value,
-              // Agrega otros campos que tu objeto domicilio requiera
+              calle,
+              colonia,
+              no_ext,
+              no_int,
+              municipio,
             },
-            contrasena: (
-              document.getElementById('contrasena') as HTMLInputElement
-            ).value,
           };
-        },
+        
+          // Solo incluir la contraseña si se proporcionó (no vacía)
+          if (contrasena.trim().length > 0) {
+            data.contrasena = contrasena;
+          }
+        
+          return data;
+        }
       }).then(async (result) => {
         if (result.isConfirmed) {
           const formData = result.value;
