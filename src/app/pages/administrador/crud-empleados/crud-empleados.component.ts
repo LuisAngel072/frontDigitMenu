@@ -4,11 +4,12 @@ import Swal from 'sweetalert2';
 import { AdministradorComponent } from '../administrador.component';
 import { Roles, Usuarios_has_roles } from '../../../types';
 import { UsuariosService } from '../../../services/usuarios.service';
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-crud-empleados',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './crud-empleados.component.html',
   styleUrl: './crud-empleados.component.css',
 })
@@ -18,7 +19,21 @@ export class CrudEmpleadosComponent {
   rolSeleccionado:number = 0;
   activo: number = 0;
   
+  searchTerm: string = '';
+  selectedRole: string = '';
 
+  get usuariosFiltrados() {
+    return this.usuarios.filter(usuario => {
+      const fullName = `${usuario.usuario_id.nombres} ${usuario.usuario_id.primer_apellido} ${usuario.usuario_id.segundo_apellido}`;
+      const searchMatch =
+        usuario.usuario_id.codigo.includes(this.searchTerm) ||
+        fullName.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
+        usuario.rol_id.rol.toLowerCase().includes(this.searchTerm.toLowerCase());
+
+      const roleMatch = this.selectedRole ? usuario.rol_id.rol === this.selectedRole : true;
+      return searchMatch && roleMatch;
+    });
+  }
 
   constructor(
     private adminComponente: AdministradorComponent,

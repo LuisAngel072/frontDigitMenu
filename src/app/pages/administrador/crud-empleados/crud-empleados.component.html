@@ -12,6 +12,7 @@
           type="search"
           class="form-control search"
           placeholder="Buscar empleado"
+          [(ngModel)]="searchTerm"
         />
       </div>
       <div class="col-auto">
@@ -42,7 +43,7 @@
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let usuario of usuarios">
+        <tr *ngFor="let usuario of usuariosFiltrados">
           <td>{{ usuario.usuario_id.codigo }}</td>
           <td>{{ usuario.usuario_id.nombres }}</td>
           <td>
