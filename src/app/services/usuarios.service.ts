@@ -3,7 +3,15 @@ import { Injectable } from '@angular/core';
 import { environment } from '../../environment';
 import { AuthService } from './auth.service';
 import { lastValueFrom } from 'rxjs/internal/lastValueFrom';
-import { Domicilios, Email, Img_us, NSS, RFC, Roles, Telefonos } from '../types';
+import {
+  Domicilios,
+  Email,
+  Img_us,
+  NSS,
+  RFC,
+  Roles,
+  Telefonos,
+} from '../types';
 
 @Injectable({
   providedIn: 'root',
@@ -37,7 +45,8 @@ export class UsuariosService {
   async obtenerUsuariosYRoles() {
     try {
       const response$ = this.http.get<any>(
-        environment.ApiIP + environment.ApiEncontrarRolesYUsuario
+        environment.ApiIP + environment.ApiEncontrarRolesYUsuario,
+        { headers: { Authorization: `Bearer ${this.authService.getToken()}` } }
       );
       const response = await lastValueFrom(response$);
       console.log(response);
@@ -70,27 +79,45 @@ export class UsuariosService {
     }
   ) {
     try {
-      const response = await this.http.patch<any>(environment.ApiIP + environment.ApiActualizarUsuario + id_usuario, body,
-        { headers: { 'Authorization': `Bearer ${this.authService.getToken()}` } }
-      ).toPromise();
-      if (response!== null || response!==undefined) {
-        return response;    
-      }else return undefined;
+      const response = await this.http
+        .patch<any>(
+          environment.ApiIP + environment.ApiActualizarUsuario + id_usuario,
+          body,
+          {
+            headers: { Authorization: `Bearer ${this.authService.getToken()}` },
+          }
+        )
+        .toPromise();
+      if (response !== null || response !== undefined) {
+        return response;
+      } else return undefined;
     } catch (error) {
-      console.error('Error al actualizar al usuario. ERROR -> usuarios.service.ts -> actualizarUsuario()', error);
+      console.error(
+        'Error al actualizar al usuario. ERROR -> usuarios.service.ts -> actualizarUsuario()',
+        error
+      );
       throw error;
     }
   }
   async desactivarUsuario(id_usuario: number) {
     try {
-      const response = await this.http.patch<any>(environment.ApiIP + environment.ApiDesactivarUsuario + id_usuario,{},
-        { headers: { 'Authorization': `Bearer ${this.authService.getToken()}` } }
-      ).toPromise();
-      if (response!== null || response!==undefined) {
-        return response;    
-      }else return undefined;
+      const response = await this.http
+        .patch<any>(
+          environment.ApiIP + environment.ApiDesactivarUsuario + id_usuario,
+          {},
+          {
+            headers: { Authorization: `Bearer ${this.authService.getToken()}` },
+          }
+        )
+        .toPromise();
+      if (response !== null || response !== undefined) {
+        return response;
+      } else return undefined;
     } catch (error) {
-      console.error('Error al desactivar al usuario. ERROR -> usuarios.service.ts -> desactivarUsuario()', error);
+      console.error(
+        'Error al desactivar al usuario. ERROR -> usuarios.service.ts -> desactivarUsuario()',
+        error
+      );
       throw error;
     }
   }

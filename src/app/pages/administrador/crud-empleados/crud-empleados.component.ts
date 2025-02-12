@@ -2,7 +2,7 @@ import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import Swal from 'sweetalert2';
 import { AdministradorComponent } from '../administrador.component';
-import { Usuarios_has_roles } from '../../../types';
+import { Roles, Usuarios_has_roles } from '../../../types';
 import { UsuariosService } from '../../../services/usuarios.service';
 
 @Component({
@@ -14,6 +14,11 @@ import { UsuariosService } from '../../../services/usuarios.service';
 })
 export class CrudEmpleadosComponent {
   @Input() usuarios: Usuarios_has_roles[] = [];
+  @Input() roles: Roles[] = [];
+  rolSeleccionado:number = 0;
+  activo: number = 0;
+  
+
 
   constructor(
     private adminComponente: AdministradorComponent,
@@ -34,11 +39,39 @@ export class CrudEmpleadosComponent {
  */
   async ngOnInit() {
     this.usuarios = this.adminComponente.usuarios;
+    this.roles = this.adminComponente.roles;
     this.filtrarUsuariosActivos()
     console.log(this.usuarios);
   }
   filtrarUsuariosActivos() {
     this.usuarios = this.usuarios.filter((usuario) => usuario.usuario_id.activo === true);
+  }
+
+  filtrarActivos(event: Event) {
+    const element = event.target as HTMLSelectElement;
+    this.activo = Number(element.value);
+    switch(this.activo) {
+      case 0:
+        this.usuarios = this.adminComponente.usuarios;
+      break;
+      case 1:
+        this.usuarios = this.adminComponente.usuarios;
+        this.usuarios = this.usuarios.filter((usuario) => usuario.usuario_id.activo === true);
+      break;
+      case 2:
+        this.usuarios = this.adminComponente.usuarios;
+        this.usuarios = this.usuarios.filter((usuario) => usuario.usuario_id.activo === false);
+      break;
+      default:
+        this.usuarios = this.adminComponente.usuarios;
+      break;
+    }
+  }
+  filtrarUsuariosPorRol(event: Event) {
+    const element = event.target as HTMLSelectElement;
+    this.rolSeleccionado = Number(element.value);
+    this.usuarios = this.adminComponente.usuarios;
+    this.usuarios = this.usuarios.filter((usuario) => usuario.rol_id.id_rol === this.rolSeleccionado);
   }
   agregarEmpleadosBoton() {
     Swal.fire({

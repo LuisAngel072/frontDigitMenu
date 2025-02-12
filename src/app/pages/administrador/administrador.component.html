@@ -1,59 +1,80 @@
 <app-header>
-    <div slot="buttons">
-        <div class="row">
-          <ul class="navbar-nav">
-            <li class="nav-item">
-              <a class="nav-link" 
-              [ngClass]="{ 'active-link': selectedSection === 'seccion1' }"
-              (click)="selectSection('seccion1')">Empleados</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link"
-              [ngClass]="{ 'active-link': selectedSection === 'seccion2' }"
-              (click)="selectSection('seccion2')">Productos</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link"
-              [ngClass]="{ 'active-link': selectedSection === 'seccion3' }"
-              (click)="selectSection('seccion3')">Categorías</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link"
-              [ngClass]="{ 'active-link': selectedSection === 'seccion4' }"
-              (click)="selectSection('seccion4')">Ingredientes</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link"
-              [ngClass]="{ 'active-link': selectedSection === 'seccion5' }"
-              (click)="selectSection('seccion5')">Mesas</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link"
-              [ngClass]="{ 'active-link': selectedSection === 'seccion6' }"
-              (click)="selectSection('seccion6')">Ventas</a>
-            </li>
-          </ul>
-        </div>
+  <div slot="buttons">
+    <div class="row">
+      <ul class="navbar-nav">
+        <li class="nav-item">
+          <a
+            class="nav-link"
+            [ngClass]="{ 'active-link': selectedSection === 'seccion1' }"
+            (click)="selectSection('seccion1')"
+            >Empleados</a
+          >
+        </li>
+        <li class="nav-item">
+          <a
+            class="nav-link"
+            [ngClass]="{ 'active-link': selectedSection === 'seccion2' }"
+            (click)="selectSection('seccion2')"
+            >Productos</a
+          >
+        </li>
+        <li class="nav-item">
+          <a
+            class="nav-link"
+            [ngClass]="{ 'active-link': selectedSection === 'seccion3' }"
+            (click)="selectSection('seccion3')"
+            >Categorías</a
+          >
+        </li>
+        <li class="nav-item">
+          <a
+            class="nav-link"
+            [ngClass]="{ 'active-link': selectedSection === 'seccion4' }"
+            (click)="selectSection('seccion4')"
+            >Ingredientes</a
+          >
+        </li>
+        <li class="nav-item">
+          <a
+            class="nav-link"
+            [ngClass]="{ 'active-link': selectedSection === 'seccion5' }"
+            (click)="selectSection('seccion5')"
+            >Mesas</a
+          >
+        </li>
+        <li class="nav-item">
+          <a
+            class="nav-link"
+            [ngClass]="{ 'active-link': selectedSection === 'seccion6' }"
+            (click)="selectSection('seccion6')"
+            >Ventas</a
+          >
+        </li>
+      </ul>
     </div>
+  </div>
 </app-header>
 
 <div class="col-12 main">
-  <div *ngIf="selectedSection==='seccion1'">
-    <app-crud-empleados [usuarios]="usuarios"></app-crud-empleados>
+  <div *ngIf="selectedSection === 'seccion1'">
+    <app-crud-empleados
+      [usuarios]="usuarios"
+      [roles]="roles"
+    ></app-crud-empleados>
   </div>
-  <div *ngIf="selectedSection==='seccion2'">
+  <div *ngIf="selectedSection === 'seccion2'">
     <app-crud-productos></app-crud-productos>
   </div>
-  <div *ngIf="selectedSection==='seccion3'">
+  <div *ngIf="selectedSection === 'seccion3'">
     <app-crud-categorias></app-crud-categorias>
   </div>
-  <div *ngIf="selectedSection==='seccion4'">
+  <div *ngIf="selectedSection === 'seccion4'">
     <app-crud-ingredientes></app-crud-ingredientes>
   </div>
-  <div *ngIf="selectedSection==='seccion5'">
+  <div *ngIf="selectedSection === 'seccion5'">
     <app-mesas></app-mesas>
   </div>
-  <div *ngIf="selectedSection==='seccion6'">
+  <div *ngIf="selectedSection === 'seccion6'">
     <app-ventas></app-ventas>
   </div>
 </div>

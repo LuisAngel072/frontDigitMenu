@@ -17,5 +17,8 @@ export const environment = {
     ApiActualizarUsuario: "usuarios/actualizar/",
     ApiDesactivarUsuario: "usuarios/desactivar/",
 
-
+    /**
+     * Roles
+     */
+    ApiObtenerRoles: "roles" //GET
 }
