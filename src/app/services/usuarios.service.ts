@@ -121,4 +121,24 @@ export class UsuariosService {
       throw error;
     }
   }
+
+  subirImg(file: File) {
+    try {
+      const formData = new FormData();
+      formData.append('file', file); // 'file' debe coincidir con el nombre del campo en el FileInterceptor
+
+      // Construir la URL completa usando la variable de entorno
+      const url = `${environment.ApiIP}img-us/subir-img`;
+
+      // Realizar la petición POST y devolver el Observable
+      return this.http.post<any>(url, formData);
+    } catch (error) {
+      console.error(
+        'Error al subir la imagen. ERROR -> usuarios.service.ts -> subirImg()',
+        error
+      );
+      throw error;
+    }
+      
+  }
 }
