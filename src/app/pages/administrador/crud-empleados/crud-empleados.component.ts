@@ -21,6 +21,7 @@ export class CrudEmpleadosComponent {
   
   searchTerm: string = '';
   selectedRole: string = '';
+  selectedFile: File | null = null;
 
   get usuariosFiltrados() {
     return this.usuarios.filter(usuario => {
@@ -38,7 +39,12 @@ export class CrudEmpleadosComponent {
   constructor(
     private adminComponente: AdministradorComponent,
     private readonly usuariosService: UsuariosService
-  ) {}
+  ) {
+    this.usuarios = this.adminComponente.usuarios;
+    this.roles = this.adminComponente.roles;
+    this.rolSeleccionado = 0;
+    this.activo = 0;
+  }
   
   async ngOnInit() {
     this.usuarios = this.adminComponente.usuarios;
@@ -75,6 +81,26 @@ export class CrudEmpleadosComponent {
     this.rolSeleccionado = Number(element.value);
     this.usuarios = this.adminComponente.usuarios;
     this.usuarios = this.usuarios.filter((usuario) => usuario.rol_id.id_rol === this.rolSeleccionado);
+  }
+
+  onFileSelected(event: Event) {
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files.length > 0) {
+      this.selectedFile = input.files[0];
+    }
+  }
+  upload() {
+    if (this.selectedFile) {
+      this.usuariosService.subirImg(this.selectedFile).subscribe({
+        next: (res) => {
+          console.log('Ruta de la imagen subida:', res.img_ruta);
+          // Aquí puedes actualizar la base de datos con la ruta devuelta
+        },
+        error: (err) => {
+          console.error('Error al subir imagen', err);
+        },
+      });
+    }
   }
 
 
@@ -427,6 +453,7 @@ export class CrudEmpleadosComponent {
       throw error;
     }
   }
+  
   async editarEmpleado(id_usuario: number) {
     try {
       const usF = this.usuarios.find(
@@ -523,7 +550,9 @@ export class CrudEmpleadosComponent {
               </select>
             </div>
           </div>
-              
+          <div class="input-group mt-2 mb-3 center-content me-3">
+            <input type="file" class="form-control border-secondary" value="${usF.usuario_id.img_perfil.img_ruta}" id="img_perfil">
+          </div>
           <div class="input-group mt-2 mb-3 center-content me-3">
             <span class="input-group-text border-secondary">RFC</span>
             <input type="text" class="form-control border-secondary" value="${
