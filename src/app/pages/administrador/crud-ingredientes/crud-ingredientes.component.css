@@ -1,0 +1,48 @@
+.table thead th {
+    white-space: normal;    /* Permite que el texto se envuelva */
+    word-wrap: break-word;  /* Fuerza el salto de línea si es muy largo */
+    /* min-width: 120px;    // Opcional, si deseas un ancho mínimo */
+  }
+  
+  /* Opcional: si quieres table-layout fixed, define anchuras */
+  .ingredientes-table,
+  .opciones-table,
+  .extras-table {
+    table-layout: fixed; /* Fija el ancho de las columnas */
+    width: 100%;
+  }
+  
+  /* Ejemplo de asignar anchuras en cada columna */
+  .ingredientes-table th:nth-child(1) {
+    width: 50%;
+  }
+  .ingredientes-table th:nth-child(2) {
+    width: 30%;
+  }
+  .ingredientes-table th:nth-child(3) {
+    width: 51%;
+  }
+  .opciones-table th:nth-child(1) {
+    width: 32%;
+  }
+  .opciones-table th:nth-child(2) {
+    width: 50%;
+  }
+  .opciones-table th:nth-child(3) {
+    width: 50%;
+  }
+
+  .extras-table th:nth-child(3) {
+    width: 50%;
+  }
+
+  /* normal */
+.icon-trash {
+    color: var(--color-eliminar);
+}
+.icon-eye {
+    color: var(--color-secundario);
+}
+.icon-edit {
+    color: var(--color-terciario);
+}
