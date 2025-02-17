@@ -12,6 +12,7 @@ import {
   Roles,
   Telefonos,
 } from '../types';
+import { Observable } from 'rxjs';
 
 @Injectable({
   providedIn: 'root',
@@ -120,5 +121,8 @@ export class UsuariosService {
       );
       throw error;
     }
+  }
+  registrarUsuario(usuario: any): Observable<any> {
+    return this.http.post<any>(environment.ApiIP + "usuarios/registro", usuario);
   }
 }
