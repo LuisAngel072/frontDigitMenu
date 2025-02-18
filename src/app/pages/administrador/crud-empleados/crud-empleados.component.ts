@@ -294,7 +294,7 @@ export class CrudEmpleadosComponent {
         const nContrasena = (document.getElementById('nuevo_contrasena') as HTMLSelectElement).value;
 
         // Verificar que todos los campos estén completos
-        if (!nNombres || !nPrimerApellido || !nRol) {
+        if (!nCodigo || !nNombres || !nPrimerApellido || !nSegundoApellido || !nTelefono || !nEmail || !nRol || !nSexo || !nRfc || !nNss || !nCalle || !nColonia || !nPostal || !nNumExt || !nNumInt || !nMunicipio || !nContrasena) {
             Swal.showValidationMessage('Por favor, complete todos los campos');
           } else {
           // Agregar el nuevo usuario
