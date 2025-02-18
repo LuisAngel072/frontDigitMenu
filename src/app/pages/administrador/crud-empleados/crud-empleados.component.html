@@ -16,14 +16,22 @@
         />
       </div>
       <div class="col-auto">
-        <select class="form-select text-start" (change)="filtrarUsuariosPorRol($event)">
+        <select
+          class="form-select text-start"
+          (change)="filtrarUsuariosPorRol($event)"
+        >
           <option class="opt" [value]="0" selected>Filtrar por rol</option>
           <option class="opt" [value]="0">Todos</option>
-          <option *ngFor="let rol of roles" class="opt" [value]="rol.id_rol">{{rol.rol}}</option>
+          <option *ngFor="let rol of roles" class="opt" [value]="rol.id_rol">
+            {{ rol.rol }}
+          </option>
         </select>
       </div>
       <div class="col-auto">
-        <select class="form-select text-start" (change)="filtrarActivos($event)">
+        <select
+          class="form-select text-start"
+          (change)="filtrarActivos($event)"
+        >
           <option class="opt" [value]="0" selected>Filtrar activos</option>
           <option class="opt" [value]="0">Todos</option>
           <option class="opt" [value]="1">Activos</option>
@@ -55,7 +63,10 @@
           </td>
           <td>{{ usuario.rol_id.rol }}</td>
           <td class="icons-space text-center">
-            <span (click)="verEmpleado(usuario.usuario_id.id_usuario)"class="material-symbols-outlined icon icon-eye">
+            <span
+              (click)="verEmpleado(usuario.usuario_id.id_usuario)"
+              class="material-symbols-outlined icon icon-eye"
+            >
               visibility
             </span>
             <span
@@ -64,16 +75,18 @@
             >
               edit_square
             </span>
-            <span (click)="desactivarEmpleado(usuario.usuario_id.id_usuario)" class="material-symbols-outlined icon icon-trash">
+            <span
+              (click)="desactivarEmpleado(usuario.usuario_id.id_usuario)"
+              class="material-symbols-outlined icon icon-trash"
+            >
               delete
             </span>
           </td>
         </tr>
       </tbody>
-      
     </table>
-    <h3 class="text-center" *ngIf="usuarios.length === 0">¡Vaya! No existen empleados registrados o están inactivos</h3>
+    <h3 class="text-center" *ngIf="usuarios.length === 0">
+      ¡Vaya! No existen empleados registrados o están inactivos
+    </h3>
   </main>
 </div>
-
-

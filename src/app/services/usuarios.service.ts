@@ -12,6 +12,7 @@ import {
   Roles,
   Telefonos,
 } from '../types';
+import { Observable } from 'rxjs';
 
 @Injectable({
   providedIn: 'root',
@@ -121,15 +122,16 @@ export class UsuariosService {
       throw error;
     }
   }
+  registrarUsuario(usuario: any): Observable<any> {
+    return this.http.post<any>(environment.ApiIP + "usuarios/registro", usuario);
+  }
 
   subirImg(file: File) {
     try {
       const formData = new FormData();
       formData.append('file', file); // 'file' debe coincidir con el nombre del campo en el FileInterceptor
-
       // Construir la URL completa usando la variable de entorno
       const url = `${environment.ApiIP}img-us/subir-img`;
-
       // Realizar la petición POST y devolver el Observable
       return this.http.post<any>(url, formData);
     } catch (error) {

@@ -49,6 +49,7 @@ export class CrudEmpleadosComponent {
   async ngOnInit() {
     this.usuarios = this.adminComponente.usuarios;
     this.roles = this.adminComponente.roles;
+    this.filtrarUsuariosActivos()
     console.log(this.usuarios);
   }
   filtrarUsuariosActivos() {
@@ -88,7 +89,6 @@ export class CrudEmpleadosComponent {
       this.selectedFile = input.files[0];
     }
   }
-
   upload() {
     if (this.selectedFile) {
       this.usuariosService.subirImg(this.selectedFile).subscribe({
@@ -103,53 +103,213 @@ export class CrudEmpleadosComponent {
     }
   }
 
+
+  obtenerIdRol(rol: string): number {
+    if (rol == "Administrador") 
+      return 1;
+     else if (rol == "Cocinero") 
+      return 2;
+     else if (rol == "Mesero") 
+      return 3;
+     else if (rol == "Cajero") 
+      return 4;
+
+    return 0;
+  }
+
+  registrar(
+    codigo: string, 
+    nombre: string, 
+    papellido: string,
+    sapellido: string,
+    telefono: string,
+    email: string,
+    sexo: string,
+    rfc: string,
+    nss: string,
+    calle: string,
+    next: string,
+    nint: string,
+    colonia: string,
+    postal: string,
+    municipio: string,
+    contrasena: string,
+    rol: string
+  ) {
+    this.usuariosService.registrarUsuario({
+    "codigo": codigo,
+    "nombres": nombre,
+    "primer_apellido": papellido,
+    "segundo_apellido": sapellido,
+    "telefono_id": {
+      "telefono": telefono
+    },
+    "email_id": {
+      "email": email
+    },
+    "sexo": sexo,
+    "rfc": {
+      "rfc": rfc
+    },
+    "nss": {
+      "nss": nss
+    },
+    "domicilio": {
+      "calle": calle,
+      "no_ext": next,
+      "no_int": nint,
+      "colonia": colonia,
+      "codigo_postal": postal,
+      "municipio": municipio
+    },
+    "contrasena": contrasena,
+    "rol": [
+      {
+        "id_rol": this.obtenerIdRol(rol),
+        "rol": rol
+      }
+    ]
+  }).subscribe({
+      next: (response) => {
+        console.log(response);
+      },
+      error: (error) => {
+        alert('Error al registrar usuario');
+        console.error(error);
+      }
+    });
+  }
+
   agregarEmpleadosBoton() {
     Swal.fire({
       title: 'Agregar Nuevo Usuario',
       html: `
-        <form class="merequetengue">
-  <div class="container">
-    <div class="row">
-      <div class="col-md-6 mb-3">
-        <input id="nombres" class="form-control" placeholder="Nombres" />
-      </div>
-      <div class="col-md-6 mb-3">
-        <input id="apellidos" class="form-control" placeholder="Apellidos" />
-      </div>
-    </div>
-    <div class="row">
-      <div class="col-md-12 mb-3">
-        <select id="rol" class="form-control">
-          <option value="Administrador">Administrador</option>
-          <option value="Cocinero">Cocinero</option>
-          <option value="Mesero">Mesero</option>
-          <option value="Cajero">Cajero</option>
-        </select>
-      </div>
-    </div>
-  </div>
-</form>
+        <form class="">
+          <div class="container">
+            <div class="row">
+              <div class="input-group mt-2 mb-3 center-content me-3">
+                <span class="input-group-text border-secondary">Código</span>
+                <input id="nuevo_codigo" class="form-control border-secondary border-secondary" />
+              </div>
+              <div class="input-group mt-2 mb-3 center-content me-3">
+                <span class="input-group-text border-secondary">Nombres</span>
+                <input id="nuevo_nombres" class="form-control border-secondary" />
+              </div>
+              <div class="input-group mt-2 mb-3 center-content me-3">
+                <span class="input-group-text border-secondary">Primer apellido</span>
+                <input id="nuevo_primer_apellido" class="form-control border-secondary" />
+              </div>
+              <div class="input-group mt-2 mb-3 center-content me-3">
+                <span class="input-group-text border-secondary">Segundo apellido</span>
+                <input id="nuevo_segundo_apellido" class="form-control border-secondary" />
+              </div>
+              <div class="input-group mt-2 mb-3 center-content me-3">
+                <span class="input-group-text border-secondary">Telefono</span>
+                <input id="nuevo_telefono" class="form-control border-secondary" />
+              </div>
+              <div class="input-group mt-2 mb-3 center-content me-3">
+                <span class="input-group-text border-secondary">Email</span>
+                <input id="nuevo_email" class="form-control border-secondary" />
+              </div>
+              <div class="row">
+              <div class="col-md-12 mb-3">
+                <select id="nuevo_rol" class="form-control border-secondary">
+                  <option value="Administrador">Administrador</option>
+                  <option value="Cocinero">Cocinero</option>
+                  <option value="Mesero">Mesero</option>
+                  <option value="Cajero">Cajero</option>
+                </select>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-md-12 mb-3">
+                <select id="nuevo_sexo" class="form-control border-secondary">
+                  <option value="Masculino" selected>Masculino</option>
+                  <option value="Femenino">Femenino</option>
+                  <option value="Otro">Otro</option>
+                </select>
+              </div>
+            </div>
+              <div class="input-group mt-2 mb-3 center-content me-3">
+                <span class="input-group-text border-secondary">RFC</span>
+                <input id="nuevo_rfc" class="form-control border-secondary" />
+              </div>
+              <div class="input-group mt-2 mb-3 center-content me-3">
+                <span class="input-group-text border-secondary">NSS</span>
+                <input id="nuevo_nss" class="form-control border-secondary"/>
+              </div>
+              <div class="input-group mt-2 mb-3 center-content me-3">
+                <span class="input-group-text border-secondary">Calle</span>
+                <input id="nuevo_calle" class="form-control border-secondary" />
+              </div>
+              <div class="input-group mt-2 mb-3 center-content me-3">
+                <span class="input-group-text border-secondary">Colonia</span>
+                <input id="nuevo_colonia" class="form-control border-secondary"/>
+              </div>
+              <div class="input-group mt-2 mb-3 center-content me-3">
+                <span class="input-group-text border-secondary">Postal</span>
+                <input id="nuevo_postal" class="form-control border-secondary"/>
+              </div>
+              <div class="input-group mt-2 mb-3 center-content me-3">
+                <span class="input-group-text border-secondary">Numero exterior</span>
+                <input id="nuevo_num_ext" class="form-control border-secondary"/>
+              </div>
+              <div class="input-group mt-2 mb-3 center-content me-3">
+                <span class="input-group-text border-secondary">Numero interior</span>
+                <input id="nuevo_num_int" class="form-control border-secondary"/>
+              </div>
+              <div class="input-group mt-2 mb-3 center-content me-3">
+                <span class="input-group-text border-secondary">Municipio</span>
+                <input id="nuevo_municipio" class="form-control border-secondary" /
+              </div>
+              <div class="input-group mt-2 mb-3 center-content me-3">
+                <span class="input-group-text border-secondary">Contraseña</span>
+                <input id="nuevo_contrasena" class="form-control border-secondary" type="password" />
+              </div>
+            </div>
+          </div>
+        </form>
 
       `,
       confirmButtonText: 'Agregar',
       showCancelButton: true,
       preConfirm: () => {
-        // Obtener los valores de los inputs
-        const nombres = (document.getElementById('nombres') as HTMLInputElement)
-          .value;
-        const apellidos = (
-          document.getElementById('apellidos') as HTMLInputElement
-        ).value;
-        const rol = (document.getElementById('rol') as HTMLSelectElement).value;
+        // Para cada relación, usamos el valor del input y agregamos el id original del objeto (si se requiere actualización)
+        const nCodigo = (document.getElementById('nuevo_codigo') as HTMLInputElement).value;
+        const nNombres = (document.getElementById('nuevo_nombres') as HTMLInputElement).value;
+        const nPrimerApellido = (document.getElementById('nuevo_primer_apellido') as HTMLInputElement).value;
+        const nSegundoApellido = (document.getElementById('nuevo_segundo_apellido') as HTMLInputElement).value;
+        const nTelefono = (document.getElementById('nuevo_telefono') as HTMLInputElement).value;
+        const nEmail = (document.getElementById('nuevo_email') as HTMLInputElement).value;
+        const nRol = (document.getElementById('nuevo_rol') as HTMLSelectElement).value;
+        const nSexo = (document.getElementById('nuevo_sexo') as HTMLSelectElement).value;
+        const nRfc = (document.getElementById('nuevo_rfc') as HTMLSelectElement).value;
+        const nNss = (document.getElementById('nuevo_nss') as HTMLSelectElement).value;
+        const nCalle = (document.getElementById('nuevo_calle') as HTMLSelectElement).value;
+        const nColonia = (document.getElementById('nuevo_colonia') as HTMLSelectElement).value;
+        const nPostal = (document.getElementById('nuevo_postal') as HTMLSelectElement).value;
+        const nNumExt = (document.getElementById('nuevo_num_ext') as HTMLSelectElement).value;
+        const nNumInt = (document.getElementById('nuevo_num_int') as HTMLSelectElement).value;
+        const nMunicipio = (document.getElementById('nuevo_municipio') as HTMLSelectElement).value;
+        const nContrasena = (document.getElementById('nuevo_contrasena') as HTMLSelectElement).value;
 
         // Verificar que todos los campos estén completos
-        if (!nombres || !apellidos || !rol) {
-          Swal.showValidationMessage('Por favor, complete todos los campos');
-        } else {
+        if (!nCodigo || !nNombres || !nPrimerApellido || !nSegundoApellido || !nTelefono || !nEmail || !nRol || !nSexo || !nRfc || !nNss || !nCalle || !nColonia || !nPostal || !nNumExt || !nNumInt || !nMunicipio || !nContrasena) {
+            Swal.showValidationMessage('Por favor, complete todos los campos');
+          } else {
           // Agregar el nuevo usuario
-          //this.addUser(nombres, apellidos, rol);
-        }
-      },
+           this.registrar(nCodigo, nNombres, nPrimerApellido, nSegundoApellido, nTelefono, nEmail, nSexo, nRfc, nNss, nCalle, nNumExt, nNumInt, nColonia, nPostal, nMunicipio, nContrasena, nRol)
+           Swal.fire({
+            title: 'Usuario Creado',
+            text: 'El usuario se ha registrado correctamente.',
+            icon: 'success',
+            confirmButtonText: 'OK'
+          });
+          setTimeout(() => {
+            window.location.reload();
+          }, 1000);
+       }
+      }
     });
   }
   async verEmpleado(id_usuario: number) {
@@ -390,11 +550,9 @@ export class CrudEmpleadosComponent {
               </select>
             </div>
           </div>
-          
           <div class="input-group mt-2 mb-3 center-content me-3">
             <input type="file" class="form-control border-secondary" value="${usF.usuario_id.img_perfil.img_ruta}" id="img_perfil">
           </div>
-
           <div class="input-group mt-2 mb-3 center-content me-3">
             <span class="input-group-text border-secondary">RFC</span>
             <input type="text" class="form-control border-secondary" value="${
@@ -660,4 +818,3 @@ export class CrudEmpleadosComponent {
   }
   
 }
-
