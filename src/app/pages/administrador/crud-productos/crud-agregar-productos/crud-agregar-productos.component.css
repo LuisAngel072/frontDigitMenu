@@ -1,0 +1,9 @@
+.container {
+    padding-top: 100px;
+}
+.btn {
+    background-color: var(--color-botonP);
+    color: white;
+    border-color: var(--color-botonP);
+    font-family: 'cocogoose',sans-serif;
+}

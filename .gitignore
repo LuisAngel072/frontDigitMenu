@@ -47,3 +47,5 @@ build/
 
 # Archivos de configuración de IDE
 *.log
+package-lock.json
+package.json
