@@ -36,13 +36,33 @@
     width: 50%;
   }
 
-  /* normal */
+ /* normal */
 .icon-trash {
-    color: var(--color-eliminar);
+  color: var(--color-eliminar);
 }
 .icon-eye {
-    color: var(--color-secundario);
+  color: var(--color-secundario);
 }
 .icon-edit {
-    color: var(--color-terciario);
+  color: var(--color-terciario);
+}
+/* hover */
+.icon-trash:hover {
+  color: var(--color-eliminarH);
+}
+.icon-eye:hover {
+  color: var(--color-secundarioH);
+}
+.icon-edit:hover {
+  color: var(--color-terciarioH);
+}
+/* active */
+.icon-trash:active {
+  color: var(--color-eliminarA);
+}
+.icon-eye:active {
+  color: var(--color-secundarioA);
+}
+.icon-edit:active {
+  color: var(--color-terciarioA);
 }

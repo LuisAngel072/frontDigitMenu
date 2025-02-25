@@ -20,5 +20,13 @@ export const environment = {
     /**
      * Roles
      */
-    ApiObtenerRoles: "roles" //GET
+    ApiObtenerRoles: "roles", //GET
+
+    /**
+     * Ingredientes
+     */
+    ApiObtenerIngredientes: "ingredientes", //GET
+    ApiCrearIngrediente: "ingredientes/registrar", //POST
+    ApiActualizarIngrediente: "ingredientes/actualizar/:id_ingr", //PATCH
+    ApiEliminarIngrediente: "ingredientes/eliminar/:id_ingr", //DELETE
 }

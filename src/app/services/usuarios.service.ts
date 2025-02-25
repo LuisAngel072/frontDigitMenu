@@ -11,6 +11,7 @@ import {
   RFC,
   Roles,
   Telefonos,
+  UsuariosDTO,
 } from '../types';
 import { Observable } from 'rxjs';
 
@@ -122,9 +123,26 @@ export class UsuariosService {
       throw error;
     }
   }
-  registrarUsuario(usuario: any): Observable<any> {
-    return this.http.post<any>(environment.ApiIP + "usuarios/registro", usuario);
+  registrarUsuario(body: UsuariosDTO): Observable <any> {
+    try {
+      const response$ = this.http.post<any>(
+        environment.ApiIP + environment.ApiCrearUsuario,
+        body,
+        {
+          responseType: 'text' as 'json',
+          headers: { Authorization: `Bearer ${this.authService.getToken()}` },
+        }
+      )
+      return response$;
+    } catch (error) {
+      console.error(
+        'Error inesperado en usuarios.service.ts -> registrarUsuario()',
+        error
+      );
+      throw error;
+    }
   }
+  
 
   subirImg(file: File) {
     try {
@@ -141,6 +159,5 @@ export class UsuariosService {
       );
       throw error;
     }
-      
   }
 }
