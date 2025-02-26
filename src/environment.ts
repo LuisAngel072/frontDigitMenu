@@ -23,6 +23,24 @@ export const environment = {
     ApiObtenerRoles: "roles", //GET
 
     /**
+     * Categorias
+     */
+    ApiObtenerCategorias: "categorias",//GET
+    ApiObtenerCategoria: "categorias/:id_cat",//GET
+    ApiRegistrarCategoria: "categorias/registrar",//POST
+    ApiEditarCategoria: "categorias/editar/:id_cat", //PATCH
+    ApitEliminarCategoria: "categorias/eliminar/:id_cat",//DELETE
+
+    /**
+     * SubCategorias
+     */
+    ApiObtenerSubCategorias: "sub-categorias",//GET
+    ApiObtenerSubCategoria: "sub-categorias/:id_subcat",//GET
+    ApiRegistrarSubCategoria: "sub-categorias/registrar",//POST
+    ApiEditarSubCategoria: "sub-categorias/editar/:id_subcat", //PATCH
+    ApitEliminarSubCategoria: "sub-categorias/eliminar/:id_subcat",
+
+    /**
      * Ingredientes
      */
     ApiObtenerIngredientes: "ingredientes", //GET

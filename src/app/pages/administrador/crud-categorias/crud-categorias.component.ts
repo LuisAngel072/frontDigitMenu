@@ -1,10 +1,4 @@
-/*import { Component, Input } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import Swal from 'sweetalert2';
-import { AdministradorComponent } from '../administrador.component';
-import { Categorias, Sub_categorias } from '../../../types';
-import { CategoriasService } from '../../../services/categorias.service';
-import { FormsModule } from '@angular/forms';
+/*
 
 @Component({
   selector: 'app-categorias',
@@ -127,12 +121,13 @@ export class CategoriasComponent {
 }
 */
 import { Component } from '@angular/core';
-
+import { CommonModule } from '@angular/common';
 @Component({
   selector: 'app-categorias',
   standalone: true,
   templateUrl: './crud-categorias.component.html',
-  styleUrls: ['./crud-categorias.component.css']
+  styleUrls: ['./crud-categorias.component.css'],
+  imports: [CommonModule],
 })
 export class CategoriasComponent {
   // TODO: Componente vacío para probar solo diseño
