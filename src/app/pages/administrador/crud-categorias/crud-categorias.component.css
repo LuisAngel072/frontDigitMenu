@@ -1,13 +1,30 @@
 .main-container {
     display: flex;
     flex-direction: column;
-    padding-top: 20vh;
-    margin: 0 15vw 0 15vw;
+    padding-top: 10vh;
+    margin: 0 10vw;
 }
+
+.tablas-container {
+    display: flex;
+    flex-direction: row;
+    gap: 30px; /* Espacio entre las tablas */
+    justify-content: center;
+    align-items: flex-start;
+    flex-wrap: wrap; /* Permite que en pantallas pequeñas se apilen */
+}
+
+.tabla-categorias,
+.tabla-subcategorias {
+    flex: 1; /* Permite que ocupen el mismo espacio */
+    min-width: 300px; /* Evita que se hagan demasiado pequeñas */
+}
+
 .icons-space {
     display: flex;
     justify-content: space-evenly;
 }
+
 .search {
     width: 100%;
 }
