@@ -66,3 +66,8 @@
 .icon-edit:active {
   color: var(--color-terciarioA);
 }
+
+.icon-add:active {
+  background-color: var(--color-botonPA);
+  color: white;
+}

@@ -1,62 +1,60 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { environment } from '../../environment';
 import { AuthService } from './auth.service';
+import { environment } from '../../environment';
 import { lastValueFrom } from 'rxjs';
-import { IngredientesDTO } from '../dtos';
+import { OpcionesDTO } from '../dtos';
 
 @Injectable({
   providedIn: 'root',
 })
-export class IngredientesService {
+export class OpcionesService {
   constructor(
     private http: HttpClient,
     private readonly authService: AuthService
   ) {}
 
-  async getIngredientes() {
+  async getOpciones() {
     try {
       const response$ = this.http.get<any>(
-        environment.ApiIP + environment.ApiObtenerIngredientes,
+        environment.ApiIP + environment.ApiObtenerOpciones,
         { headers: { Authorization: `Bearer ${this.authService.getToken()}` } }
       );
       const response = await lastValueFrom(response$);
       return response;
     } catch (error) {
       console.error(
-        'Error al obtener los ingredientes. ERROR -> getIngredientes.service.ts -> obtenerIngredientes()',
+        'Error al obtener las opciones. ERROR -> getOpciones.service.ts -> obtenerOpciones()',
         error
       );
       throw error;
     }
   }
 
-  async crearIngrediente(body: IngredientesDTO) {
+  async crearOpcion(body: OpcionesDTO) {
     try {
-      console.log(body)
       const response$ = this.http.post<any>(
-        environment.ApiIP + environment.ApiCrearIngrediente,
+        environment.ApiIP + environment.ApiCrearOpcion,
         body,
         {
           responseType: 'text' as 'json',
           headers: { Authorization: `Bearer ${this.authService.getToken()}` },
         }
       );
-      const response = await lastValueFrom(response$);
-      return response;
+      return response$;
     } catch (error) {
       console.error(
-        'Error inesperado en ingredientes.service.ts -> crearIngrediente()',
+        'Error inesperado en opciones.service.ts -> crearOpcion()',
         error
       );
       throw error;
     }
   }
 
-  async upIngrediente(id_ingr: number, body: IngredientesDTO) {
+  async upOpcion(id_opcion: number, body: OpcionesDTO) {
     try {
       const response$ = this.http.patch<any>(
-        environment.ApiIP + environment.ApiActualizarIngrediente + id_ingr,
+        environment.ApiIP + environment.ApiActualizarOpcion + id_opcion,
         body,
         {
           responseType: 'text' as 'json',
@@ -67,31 +65,30 @@ export class IngredientesService {
       return response;
     } catch (error) {
       console.error(
-        'Error inesperado en ingredientes.service.ts -> upIngrediente()',
+        'Error inesperado en opciones.service.ts -> upOpcion()',
         error
       );
       throw error;
     }
   }
 
-  async delIngrediente(id_ingr: number) {
+  async delOpcion(id_opcion: number) {
     try {
       const response$ = this.http.delete<any>(
-        environment.ApiIP + environment.ApiEliminarIngrediente + id_ingr,
+        environment.ApiIP + environment.ApiEliminarOpcion + id_opcion,
         {
           responseType: 'text' as 'json',
           headers: { Authorization: `Bearer ${this.authService.getToken()}` },
         }
       );
       const response = await lastValueFrom(response$);
-      return response; 
+      return response;
     } catch (error) {
       console.error(
-        'Error inesperado en ingredientes.service.ts -> delIngrediente()',
+        'Error inesperado en opciones.service.ts -> delOpcion()',
         error
       );
       throw error;
     }
-    
   }
 }

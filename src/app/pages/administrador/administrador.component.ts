@@ -7,10 +7,11 @@ import { CategoriasComponent } from './crud-categorias/crud-categorias.component
 import { CrudIngredientesComponent } from './crud-ingredientes/crud-ingredientes.component';
 import { MesasComponent } from './mesas/mesas.component';
 import { VentasComponent } from './ventas/ventas.component';
-import { Roles, Usuarios_has_roles } from '../../types';
+import { Ingredientes, Roles, Usuarios_has_roles } from '../../types';
 import { UsuariosService } from '../../services/usuarios.service';
 import { RolesService } from '../../services/roles.service';
 import { CrudAgregarProductosComponent } from './crud-productos/crud-agregar-productos/crud-agregar-productos.component';
+import { IngredientesService } from '../../services/ingredientes.service';
 @Component({
   selector: 'app-administrador',
   standalone: true,
@@ -37,16 +38,19 @@ export class AdministradorComponent {
 
   public usuarios: Usuarios_has_roles[] = [];
   public roles: Roles[] = [];
+  public ingredientes: Ingredientes[] = [];
 
   constructor(
     private readonly usuariosService: UsuariosService,
     private readonly rolesService: RolesService,
+    private readonly ingredientesService: IngredientesService,
   ) {}
   
 
   async ngOnInit() {
     this.roles = await this.rolesService.obtenerRoles();
     this.usuarios = await this.usuariosService.obtenerUsuariosYRoles();
+    this.ingredientes = await this.ingredientesService.getIngredientes();
   }
   selectSection(section: string): void {
     this.selectedSection = section;

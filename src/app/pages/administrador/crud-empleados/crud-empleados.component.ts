@@ -6,8 +6,8 @@ import {
   Roles,
   Usuarios,
   Usuarios_has_roles,
-  UsuariosDTO,
 } from '../../../types';
+import { UsuariosDTO } from '../../../dtos';
 import { UsuariosService } from '../../../services/usuarios.service';
 import { FormsModule } from '@angular/forms';
 import { switchMap } from 'rxjs';
@@ -66,6 +66,8 @@ export class CrudEmpleadosComponent {
     this.usuarios = this.usuarios.filter(
       (usuario) => usuario.usuario_id.activo === true
     );
+
+    
   }
 
   filtrarActivos(event: Event) {
@@ -405,7 +407,10 @@ export class CrudEmpleadosComponent {
             data.rfc.rfc = 'NO ASIGNADO';
           }
           this.formData = data;
-        },
+          
+        }
+        
+        ,
       }).then(async (result) => {
         if (result.isConfirmed) {
           const confirmacion = await Swal.fire({
@@ -670,6 +675,7 @@ export class CrudEmpleadosComponent {
         });
         return;
       }
+      
       Swal.fire({
         title: 'Editar empleado',
         html: `
@@ -999,8 +1005,8 @@ export class CrudEmpleadosComponent {
             } catch (error) {
               this.usuarios =
                 await this.usuariosService.obtenerUsuariosYRoles();
-
               this.adminComponente.usuarios = this.usuarios;
+              
               Swal.close();
               Swal.fire({
                 icon: 'error',
