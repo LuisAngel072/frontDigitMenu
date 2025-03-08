@@ -1,18 +1,16 @@
-/*import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { CategoriasComponent } from './crud-categorias.component';
 
-import { CrudCategoriasComponent } from './crud-categorias.component';
-
-describe('CrudCategoriasComponent', () => {
-  let component: CrudCategoriasComponent;
-  let fixture: ComponentFixture<CrudCategoriasComponent>;
+describe('CategoriasComponent', () => {
+  let component: CategoriasComponent;
+  let fixture: ComponentFixture<CategoriasComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [CrudCategoriasComponent]
-    })
-    .compileComponents();
+      imports: [CategoriasComponent]  // Asegúrate de que el componente esté registrado correctamente
+    }).compileComponents();
     
-    fixture = TestBed.createComponent(CrudCategoriasComponent);
+    fixture = TestBed.createComponent(CategoriasComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });
@@ -21,4 +19,3 @@ describe('CrudCategoriasComponent', () => {
     expect(component).toBeTruthy();
   });
 });
-*/

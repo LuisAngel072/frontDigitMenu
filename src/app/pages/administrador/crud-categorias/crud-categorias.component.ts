@@ -1,61 +1,31 @@
-/*
+import { Component, OnInit } from '@angular/core';
+import { CategoriaService } from 'src/app/services/categoria.service';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-categorias',
-  standalone: true,
-  imports: [CommonModule, FormsModule],
   templateUrl: './crud-categorias.component.html',
-  styleUrl: './crud-categorias.component.css',
+  styleUrls: ['./crud-categorias.component.css'],
 })
-
-export class CategoriasComponent {
-  @Input() categorias: Categorias[] = [];
-  @Input() subcategorias: Sub_categorias[] = [];
+export class CategoriasComponent implements OnInit {
+  categorias: any[] = [];
   searchCategoria: string = '';
-  searchSubcategoria: string = '';
 
-  constructor(
-    private categoriasService: CategoriasService
-  ) {}
-  
-  async ngOnInit() {
-    this.categorias = this.categoriasService.obtenerCategorias();
-    this.subcategorias = this.categoriasService.obtenerSubcategorias();
-  }
-  
+  constructor(private categoriaService: CategoriaService) {}
 
-  get categoriasFiltradas() {
-    return this.categorias.filter(categoria =>
-      categoria.nombre_cat.toLowerCase().includes(this.searchCategoria.toLowerCase())
-    );
+  ngOnInit(): void {
+    this.obtenerCategorias();
   }
 
-  get subcategoriasFiltradas() {
-    return this.subcategorias.filter(subcategoria =>
-      subcategoria.nombre_subcat.toLowerCase().includes(this.searchSubcategoria.toLowerCase())
-    );
-  }
-
-  agregarCategoria() {
-    Swal.fire({
-      title: 'Agregar Nueva Categoría',
-      input: 'text',
-      inputPlaceholder: 'Nombre de la categoría',
-      showCancelButton: true,
-      confirmButtonText: 'Agregar',
-      preConfirm: (nombre) => {
-        if (!nombre) {
-          Swal.showValidationMessage('El nombre no puede estar vacío');
-        }
-        return { nombre_cat: nombre };
+  obtenerCategorias() {
+    this.categoriaService.obtenerCategorias().subscribe(
+      (data) => {
+        this.categorias = data;
       },
-    }).then(async (result) => {
-      if (result.isConfirmed) {
-        await this.categoriasService.agregarCategoria(result.value);
-        this.categorias = await this.categoriasService.obtenerCategorias();
-        Swal.fire('¡Categoría agregada!', '', 'success');
+      (error) => {
+        console.error('Error al obtener categorías', error);
       }
-    });
+    );
   }
 
   agregarCategoria() {
@@ -65,40 +35,29 @@ export class CategoriasComponent {
       inputPlaceholder: 'Nombre de la categoría',
       showCancelButton: true,
       confirmButtonText: 'Agregar',
-      preConfirm: (nombre) => {
-        if (!nombre) {
-          Swal.showValidationMessage('El nombre no puede estar vacío');
-        }
-        return { id_cat: this.categorias.length + 1, nombre_cat: nombre };
-      },
     }).then((result) => {
-      if (result.isConfirmed) {
-        this.categoriasService.agregarCategoria(result.value);
-        this.categorias = this.categoriasService.obtenerCategorias();
-        Swal.fire('¡Categoría agregada!', '', 'success');
+      if (result.isConfirmed && result.value) {
+        this.categoriaService.registrarCategoria({ nombre_cat: result.value }).subscribe(() => {
+          this.obtenerCategorias();
+          Swal.fire('¡Categoría agregada!', '', 'success');
+        });
       }
     });
   }
-  
 
-  editarCategoria(categoria: Categorias) {
+  editarCategoria(categoria: any) {
     Swal.fire({
       title: 'Editar Categoría',
       input: 'text',
       inputValue: categoria.nombre_cat,
       showCancelButton: true,
       confirmButtonText: 'Guardar',
-      preConfirm: (nuevoNombre) => {
-        if (!nuevoNombre) {
-          Swal.showValidationMessage('El nombre no puede estar vacío');
-        }
-        return { id_cat: categoria.id_cat, nombre_cat: nuevoNombre };
-      },
-    }).then(async (result) => {
-      if (result.isConfirmed) {
-        await this.categoriasService.editarCategoria(result.value);
-        this.categorias = await this.categoriasService.obtenerCategorias();
-        Swal.fire('¡Categoría actualizada!', '', 'success');
+    }).then((result) => {
+      if (result.isConfirmed && result.value) {
+        this.categoriaService.editarCategoria(categoria.id_cat, { nombre_cat: result.value }).subscribe(() => {
+          this.obtenerCategorias();
+          Swal.fire('¡Categoría actualizada!', '', 'success');
+        });
       }
     });
   }
@@ -110,25 +69,12 @@ export class CategoriasComponent {
       icon: 'warning',
       showCancelButton: true,
       confirmButtonText: 'Sí, eliminar',
-    }).then(async (result) => {
+    }).then((result) => {
       if (result.isConfirmed) {
-        await this.categoriasService.eliminarCategoria(id);
-        this.categorias = await this.categoriasService.obtenerCategorias();
-        Swal.fire('¡Categoría eliminada!', '', 'success');
+        this.categoriaService.eliminarCategoria(id).subscribe(() => {
+          this.obtenerCategorias();
+          Swal.fire('¡Categoría eliminada!', '', 'success');
+        });
       }
     });
   }
-}
-*/
-import { Component } from '@angular/core';
-import { CommonModule } from '@angular/common';
-@Component({
-  selector: 'app-categorias',
-  standalone: true,
-  templateUrl: './crud-categorias.component.html',
-  styleUrls: ['./crud-categorias.component.css'],
-  imports: [CommonModule],
-})
-export class CategoriasComponent {
-  // TODO: Componente vacío para probar solo diseño
-}

@@ -1,48 +1,50 @@
-/*import { Injectable } from '@angular/core';
-import { Categorias, Sub_categorias } from '../types';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { Categoria } from './entities/categoria.entity';
+import { CrearCategoriaDto } from './dtos/crear-categoria.dto';
+import { ActualizarCategoriaDto } from './dtos/actualizar-categoria.dto';
 
-@Injectable({
-  providedIn: 'root'
-})
+@Injectable()
 export class CategoriasService {
-  private categorias: Categorias[] = [
-    { id_cat: 1, nombre_cat: 'Bebidas' },
-    { id_cat: 2, nombre_cat: 'Comidas' }
-  ];
+  constructor(
+    @InjectRepository(Categoria)
+    private readonly categoriaRepo: Repository<Categoria>,
+  ) {}
 
-  private subcategorias: Sub_categorias[] = [
-    { id_subcat: 1, nombre_subcat: 'Refrescos', categoria_id: { id_cat: 1, nombre_cat: 'Bebidas' } },
-    { id_subcat: 2, nombre_subcat: 'Jugos', categoria_id: { id_cat: 1, nombre_cat: 'Bebidas' } }
-  ];
-
-  constructor() {}
-
-  // Obtener todas las categorías
-  obtenerCategorias(): Categorias[] {
-    return this.categorias;
+  async obtenerCategorias(): Promise<Categoria[]> {
+    return this.categoriaRepo.find({ relations: ['subcategorias'] });
   }
 
-  // Obtener todas las subcategorías
-  obtenerSubcategorias(): Sub_categorias[] {
-    return this.subcategorias;
+  async obtenerCategoria(id_cat: number): Promise<Categoria> {
+    const categoria = await this.categoriaRepo.findOne({
+      where: { id_cat },
+      relations: ['subcategorias'],
+    });
+    if (!categoria) {
+      throw new NotFoundException('Categoría no encontrada');
+    }
+    return categoria;
   }
 
-  // Agregar una nueva categoría
-  agregarCategoria(nuevaCategoria: Categorias): void {
-    this.categorias.push(nuevaCategoria);
+  async registrarCategoria(data: CrearCategoriaDto): Promise<Categoria> {
+    const nuevaCategoria = this.categoriaRepo.create(data);
+    return this.categoriaRepo.save(nuevaCategoria);
   }
 
-  // Agregar una nueva subcategoría
-  agregarSubcategoria(nuevaSubcategoria: Sub_categorias): void {
-    this.subcategorias.push(nuevaSubcategoria);
+  async editarCategoria(
+    id_cat: number,
+    cambios: ActualizarCategoriaDto,
+  ): Promise<Categoria> {
+    await this.obtenerCategoria(id_cat);
+    await this.categoriaRepo.update(id_cat, cambios);
+    return this.obtenerCategoria(id_cat);
   }
 
-  // Editar una categoría existente
-  editarCategoria(id: number, nuevoNombre: string): void {
-    const categoria = this.categorias.find(cat => cat.id_cat === id);
-    if (categoria) {
-      categoria.nombre_cat = nuevoNombre;
+  async eliminarCategoria(id_cat: number): Promise<void> {
+    const resultado = await this.categoriaRepo.delete(id_cat);
+    if (resultado.affected === 0) {
+      throw new NotFoundException('Categoría no encontrada');
     }
   }
 }
-*/
