@@ -26,25 +26,43 @@ export const environment = {
      * Categorias
      */
     ApiObtenerCategorias: "categorias",//GET
-    ApiObtenerCategoria: "categorias/:id_cat",//GET
+    ApiObtenerCategoria: "categorias/",//GET
     ApiRegistrarCategoria: "categorias/registrar",//POST
-    ApiEditarCategoria: "categorias/editar/:id_cat", //PATCH
-    ApitEliminarCategoria: "categorias/eliminar/:id_cat",//DELETE
+    ApiEditarCategoria: "categorias/editar/", //PATCH
+    ApitEliminarCategoria: "categorias/eliminar/",//DELETE
 
     /**
      * SubCategorias
      */
     ApiObtenerSubCategorias: "sub-categorias",//GET
-    ApiObtenerSubCategoria: "sub-categorias/:id_subcat",//GET
+    ApiObtenerSubCategoria: "sub-categorias/",//GET
     ApiRegistrarSubCategoria: "sub-categorias/registrar",//POST
-    ApiEditarSubCategoria: "sub-categorias/editar/:id_subcat", //PATCH
-    ApitEliminarSubCategoria: "sub-categorias/eliminar/:id_subcat",
+    ApiEditarSubCategoria: "sub-categorias/editar/", //PATCH
+    ApitEliminarSubCategoria: "sub-categorias/eliminar/",//DELETE
 
     /**
      * Ingredientes
      */
     ApiObtenerIngredientes: "ingredientes", //GET
     ApiCrearIngrediente: "ingredientes/registrar", //POST
-    ApiActualizarIngrediente: "ingredientes/actualizar/:id_ingr", //PATCH
-    ApiEliminarIngrediente: "ingredientes/eliminar/:id_ingr", //DELETE
+    ApiActualizarIngrediente: "ingredientes/actualizar/", //PATCH
+    ApiEliminarIngrediente: "ingredientes/eliminar/", //DELETE
+
+    /**
+     * Extras
+     */
+    ApiObtenerExtras: "extras", //GET
+    ApiObtenerExtra: "extras/", //GET
+    ApiCrearExtra: "extras/registrar", //POST
+    ApiActualizarExtra: "extras/actualizar/", //PATCH
+    ApiEliminarExtra: "extras/eliminar/", //DELETE
+
+    /**
+     * Opciones
+     */
+    ApiObtenerOpciones: "opciones", //GET
+    ApiObtenerOpcion: "opciones/", //GET
+    ApiCrearOpcion: "opciones/registrar", //POST
+    ApiActualizarOpcion: "opciones/actualizar/", //PATCH
+    ApiEliminarOpcion: "opciones/eliminar/", //DELETE
 }

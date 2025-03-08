@@ -14,12 +14,20 @@
     --color-eliminarA: #e24f00;
     --color-peligro: #a60505;
     --color-peligroH: #c21c1c;
-    --color-peligroA:rgb(114, 0, 0)5;
+    --color-peligroA: rgb(114, 0, 0)5;
 }
-input, td, option {
+
+input,
+td,
+option {
     font-family: 'cocogoose', sans-serif;
 }
-h1, h2, h3, th, select {
+
+h1,
+h2,
+h3,
+th,
+select {
     font-family: 'cocogoose-letter', sans-serif;
 }
 
@@ -28,53 +36,66 @@ select.form-select {
     -moz-appearance: none;
     appearance: none;
     font-family: 'cocogoose-letter', sans-serif;
-  }
+}
 
-  option.form-select:hover {
+option.form-select:hover {
     background-color: var(--color-secundario);
 }
+
 .icon {
     transition: transform 0.2s ease, background-color 0.2s ease, border-color 0.2s ease;
     cursor: pointer;
 }
+
 .main-container {
     display: flex;
     flex-direction: column;
     padding-top: 20vh;
     margin: 0 8vw 0 8vw;
 }
+
 .icon:hover {
     transform: scale(1.05);
 }
+
 .icon:active {
     transform: scale(0.95);
 }
+
 .nav-link {
     font-family: 'cocogoose-letter', sans-serif;
     transition: transform 0.2s ease, background-color 0.2s ease, border-color 0.2s ease;
     color: #000;
-    cursor: pointer; /* Cambia el cursor a una mano al pasar sobre el enlace */
+    cursor: pointer;
+    /* Cambia el cursor a una mano al pasar sobre el enlace */
 }
+
 .nav-link:hover {
     color: var(--color-secundarioH);
     transform: scale(1.05);
 }
+
 .nav-link:active {
     color: var(--color-secundarioA);
     transform: scale(0.95);
 }
+
 .active-link {
     color: var(--color-secundario);
 }
+
 .btn {
     transition: transform 0.2s ease, background-color 0.2s ease, border-color 0.2s ease;
 }
+
 .btn:hover {
     transform: scale(1.05);
 }
+
 .btn:active {
     transform: scale(0.95);
 }
+
 .material-symbols-outlined {
     background: none;
     border: none;
@@ -84,32 +105,61 @@ select.form-select {
 .icon-trash {
     color: var(--color-eliminar);
 }
+
 .icon-eye {
     color: var(--color-secundario);
 }
+
+.icon-add {
+    background: var(--color-botonP);
+    color: white;
+    border-radius: 5px;
+    height: 100%;
+    /* Para igualar la altura al input */
+    display: flex;
+    align-items: center;
+}
+
+.icon-add:hover {
+    background-color: var(--color-botonPH);
+    color: white;
+}
+
+.icon-add:active {
+    background-color: var(--color-botonPA);
+    color: white;
+}
+
 .icon-edit {
     color: var(--color-terciario);
 }
+
 /* hover */
 .icon-trash:hover {
     color: var(--color-eliminarH);
 }
+
 .icon-eye:hover {
     color: var(--color-secundarioH);
 }
+
 .icon-edit:hover {
     color: var(--color-terciarioH);
 }
+
 /* active */
 .icon-trash:active {
     color: var(--color-eliminarA);
 }
+
 .icon-eye:active {
     color: var(--color-secundarioA);
 }
+
 .icon-edit:active {
     color: var(--color-terciarioA);
 }
+
 .table-striped {
     table-layout: fixed;
 }
@@ -118,19 +168,21 @@ select.form-select {
     background-color: var(--color-botonP);
     color: white;
     border-color: var(--color-botonP);
-    font-family: 'cocogoose',sans-serif;
+    font-family: 'cocogoose', sans-serif;
 }
+
 .btn.btn-terc {
     background-color: var(--color-terciario);
     color: white;
     border-color: var(--color-terciario);
-    font-family: 'cocogoose',sans-serif;
+    font-family: 'cocogoose', sans-serif;
 }
+
 .btn.btn-peligro {
     background-color: var(--color-peligro);
     color: white;
     border-color: var(--color-peligro);
-    font-family: 'cocogoose',sans-serif;
+    font-family: 'cocogoose', sans-serif;
 }
 
 .search:focus {
@@ -139,61 +191,74 @@ select.form-select {
 
 .swal2-title {
     font-family: 'cocogoose-letter', sans-serif;
-  }
-  .swal2-confirm {
+}
+
+.swal2-confirm {
     background-color: var(--color-botonP);
-  }
-  
-  .swal2-html-container {
+}
+
+.swal2-html-container {
     font-family: 'cocogoose', sans-serif;
-  }
-  
+}
+
 .btn.btn-prim:hover {
     background-color: var(--color-botonPH);
     color: white;
     border-color: var(--color-botonPH);
-    transform: scale(1.05); /* Aumenta el tamaño en un 5% */
+    transform: scale(1.05);
+    /* Aumenta el tamaño en un 5% */
 }
-.btn.btn-prim:active{
+
+.btn.btn-prim:active {
     background-color: var(--color-botonPA);
     color: white;
     border-color: var(--color-botonPA);
-    transform: scale(0.95); /* Reduce el tamaño en un 5% para efecto de presionado */
+    transform: scale(0.95);
+    /* Reduce el tamaño en un 5% para efecto de presionado */
 }
+
 .btn.btn-terc:hover {
     background-color: var(--color-terciarioH);
     color: white;
     border-color: var(--color-terciarioH);
-    transform: scale(1.05); /* Aumenta el tamaño en un 5% */
+    transform: scale(1.05);
+    /* Aumenta el tamaño en un 5% */
 }
-.btn.btn-terc:active{
+
+.btn.btn-terc:active {
     background-color: var(--color-terciarioA);
     color: white;
     border-color: var(--color-terciarioA);
-    transform: scale(0.95); /* Reduce el tamaño en un 5% para efecto de presionado */
+    transform: scale(0.95);
+    /* Reduce el tamaño en un 5% para efecto de presionado */
 }
+
 .btn.btn-peligro:hover {
     background-color: var(--color-peligroH);
     color: white;
     border-color: var(--color-peligroH);
-    transform: scale(1.05); /* Aumenta el tamaño en un 5% */
+    transform: scale(1.05);
+    /* Aumenta el tamaño en un 5% */
 }
+
 .btn.btn-peligro:active {
     background-color: var(--color-peligroA);
     color: white;
     border-color: var(--color-peligroA);
-    transform: scale(0.95); /* Reduce el tamaño en un 5% para efecto de presionado */
+    transform: scale(0.95);
+    /* Reduce el tamaño en un 5% para efecto de presionado */
 }
+
 @font-face {
     font-family: 'cocogoose-letter';
     src: url('/assets/fonts/CocogooseProLetterpressTrial-Regular.woff') format('woff');
     font-weight: normal;
     font-style: normal;
 }
+
 @font-face {
     font-family: 'cocogoose';
     src: url('assets/fonts/Cocogoose_trial.otf') format('otf');
     font-weight: normal;
     font-style: normal;
 }
-

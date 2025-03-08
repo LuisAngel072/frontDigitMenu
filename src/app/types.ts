@@ -15,41 +15,7 @@ export type Usuarios = {
   activo: boolean; //El valor es entre 1 y 0. 1 activo, 0 inactivo
 };
 
-export type UsuariosDTO = {
-  codigo: string;
-  nombres: string;
-  primer_apellido: string;
-  segundo_apellido: string;
-  telefono_id: {
-    telefono: string;
-  };
-  email_id: {
-    email: string;
-  };
-  sexo: string; // Pienso en un ENUM: Masc, Fem, Otro
-  rfc: {
-    rfc: string;
-  };
-  nss: {
-    nss: string;
-  };
-  domicilio: {
-    calle: string;
-    colonia: string;
-    codigo_postal: string; //Solo 5 caracteres
-    no_ext: string; //Solo 5 caracteres
-    no_int?: string; //Opcional, posible undefined, no mas de 5 caracteres
-    municipio: string;
-  };
-  img_us: { img_perfil: string };
-  rol: {
-    id_rol: number;
-    rol: string;
-    descripcion: string;
-  }[];
-  contrasena: string;
-  activo: boolean; //El valor es entre 1 y 0. 1 activo, 0 inactivo
-};
+
 
 export type Telefonos = {
   id_telefono: number;
@@ -109,17 +75,31 @@ export type Sub_categorias = {
   id_subcat: number;
   nombre_subcat: string;
   categoria_id: Categorias;
+  ruta_img?: string;
 };
 
 export type Categorias = {
   id_cat: number;
   nombre_cat: string;
+  ruta_img?: string;
 };
 
 export type Ingredientes = {
-  id_ing: number;
+  id_ingr: number;
   nombre_ingrediente: string;
   precio: number;
 };
 
-export type Extras = {};
+export type Extras = {
+  id_extra: number;
+  nombre_extra: string;
+  precio: number;
+};
+
+export type Opciones = {
+  id_opcion: number;
+  nombre_opcion: string;
+  porcentaje: number;
+};
+
+

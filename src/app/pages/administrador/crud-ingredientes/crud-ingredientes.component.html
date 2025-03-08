@@ -5,6 +5,28 @@
       <!-- Ingredientes -->
       <div class="col-lg-4 col-md-6 col-sm-12">
         <h3 class="text-center">Ingredientes</h3>
+        <div class="row mb-3 align-items-center">
+          <!-- Columna para el input -->
+          <div class="col">
+            <input
+              type="search"
+              class="form-control"
+              placeholder="Buscar ingrediente"
+            />
+          </div>
+
+          <!-- Columna para el botón -->
+          <div class="col-auto">
+            <button class="btn icon icon-add d-flex align-items-center">
+              <span
+                class="material-symbols-outlined"
+                (click)="crearIngrediente()"
+                >add</span
+              >
+            </button>
+          </div>
+        </div>
+
         <div class="table-responsive">
           <table class="table table-striped ingredientes-table">
             <thead>
@@ -15,27 +37,52 @@
               </tr>
             </thead>
             <tbody>
-              <td></td>
-              <td></td>
-              <td>
-                <span class="material-symbols-outlined icon icon-eye">
-                  visibility
-                </span>
-                <span class="material-symbols-outlined icon icon-edit">
-                  edit_square
-                </span>
-                <span class="material-symbols-outlined icon icon-trash">
-                  delete
-                </span>
-              </td>
+              <tr *ngFor="let ingr of ingredientes">
+                <td>{{ingr.nombre_ingrediente}}</td>
+                <td>{{ingr.precio}}</td>
+                <td>
+                  <span
+                    class="material-symbols-outlined icon icon-eye"
+                    (click)="verIngrediente(ingr.id_ingr)"
+                  >
+                    visibility
+                  </span>
+                  <span class="material-symbols-outlined icon icon-edit" (click)="actualizarIngrediente(ingr.id_ingr)">
+                    edit_square
+                  </span>
+                  <span class="material-symbols-outlined icon icon-trash" (click)="delIngrediente(ingr.id_ingr)">
+                    delete
+                  </span>
+                </td>
+              </tr>
             </tbody>
           </table>
+          <h3 class="text-center" *ngIf="ingredientes.length === 0">
+            ¡Vaya! No existen ingredientes registrados.
+          </h3>
         </div>
       </div>
 
       <!-- Opciones -->
       <div class="col-lg-4 col-md-6 col-sm-12">
         <h3 class="text-center">Opciones</h3>
+        <div class="row mb-3 align-items-center">
+          <!-- Columna para el input -->
+          <div class="col">
+            <input
+              type="search"
+              class="form-control"
+              placeholder="Buscar opciones"
+            />
+          </div>
+
+          <!-- Columna para el botón -->
+          <div class="col-auto">
+            <button class="btn icon icon-add d-flex align-items-center">
+              <span class="material-symbols-outlined">add</span>
+            </button>
+          </div>
+        </div>
         <div class="table-responsive">
           <table class="table table-striped opciones-table">
             <thead>
@@ -67,6 +114,23 @@
       <!-- Extras -->
       <div class="col-lg-4 col-md-6 col-sm-12">
         <h3 class="text-center">Extras</h3>
+        <div class="row mb-3 align-items-center">
+          <!-- Columna para el input -->
+          <div class="col">
+            <input
+              type="search"
+              class="form-control"
+              placeholder="Buscar extras"
+            />
+          </div>
+
+          <!-- Columna para el botón -->
+          <div class="col-auto">
+            <button class="btn icon icon-add d-flex align-items-center">
+              <span class="material-symbols-outlined">add</span>
+            </button>
+          </div>
+        </div>
         <div class="table-responsive">
           <table class="table table-striped extras-table">
             <thead>
