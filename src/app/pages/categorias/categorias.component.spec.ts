@@ -1,5 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { CategoriasComponent } from './crud-categorias.component';
+
+import { CategoriasComponent } from './categorias.component';
 
 describe('CategoriasComponent', () => {
   let component: CategoriasComponent;
@@ -7,8 +8,9 @@ describe('CategoriasComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [CategoriasComponent]  // Asegúrate de que el componente esté registrado correctamente
-    }).compileComponents();
+      imports: [CategoriasComponent]
+    })
+    .compileComponents();
     
     fixture = TestBed.createComponent(CategoriasComponent);
     component = fixture.componentInstance;

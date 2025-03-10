@@ -3,7 +3,7 @@ import { HeaderComponent } from '../comun-componentes/header/header.component';
 import { CommonModule } from '@angular/common';
 import { CrudEmpleadosComponent } from './crud-empleados/crud-empleados.component';
 import { CrudProductosComponent } from './crud-productos/crud-productos.component';
-import { CategoriasComponent } from './crud-categorias/crud-categorias.component';
+import { CategoriasComponent } from '../categorias/categorias.component';
 import { CrudIngredientesComponent } from './crud-ingredientes/crud-ingredientes.component';
 import { MesasComponent } from './mesas/mesas.component';
 import { VentasComponent } from './ventas/ventas.component';
@@ -43,9 +43,8 @@ export class AdministradorComponent {
   constructor(
     private readonly usuariosService: UsuariosService,
     private readonly rolesService: RolesService,
-    private readonly ingredientesService: IngredientesService,
+    private readonly ingredientesService: IngredientesService
   ) {}
-  
 
   async ngOnInit() {
     this.roles = await this.rolesService.obtenerRoles();

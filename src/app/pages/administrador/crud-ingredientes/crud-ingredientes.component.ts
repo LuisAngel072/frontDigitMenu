@@ -63,6 +63,14 @@ export class CrudIngredientesComponent {
     }
   }
 
+  /**
+   * Registrar ingrediente en la base de datos
+   * 
+   * IngredientesDTO
+   * 
+   * nombre_ingrediente
+   * precio: no debe exceder más de 5 digitos 999.99
+   */
   async crearIngrediente() {
     try {
       Swal.fire({
@@ -166,6 +174,11 @@ export class CrudIngredientesComponent {
     }
   }
 
+  /**
+   * NO ADMITIR CAMPOS VACÍOS
+   * @param id_ingr Ingrediente a actualizar
+   * @returns Ingrediente actualizado
+   */
   async actualizarIngrediente(id_ingr: number) {
     try {
       const ingrediente = this.ingredientes.find(
