@@ -41,7 +41,7 @@ export class OpcionesService {
           headers: { Authorization: `Bearer ${this.authService.getToken()}` },
         }
       );
-      return response$;
+      const response = await lastValueFrom(response$);
     } catch (error) {
       console.error(
         'Error inesperado en opciones.service.ts -> crearOpcion()',

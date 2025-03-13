@@ -17,13 +17,13 @@ import { OpcionesService } from '../../../services/opciones.service';
 export class CrudIngredientesComponent {
   @Input() ingredientes: Ingredientes[] = [];
   @Input() extras: Extras[] = [];
-  @Input() opciones: Opciones[] = []
+  @Input() opciones: Opciones[] = [];
 
   constructor(
     private readonly ingrServices: IngredientesService,
     private readonly opcionesService: OpcionesService,
     private readonly extrasService: ExtrasService,
-    private adminComponente: AdministradorComponent,
+    private adminComponente: AdministradorComponent
   ) {}
 
   async ngOnInit() {
@@ -32,6 +32,42 @@ export class CrudIngredientesComponent {
     this.opciones = this.adminComponente.opciones;
   }
 
+  /**
+   * BUSCADORES
+   */
+  filtrarIngredientes(event: any) {
+    const valor = event.target.lowerCase();
+    this.ingredientes = this.adminComponente.ingredientes.filter(
+      (ingrediente) => {
+        const nombre_ingr = ingrediente.nombre_ingrediente.toLowerCase() || '';
+        const precio = ingrediente.precio.toString().toLowerCase() || '';
+
+        return nombre_ingr.includes(valor) || precio.includes(valor);
+      }
+    );
+  }
+  filtrarOpciones(event: any) {
+    const valor = event.target.lowerCase();
+    this.opciones = this.adminComponente.opciones.filter(
+      (opcion) => {
+        const nombre_opcion = opcion.nombre_opcion.toLowerCase() || '';
+        const porcentaje = opcion.porcentaje.toString().toLowerCase() || '';
+
+        return nombre_opcion.includes(valor) || porcentaje.includes(valor);
+      }
+    );
+  }
+  filtrarExtras(event: any) {
+    const valor = event.target.lowerCase();
+    this.extras = this.adminComponente.extras.filter(
+      (extra) => {
+        const nombre_extra = extra.nombre_extra.toLowerCase() || '';
+        const precio = extra.precio.toString().toLowerCase() || '';
+
+        return nombre_extra.includes(valor) || precio.includes(valor);
+      }
+    );
+  }
   /**
    *
    * INGREDIENTES CRUD
@@ -359,7 +395,7 @@ export class CrudIngredientesComponent {
               icon: 'success',
               title: 'Ingrediente eliminado',
               text: 'Ingrediente eliminado con éxito',
-              timer: 2000
+              timer: 2000,
             });
             this.ingredientes = await this.ingrServices.getIngredientes();
             this.adminComponente.ingredientes = this.ingredientes;
@@ -403,7 +439,9 @@ export class CrudIngredientesComponent {
    */
   async verOpcion(id_opcion: number) {
     try {
-      const opcionF = this.opciones.find((opcion) => opcion.id_opcion === id_opcion);
+      const opcionF = this.opciones.find(
+        (opcion) => opcion.id_opcion === id_opcion
+      );
 
       if (!opcionF) {
         Swal.fire({
@@ -550,7 +588,7 @@ export class CrudIngredientesComponent {
   async actualizarOpcion(id_opcion: number) {
     try {
       const opcionF = this.opciones.find(
-        (opcion) => opcion.id_opcion  === id_opcion
+        (opcion) => opcion.id_opcion === id_opcion
       );
 
       if (!opcionF) {
@@ -587,8 +625,9 @@ export class CrudIngredientesComponent {
           const nombre_opcion = (
             document.getElementById('nombre_opcion') as HTMLInputElement
           ).value.trim();
-          const porcentaje = (document.getElementById('porcentaje') as HTMLInputElement)
-            .value;
+          const porcentaje = (
+            document.getElementById('porcentaje') as HTMLInputElement
+          ).value;
 
           if (!nombre_opcion || !porcentaje) {
             Swal.showValidationMessage(
@@ -663,13 +702,13 @@ export class CrudIngredientesComponent {
 
   /**
    * Elimina el registro de una opcion cuando el usuario da clic al boton de basura
-   * @param id_opcion 
-   * @returns 
+   * @param id_opcion
+   * @returns
    */
   async delOpcion(id_opcion: number) {
     try {
       const opcionF = this.opciones.find(
-        (opcion) => opcion.id_opcion  === id_opcion
+        (opcion) => opcion.id_opcion === id_opcion
       );
 
       if (!opcionF) {
@@ -716,7 +755,7 @@ export class CrudIngredientesComponent {
               text: 'Opción eliminada con éxito',
               timer: 2000,
             });
-            
+
             this.opciones = await this.opcionesService.getOpciones();
             this.adminComponente.opciones = this.opciones;
             return;
@@ -904,9 +943,7 @@ export class CrudIngredientesComponent {
    */
   async actualizarExtra(id_extra: number) {
     try {
-      const extraF = this.extras.find(
-        (extra) => extra.id_extra  === id_extra
-      );
+      const extraF = this.extras.find((extra) => extra.id_extra === id_extra);
 
       if (!extraF) {
         Swal.fire({
@@ -985,8 +1022,10 @@ export class CrudIngredientesComponent {
                   Swal.showLoading(); // Muestra el spinner de carga
                 },
               });
+
               this.extrasService.upExtra(id_extra, formData);
               Swal.close();
+
               this.extras = await this.extrasService.getExtras();
               this.adminComponente.extras = this.extras;
               Swal.fire({
@@ -1018,9 +1057,7 @@ export class CrudIngredientesComponent {
 
   async delExtra(id_extra: number) {
     try {
-      const extraF = this.extras.find(
-        (extra) => extra.id_extra  === id_extra
-      );
+      const extraF = this.extras.find((extra) => extra.id_extra === id_extra);
 
       if (!extraF) {
         Swal.fire({
@@ -1094,5 +1131,4 @@ export class CrudIngredientesComponent {
    * FIN DE EXTRAS CRUD
    *
    */
-
 }
