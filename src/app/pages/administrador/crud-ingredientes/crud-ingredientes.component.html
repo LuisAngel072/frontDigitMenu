@@ -68,6 +68,9 @@
             ¡Vaya! No existen ingredientes registrados.
           </h3>
         </div>
+        <div class="col-12 d-flex justify-content-center">
+          <pagination-controls (pageChange)="onPageChange($event)" class="pagination"  previousLabel="Anterior" nextLabel="Siguiente"></pagination-controls>
+        </div>
       </div>
 
       <!-- Opciones -->

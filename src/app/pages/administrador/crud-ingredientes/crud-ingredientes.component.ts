@@ -7,10 +7,11 @@ import { CommonModule } from '@angular/common';
 import { ExtrasDTO, IngredientesDTO, OpcionesDTO } from '../../../dtos';
 import { ExtrasService } from '../../../services/extras.service';
 import { OpcionesService } from '../../../services/opciones.service';
+import { NgxPaginationModule } from 'ngx-pagination';
 @Component({
   selector: 'app-crud-ingredientes',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, NgxPaginationModule],
   templateUrl: './crud-ingredientes.component.html',
   styleUrl: './crud-ingredientes.component.css',
 })
@@ -18,6 +19,8 @@ export class CrudIngredientesComponent {
   @Input() ingredientes: Ingredientes[] = [];
   @Input() extras: Extras[] = [];
   @Input() opciones: Opciones[] = [];
+
+  currentPage: number = 1;
 
   constructor(
     private readonly ingrServices: IngredientesService,
@@ -67,6 +70,10 @@ export class CrudIngredientesComponent {
         return nombre_extra.includes(valor) || precio.includes(valor);
       }
     );
+  }
+
+  onPageChange(page: number) {
+    this.currentPage = page;
   }
   /**
    *
