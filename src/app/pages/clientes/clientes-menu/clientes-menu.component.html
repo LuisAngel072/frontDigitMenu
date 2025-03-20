@@ -1,0 +1,43 @@
+<div class="container mt-3">
+    <h2 class="text-center">Menú</h2>
+    <div class="accordion" id="menuAccordion">
+        <div class="accordion-item">
+            <h2 class="accordion-header" id="headingOne">
+                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                    Comidas
+                </button>
+            </h2>
+            <div id="collapseOne" class="accordion-collapse collapse show" aria-labelledby="headingOne" data-bs-parent="#menuAccordion">
+                <div class="accordion-body">
+                    <div class="list-group">
+                        <button class="list-group-item list-group-item-action" data-bs-toggle="collapse" data-bs-target="#burritos">Burritos</button>
+                        <div class="collapse" id="burritos">
+                            <button class="list-group-item list-group-item-action" (click)="showProduct('Burrito Clásico')">Burrito Clásico</button>
+                            <button class="list-group-item list-group-item-action" (click)="showProduct('Burrito Especial')">Burrito Especial</button>
+                        </div>
+                        <button class="list-group-item list-group-item-action" data-bs-toggle="collapse" data-bs-target="#pizzas">Pizzas</button>
+                        <div class="collapse" id="pizzas">
+                            <button class="list-group-item list-group-item-action" (click)="showProduct('Pizza Hawaiana')">Pizza Hawaiana</button>
+                            <button class="list-group-item list-group-item-action" (click)="showProduct('Pizza Mexicana')">Pizza Mexicana</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="accordion-item">
+            <h2 class="accordion-header" id="headingTwo">
+                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="true" aria-controls="collapseTwo">
+                    Bebidas
+                </button>
+            </h2>
+            <div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="headingTwo" data-bs-parent="#menuAccordion">
+                <div class="accordion-body">
+                    <div class="list-group">
+                        <button class="list-group-item list-group-item-action" (click)="showProduct('Jugo Natural')">Jugo Natural</button>
+                        <button class="list-group-item list-group-item-action" (click)="showProduct('Café')">Café</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

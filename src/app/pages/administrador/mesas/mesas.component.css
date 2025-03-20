@@ -1,0 +1,26 @@
+main {
+    padding-top: 120px;
+    height: 100vh;
+    width: 100vw;
+}
+
+.qr-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.qr-item {
+    text-align: center;
+    border: 1px solid #ddd;
+    padding: 10px;
+    border-radius: 10px;
+    background: #f9f9f9;
+}
+
+.botones-qr {
+    display: flex;
+    justify-content: space-around;
+    width: 20%;
+}
