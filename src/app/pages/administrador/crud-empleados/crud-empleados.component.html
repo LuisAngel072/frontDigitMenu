@@ -12,7 +12,7 @@
           type="search"
           class="form-control search"
           placeholder="Buscar empleado"
-          [(ngModel)]="searchTerm"
+          (keyup)="filtrarUsuarios($event)"
         />
       </div>
       <div class="col-auto">
@@ -50,7 +50,7 @@
           <th>Acciones</th>
         </tr>
       </thead>
-      <tbody>
+      <tbody *ngIf="usuarios.length > 0">
         <tr *ngFor="let usuario of usuariosFiltrados">
           <td>{{ usuario.usuario_id.codigo }}</td>
           <td>{{ usuario.usuario_id.nombres }}</td>
@@ -85,6 +85,20 @@
         </tr>
       </tbody>
     </table>
+    <div class="pagination-container row">
+      <div class="col-12 d-flex justify-content-center">
+        <mat-paginator
+          *ngIf="this.usuarios.length > 0"
+          [length]="this.usuarios.length"
+          [pageSize]="this.pageSize"
+          [hidePageSize]="true"
+          [pageSizeOptions]="[5, 7, 10]"
+          (page)="onPageChange($event)"
+
+        >
+        </mat-paginator>
+      </div>
+    </div>
     <h3 class="text-center" *ngIf="usuarios.length === 0">
       ¡Vaya! No existen empleados registrados o están inactivos
     </h3>

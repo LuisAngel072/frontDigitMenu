@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, SimpleChanges, ViewChild } from '@angular/core';
 import { IngredientesService } from '../../../services/ingredientes.service';
 import Swal from 'sweetalert2';
 import { Extras, Ingredientes, Opciones } from '../../../types';
@@ -8,19 +8,32 @@ import { ExtrasDTO, IngredientesDTO, OpcionesDTO } from '../../../dtos';
 import { ExtrasService } from '../../../services/extras.service';
 import { OpcionesService } from '../../../services/opciones.service';
 import { NgxPaginationModule } from 'ngx-pagination';
+import {
+  MatPaginator,
+  MatPaginatorIntl,
+  MatPaginatorModule,
+  PageEvent,
+} from '@angular/material/paginator';
+import { CustomPaginatorIntl } from '../../../../matPaginator';
 @Component({
   selector: 'app-crud-ingredientes',
   standalone: true,
-  imports: [CommonModule, NgxPaginationModule],
+  imports: [CommonModule, NgxPaginationModule, MatPaginatorModule],
   templateUrl: './crud-ingredientes.component.html',
   styleUrl: './crud-ingredientes.component.css',
+  providers: [
+    { provide: MatPaginatorIntl, useClass: CustomPaginatorIntl }
+  ],
 })
 export class CrudIngredientesComponent {
   @Input() ingredientes: Ingredientes[] = [];
   @Input() extras: Extras[] = [];
   @Input() opciones: Opciones[] = [];
 
+  @ViewChild(MatPaginator) paginator!: MatPaginator;
+
   currentPage: number = 1;
+  pageSize: number = 7;
 
   constructor(
     private readonly ingrServices: IngredientesService,
@@ -33,6 +46,69 @@ export class CrudIngredientesComponent {
     this.ingredientes = this.adminComponente.ingredientes;
     this.extras = this.adminComponente.extras;
     this.opciones = this.adminComponente.opciones;
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['ingredientes'] && this.ingredientes) {
+      this.updateIngredientesFiltrados();
+    }
+    if (changes['opciones'] && this.opciones) {
+      this.updateIngredientesFiltrados();
+    }
+    if (changes['extras'] && this.extras) {
+      this.updateIngredientesFiltrados();
+    }
+  }
+
+  onPageChangeIngr(event: PageEvent) {
+    this.currentPage = event.pageIndex;
+    this.pageSize = event.pageSize;
+    this.updateIngredientesFiltrados();
+  }
+
+  onPageChangeOpc(event: PageEvent) {
+    this.currentPage = event.pageIndex;
+    this.pageSize = event.pageSize;
+    this.updateOpcionesFiltradas();
+  }
+
+  onPageChangeExt(event: PageEvent) {
+    this.currentPage = event.pageIndex;
+    this.pageSize = event.pageSize;
+    this.updateExtrasFiltrados();
+  }
+  /**
+   * Permite paginar los ingredientes
+   */
+  updateIngredientesFiltrados() {
+    const startIndex = this.currentPage * this.pageSize;
+    const endIndex = startIndex + this.pageSize;
+    this.ingredientes = this.adminComponente.ingredientes.slice(
+      startIndex,
+      endIndex
+    );
+  }
+  /**
+   * Permite paginar las opciones
+   */
+  updateOpcionesFiltradas() {
+    const startIndex = this.currentPage * this.pageSize;
+    const endIndex = startIndex + this.pageSize;
+    this.opciones = this.adminComponente.opciones.slice(
+      startIndex,
+      endIndex
+    );
+  }
+  /**
+   * Permite paginar los extras
+   */
+  updateExtrasFiltrados() {
+    const startIndex = this.currentPage * this.pageSize;
+    const endIndex = startIndex + this.pageSize;
+    this.extras = this.adminComponente.extras.slice(
+      startIndex,
+      endIndex
+    );
   }
 
   /**
@@ -51,30 +127,23 @@ export class CrudIngredientesComponent {
   }
   filtrarOpciones(event: any) {
     const valor = event.target.lowerCase();
-    this.opciones = this.adminComponente.opciones.filter(
-      (opcion) => {
-        const nombre_opcion = opcion.nombre_opcion.toLowerCase() || '';
-        const porcentaje = opcion.porcentaje.toString().toLowerCase() || '';
+    this.opciones = this.adminComponente.opciones.filter((opcion) => {
+      const nombre_opcion = opcion.nombre_opcion.toLowerCase() || '';
+      const porcentaje = opcion.porcentaje.toString().toLowerCase() || '';
 
-        return nombre_opcion.includes(valor) || porcentaje.includes(valor);
-      }
-    );
+      return nombre_opcion.includes(valor) || porcentaje.includes(valor);
+    });
   }
   filtrarExtras(event: any) {
     const valor = event.target.lowerCase();
-    this.extras = this.adminComponente.extras.filter(
-      (extra) => {
-        const nombre_extra = extra.nombre_extra.toLowerCase() || '';
-        const precio = extra.precio.toString().toLowerCase() || '';
+    this.extras = this.adminComponente.extras.filter((extra) => {
+      const nombre_extra = extra.nombre_extra.toLowerCase() || '';
+      const precio = extra.precio.toString().toLowerCase() || '';
 
-        return nombre_extra.includes(valor) || precio.includes(valor);
-      }
-    );
+      return nombre_extra.includes(valor) || precio.includes(valor);
+    });
   }
 
-  onPageChange(page: number) {
-    this.currentPage = page;
-  }
   /**
    *
    * INGREDIENTES CRUD
