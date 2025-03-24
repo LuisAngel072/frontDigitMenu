@@ -1,0 +1,58 @@
+.welcome-container {
+    position: relative;
+    height: 100vh;
+    width: 100%;
+    overflow: hidden;
+}
+
+.background-image {
+    background-image: url('../../../assets/images/Pizza-3007395.jpg');
+    background-size: cover;
+    background-position: center;
+    height: 100%;
+    width: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    opacity: 0.7;
+}
+  
+.logo {
+    position: absolute;
+    bottom: 20px;
+    left: 20px;
+} 
+  
+.modal-panel {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: white;
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+  
+.modal-panel h1 {
+    margin-bottom: 20px;
+}
+
+.img-fluid {
+    width: 20%;
+    border-radius: 20%;
+}
+
+#boton-clientes {
+    background-color: var(--color-botonP);
+    color: white;
+    border-color: var(--color-botonP);
+    font-family: 'cocogoose', sans-serif;
+}
+
+.img-home {
+    width: 20vw;
+    height: 40vh;
+    object-fit: cover;
+    border-radius: 20px;
+}

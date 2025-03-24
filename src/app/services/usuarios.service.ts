@@ -26,14 +26,16 @@ export class UsuariosService {
 
   async obtenerUnUsuario(codigo: string) {
     try {
-      const response = this.http.get<any>(
-        environment.ApiIP + environment.ApiEncontrarUsuario + codigo,
+      const response$ = this.http.get<any>(
+        environment.ApiIP + environment.ApiEncontrarUsuario + '/' +codigo,
         {
           headers: {
             Authorization: `Bearer ${this.authService.getToken()}`,
           },
         }
       );
+      const response = lastValueFrom(response$);
+      console.log(response)
       return response;
     } catch (error) {
       console.error(
@@ -62,7 +64,7 @@ export class UsuariosService {
     }
   }
 
-  async actualizarUsuario(
+  actualizarUsuario(
     id_usuario: number,
     body: {
       codigo: string;
@@ -79,20 +81,17 @@ export class UsuariosService {
       img_perfil: Img_us;
       rol: Roles[];
     }
-  ) {
+  ): Observable<any> {
     try {
-      const response = await this.http
-        .patch<any>(
-          environment.ApiIP + environment.ApiActualizarUsuario + id_usuario,
-          body,
-          {
-            headers: { Authorization: `Bearer ${this.authService.getToken()}` },
-          }
-        )
-        .toPromise();
-      if (response !== null || response !== undefined) {
-        return response;
-      } else return undefined;
+      const response = this.http.patch<any>(
+        environment.ApiIP + environment.ApiActualizarUsuario + id_usuario,
+        body,
+        {
+          responseType: 'text' as 'json',
+          headers: { Authorization: `Bearer ${this.authService.getToken()}` },
+        }
+      );
+      return response;
     } catch (error) {
       console.error(
         'Error al actualizar al usuario. ERROR -> usuarios.service.ts -> actualizarUsuario()',
@@ -123,7 +122,7 @@ export class UsuariosService {
       throw error;
     }
   }
-  registrarUsuario(body: UsuariosDTO): Observable <any> {
+  registrarUsuario(body: UsuariosDTO): Observable<any> {
     try {
       const response$ = this.http.post<any>(
         environment.ApiIP + environment.ApiCrearUsuario,
@@ -132,7 +131,7 @@ export class UsuariosService {
           responseType: 'text' as 'json',
           headers: { Authorization: `Bearer ${this.authService.getToken()}` },
         }
-      )
+      );
       return response$;
     } catch (error) {
       console.error(
@@ -142,7 +141,6 @@ export class UsuariosService {
       throw error;
     }
   }
-  
 
   subirImg(file: File) {
     try {

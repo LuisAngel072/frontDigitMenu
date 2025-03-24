@@ -1,33 +1,43 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, SimpleChanges, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import Swal from 'sweetalert2';
 import { AdministradorComponent } from '../administrador.component';
-import {
-  Roles,
-  Usuarios,
-  Usuarios_has_roles,
-} from '../../../types';
+import { Roles, Usuarios_has_roles } from '../../../types';
 import { UsuariosDTO } from '../../../dtos';
 import { UsuariosService } from '../../../services/usuarios.service';
 import { FormsModule } from '@angular/forms';
 import { switchMap } from 'rxjs';
+import {
+  MatPaginator,
+  MatPaginatorIntl,
+  MatPaginatorModule,
+  PageEvent,
+} from '@angular/material/paginator';
+import { CustomPaginatorIntl } from '../../../../matPaginator';
 
 @Component({
   selector: 'app-crud-empleados',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, MatPaginatorModule],
   templateUrl: './crud-empleados.component.html',
   styleUrl: './crud-empleados.component.css',
+  providers: [{ provide: MatPaginatorIntl, useClass: CustomPaginatorIntl }],
 })
 export class CrudEmpleadosComponent {
   @Input() usuarios: Usuarios_has_roles[] = [];
   @Input() roles: Roles[] = [];
+
+  @ViewChild(MatPaginator) paginator!: MatPaginator;
+
+  pageSize: number = 7;
+  currentPage: number = 0;
+
   rolSeleccionado: number = 0;
   activo: number = 0;
   formData: any = {};
 
-  searchTerm: string = '';
-  selectedRole: string = '';
+  usuariosFiltrados: Usuarios_has_roles[] = [];
+
   selectedFile: File | null = null;
 
   constructor(
@@ -44,21 +54,45 @@ export class CrudEmpleadosComponent {
     this.usuarios = this.adminComponente.usuarios;
     this.roles = this.adminComponente.roles;
     console.log(this.usuarios);
+    this.updateUsuariosFiltrados();
   }
-  get usuariosFiltrados() {
-    return this.usuarios.filter((usuario) => {
-      const fullName = `${usuario.usuario_id.nombres} ${usuario.usuario_id.primer_apellido} ${usuario.usuario_id.segundo_apellido}`;
-      const searchMatch =
-        usuario.usuario_id.codigo.includes(this.searchTerm) ||
-        fullName.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
-        usuario.rol_id.rol
-          .toLowerCase()
-          .includes(this.searchTerm.toLowerCase());
 
-      const roleMatch = this.selectedRole
-        ? usuario.rol_id.rol === this.selectedRole
-        : true;
-      return searchMatch && roleMatch;
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['usuarios'] && this.usuarios) {
+      this.updateUsuariosFiltrados();
+    }
+  }
+
+  onPageChange(event: PageEvent) {
+    this.currentPage = event.pageIndex;
+    this.pageSize = event.pageSize;
+    this.updateUsuariosFiltrados();
+  }
+
+  updateUsuariosFiltrados() {
+    const startIndex = this.currentPage * this.pageSize;
+    const endIndex = startIndex + this.pageSize;
+    this.usuariosFiltrados = this.usuarios.slice(startIndex, endIndex);
+  }
+
+  filtrarUsuarios(event: any) {
+    const valor = event.target.lowerCase();
+    this.usuarios = this.adminComponente.usuarios.filter((usuario) => {
+      const codigo = usuario.usuario_id.codigo.toLowerCase() || '';
+      const nombres = usuario.usuario_id.nombres.toLowerCase() || '';
+      const primer_apellido =
+        usuario.usuario_id.primer_apellido.toString().toLowerCase() || '';
+      const segundo_apellido =
+        usuario.usuario_id.segundo_apellido.toString().toLowerCase() || '';
+      const rol = usuario.rol_id.rol.toString().toLowerCase() || '';
+
+      return (
+        codigo.includes(valor) ||
+        nombres.includes(valor) ||
+        primer_apellido.includes(valor) ||
+        segundo_apellido.includes(valor) ||
+        rol.includes(valor)
+      );
     });
   }
 
@@ -66,8 +100,6 @@ export class CrudEmpleadosComponent {
     this.usuarios = this.usuarios.filter(
       (usuario) => usuario.usuario_id.activo === true
     );
-
-    
   }
 
   filtrarActivos(event: Event) {
@@ -366,7 +398,7 @@ export class CrudEmpleadosComponent {
               };
               break;
           }
-          const rolesArray = [rolUs]
+          const rolesArray = [rolUs];
           // Construir el objeto de datos con la estructura esperada
           let data: UsuariosDTO = {
             codigo,
@@ -407,10 +439,7 @@ export class CrudEmpleadosComponent {
             data.rfc.rfc = 'NO ASIGNADO';
           }
           this.formData = data;
-          
-        }
-        
-        ,
+        },
       }).then(async (result) => {
         if (result.isConfirmed) {
           const confirmacion = await Swal.fire({
@@ -441,7 +470,8 @@ export class CrudEmpleadosComponent {
                 .pipe(
                   switchMap((res) => {
                     console.log('Ruta de la imagen subida:', res.img_ruta);
-                    this.formData.img_us.img_ruta = String(res.img_ruta);
+                    this.formData.img_us.img_ruta =
+                      'img-us/' + String(res.img_ruta);
                     // Una vez que la imagen se ha subido y la ruta se ha asignado, registramos al usuario
                     console.log(this.formData);
                     return this.usuariosService.registrarUsuario(this.formData);
@@ -567,6 +597,13 @@ export class CrudEmpleadosComponent {
               usF?.usuario_id.segundo_apellido
             }" id="segundo_apellido" disabled>
           </div>
+
+          <div class="input-group mb-3">
+            <span class="input-group-text border-secondary">Activo</span>
+            <input type="text" class="form-control border-secondary" value="${
+              usF?.usuario_id.activo
+            }" id="activo" disabled>
+          </div>
       
           <div class="input-group mt-2 mb-3 center-content me-3">
             <span class="input-group-text border-secondary">Teléfono</span>
@@ -675,7 +712,7 @@ export class CrudEmpleadosComponent {
         });
         return;
       }
-      
+
       Swal.fire({
         title: 'Editar empleado',
         html: `
@@ -885,6 +922,14 @@ export class CrudEmpleadosComponent {
             document.getElementById('contrasena') as HTMLInputElement
           ).value;
 
+          const fileInput = document.getElementById(
+            'img_perfil'
+          ) as HTMLInputElement;
+          const file: File | null =
+            fileInput?.files && fileInput.files[0] ? fileInput.files[0] : null;
+          this.selectedFile =
+            fileInput?.files && fileInput.files[0] ? fileInput.files[0] : null;
+
           // Validar que los campos obligatorios no estén vacíos (excepto contraseña)
           if (
             !codigo ||
@@ -903,14 +948,6 @@ export class CrudEmpleadosComponent {
               'Por favor, complete todos los campos obligatorios.'
             );
             return;
-          }
-          for (let usuario of this.usuarios) {
-            if (codigo === usuario.usuario_id.codigo)
-              Swal.showValidationMessage('El código debe ser único');
-            if (rfc === usuario.usuario_id.rfc.rfc)
-              Swal.showValidationMessage('El rfc debe ser único');
-            if (nss === usuario.usuario_id.nss.nss)
-              Swal.showValidationMessage('El nss debe ser único');
           }
 
           // Construir el objeto de datos con la estructura esperada
@@ -943,10 +980,15 @@ export class CrudEmpleadosComponent {
               id_nss: usF?.usuario_id.nss?.id_nss,
               nss: nss,
             },
+            img_perfil: {
+              id_img: usF?.usuario_id.img_perfil.id_img,
+              img_ruta: file ? file.name : 'Pendiente',
+            },
             domicilio: {
               id_dom: usF?.usuario_id.domicilio?.id_dom,
               calle,
               colonia,
+              codigo_postal,
               no_ext,
               no_int,
               municipio,
@@ -957,12 +999,12 @@ export class CrudEmpleadosComponent {
           if (contrasena.trim().length > 0) {
             data.contrasena = contrasena;
           }
-
+          this.formData = data;
           return data;
         },
       }).then(async (result) => {
         if (result.isConfirmed) {
-          const formData = result.value;
+          
           const confirmacion = await Swal.fire({
             title: '¿Estás seguro de editar el empleado?',
             showDenyButton: true,
@@ -975,44 +1017,96 @@ export class CrudEmpleadosComponent {
             icon: 'warning',
           });
           if (confirmacion.isConfirmed) {
-            console.log('Datos a actualizar:', formData);
+            console.log('Datos a actualizar:', this.formData);
             // Llamada al servicio para actualizar el empleado
-            try {
-              Swal.fire({
-                title: 'Cargando...',
-                html: 'Por favor, espere mientras se procesa la información.',
-                allowOutsideClick: false, // Evita que se pueda cerrar
-                allowEscapeKey: false, // Evita que se cierre con la tecla Escape
-                allowEnterKey: false, // Evita que se cierre con Enter
-                didOpen: () => {
-                  Swal.showLoading(); // Muestra el spinner de carga
-                },
-              });
-              this.usuariosService.actualizarUsuario(
-                usF.usuario_id.id_usuario,
-                formData
-              );
-              Swal.close();
-              Swal.fire({
-                title: 'Empleado actualizado correctamente',
-                icon: 'success',
-                timer: 2000,
-              });
-              this.usuarios =
-                await this.usuariosService.obtenerUsuariosYRoles();
+            Swal.fire({
+              title: 'Cargando...',
+              html: 'Por favor, espere mientras se procesa la información.',
+              allowOutsideClick: false, // Evita que se pueda cerrar
+              allowEscapeKey: false, // Evita que se cierre con la tecla Escape
+              allowEnterKey: false, // Evita que se cierre con Enter
+              didOpen: () => {
+                Swal.showLoading(); // Muestra el spinner de carga
+              },
+            });
+            if (this.selectedFile) {
+              this.usuariosService
+                .subirImg(this.selectedFile)
+                .pipe(
+                  switchMap((res) => {
+                    console.log('Ruta de la imagen subida:', res.img_ruta);
+                    this.formData.img_perfil.img_ruta =
+                      'img-us/' + String(res.img_ruta);
+                    // Una vez que la imagen se ha subido y la ruta se ha asignado, actualizamos al usuario
+                    console.log(this.formData);
+                    return this.usuariosService.actualizarUsuario(
+                      usF.usuario_id.id_usuario,
+                      this.formData
+                    );
+                  })
+                )
+                .subscribe({
+                  next: (response) => {
+                    console.log(this.formData);
+                    Swal.close();
+                    Swal.fire({
+                      title: 'Empleado actualizado correctamente',
+                      icon: 'success',
+                      timer: 2000,
+                    });
+                    // Actualiza la lista de usuarios después del registro exitoso
+                    this.usuariosService
+                      .obtenerUsuariosYRoles()
+                      .then((usuarios) => {
+                        this.usuarios = usuarios;
+                        this.adminComponente.usuarios = this.usuarios;
+                        this.formData = {};
+                      });
+                  },
+                  error: async (err) => {
+                    console.error('Error al actualizar el usuario:', err);
+                    Swal.close();
+                    Swal.fire({
+                      icon: 'error',
+                      title: 'Error',
+                      text: 'No se pudo actualizar el empleado.',
+                    });
+                    this.usuarios =
+                      await this.usuariosService.obtenerUsuariosYRoles();
 
-              this.adminComponente.usuarios = this.usuarios;
-            } catch (error) {
-              this.usuarios =
-                await this.usuariosService.obtenerUsuariosYRoles();
-              this.adminComponente.usuarios = this.usuarios;
-              
-              Swal.close();
-              Swal.fire({
-                icon: 'error',
-                title: 'Error',
-                text: 'No se pudo actualizar el empleado.',
-              });
+                    this.adminComponente.usuarios = this.usuarios;
+                  },
+                });
+            } else {
+              console.log(this.formData);
+              this.formData.img_us.img_ruta = 'Pendiente';
+              // Si no hay una imagen seleccionada, procede directamente a registrar el usuario
+              this.usuariosService
+                .actualizarUsuario(usF.usuario_id.id_usuario, this.formData)
+                .subscribe({
+                  next: async (response) => {
+                    Swal.close();
+                    Swal.fire({
+                      title: 'Empleado actualizado correctamente',
+                      icon: 'success',
+                      timer: 2000,
+                    });
+                    // Actualiza la lista de usuarios después del registro exitoso
+                    this.usuarios =
+                      await this.usuariosService.obtenerUsuariosYRoles();
+
+                    this.adminComponente.usuarios = this.usuarios;
+                  },
+                  error: (err) => {
+                    console.error('Error al actualizar usuario:', err);
+                    Swal.close();
+                    Swal.fire({
+                      icon: 'error',
+                      title: 'Error',
+                      text: 'No se pudo actualizar el empleado.',
+                    });
+                  },
+                });
             }
           }
         }

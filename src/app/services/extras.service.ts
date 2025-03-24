@@ -41,7 +41,8 @@ export class ExtrasService {
           headers: { Authorization: `Bearer ${this.authService.getToken()}` },
         }
       );
-      return response$;
+      const response = await lastValueFrom(response$);
+      return response;
     } catch (error) {
       console.error(
         'Error inesperado en extras.service.ts -> crearExtra()',
@@ -75,7 +76,7 @@ export class ExtrasService {
   async delExtra(id_extra: number) {
     try {
       const response$ = this.http.delete<any>(
-        environment.ApiIP + environment.ApiEliminarIngrediente + id_extra,
+        environment.ApiIP + environment.ApiEliminarExtra + id_extra,
         {
           responseType: 'text' as 'json',
           headers: { Authorization: `Bearer ${this.authService.getToken()}` },

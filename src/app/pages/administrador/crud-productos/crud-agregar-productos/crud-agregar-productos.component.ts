@@ -67,4 +67,12 @@ export class CrudAgregarProductosComponent {
       confirmButtonText: 'OK'
     });
   }
+
+  onFileSelected(event: any) {
+    const file: File = event.target.files[0];
+    if (file) {
+      console.log('Imagen seleccionada:', file.name);
+      // Aquí puedes procesar la imagen, subirla a un servidor, etc.
+    }
+  }
 }

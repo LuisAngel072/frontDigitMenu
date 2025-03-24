@@ -12,6 +12,7 @@
               type="search"
               class="form-control"
               placeholder="Buscar ingrediente"
+              (keyup)="filtrarIngredientes($event)"
             />
           </div>
 
@@ -38,8 +39,8 @@
             </thead>
             <tbody>
               <tr *ngFor="let ingr of ingredientes">
-                <td>{{ingr.nombre_ingrediente}}</td>
-                <td>{{ingr.precio}}</td>
+                <td>{{ ingr.nombre_ingrediente }}</td>
+                <td>{{ ingr.precio }}</td>
                 <td>
                   <span
                     class="material-symbols-outlined icon icon-eye"
@@ -47,17 +48,36 @@
                   >
                     visibility
                   </span>
-                  <span class="material-symbols-outlined icon icon-edit" (click)="actualizarIngrediente(ingr.id_ingr)">
+                  <span
+                    class="material-symbols-outlined icon icon-edit"
+                    (click)="actualizarIngrediente(ingr.id_ingr)"
+                  >
                     edit_square
                   </span>
-                  <span class="material-symbols-outlined icon icon-trash" (click)="delIngrediente(ingr.id_ingr)">
+                  <span
+                    class="material-symbols-outlined icon icon-trash"
+                    (click)="delIngrediente(ingr.id_ingr)"
+                  >
                     delete
                   </span>
                 </td>
               </tr>
             </tbody>
           </table>
-          <h3 class="text-center" *ngIf="ingredientes.length === 0">
+          <div class="pagination-container row">
+            <div class="col-12 d-flex justify-content-center">
+              <mat-paginator
+                *ngIf="this.ingredientes.length > 0"
+                [length]="this.ingredientes.length"
+                [pageSize]="this.pageSize"
+                [hidePageSize]="true"
+                [pageSizeOptions]="[5, 7, 10]"
+                (page)="onPageChangeIngr($event)"
+              >
+              </mat-paginator>
+            </div>
+          </div>
+          <h3 class="text-center" *ngIf="this.ingredientes.length === 0">
             ¡Vaya! No existen ingredientes registrados.
           </h3>
         </div>
@@ -73,13 +93,16 @@
               type="search"
               class="form-control"
               placeholder="Buscar opciones"
+              (keyup)="filtrarOpciones($event)"
             />
           </div>
 
           <!-- Columna para el botón -->
           <div class="col-auto">
             <button class="btn icon icon-add d-flex align-items-center">
-              <span class="material-symbols-outlined">add</span>
+              <span class="material-symbols-outlined" (click)="crearOpcion()"
+                >add</span
+              >
             </button>
           </div>
         </div>
@@ -93,21 +116,48 @@
               </tr>
             </thead>
             <tbody>
-              <td></td>
-              <td></td>
-              <td>
-                <span class="material-symbols-outlined icon icon-eye">
-                  visibility
-                </span>
-                <span class="material-symbols-outlined icon icon-edit">
-                  edit_square
-                </span>
-                <span class="material-symbols-outlined icon icon-trash">
-                  delete
-                </span>
-              </td>
+              <tr *ngFor="let opcion of opciones">
+                <td>{{ opcion.nombre_opcion }}</td>
+                <td>{{ opcion.porcentaje }}</td>
+                <td>
+                  <span
+                    class="material-symbols-outlined icon icon-eye"
+                    (click)="verOpcion(opcion.id_opcion)"
+                  >
+                    visibility
+                  </span>
+                  <span
+                    class="material-symbols-outlined icon icon-edit"
+                    (click)="actualizarOpcion(opcion.id_opcion)"
+                  >
+                    edit_square
+                  </span>
+                  <span
+                    class="material-symbols-outlined icon icon-trash"
+                    (click)="delOpcion(opcion.id_opcion)"
+                  >
+                    delete
+                  </span>
+                </td>
+              </tr>
             </tbody>
           </table>
+          <div class="pagination-container row">
+            <div class="col-12 d-flex justify-content-center">
+              <mat-paginator
+                *ngIf="this.opciones.length > 0"
+                [length]="this.opciones.length"
+                [pageSize]="this.pageSize"
+                [hidePageSize]="true"
+                [pageSizeOptions]="[5, 7, 10]"
+                (page)="onPageChangeOpc($event)"
+              >
+              </mat-paginator>
+            </div>
+          </div>
+          <h3 class="text-center" *ngIf="this.opciones.length === 0">
+            ¡Vaya! No existen opciones registradas.
+          </h3>
         </div>
       </div>
 
@@ -121,13 +171,16 @@
               type="search"
               class="form-control"
               placeholder="Buscar extras"
+              (keyup)="filtrarExtras($event)"
             />
           </div>
 
           <!-- Columna para el botón -->
           <div class="col-auto">
             <button class="btn icon icon-add d-flex align-items-center">
-              <span class="material-symbols-outlined">add</span>
+              <span class="material-symbols-outlined" (click)="crearExtra()"
+                >add</span
+              >
             </button>
           </div>
         </div>
@@ -141,21 +194,48 @@
               </tr>
             </thead>
             <tbody>
-              <td></td>
-              <td></td>
-              <td>
-                <span class="material-symbols-outlined icon icon-eye">
-                  visibility
-                </span>
-                <span class="material-symbols-outlined icon icon-edit">
-                  edit_square
-                </span>
-                <span class="material-symbols-outlined icon icon-trash">
-                  delete
-                </span>
-              </td>
+              <tr *ngFor="let extra of extras">
+                <td>{{ extra.nombre_extra }}</td>
+                <td>{{ extra.precio }}</td>
+                <td>
+                  <span
+                    class="material-symbols-outlined icon icon-eye"
+                    (click)="verExtra(extra.id_extra)"
+                  >
+                    visibility
+                  </span>
+                  <span
+                    class="material-symbols-outlined icon icon-edit"
+                    (click)="actualizarExtra(extra.id_extra)"
+                  >
+                    edit_square
+                  </span>
+                  <span
+                    class="material-symbols-outlined icon icon-trash"
+                    (click)="delExtra(extra.id_extra)"
+                  >
+                    delete
+                  </span>
+                </td>
+              </tr>
             </tbody>
           </table>
+          <div class="pagination-container row">
+            <div class="col-12 d-flex justify-content-center">
+              <mat-paginator
+                *ngIf="this.extras.length > 0"
+                [length]="this.extras.length"
+                [pageSize]="this.pageSize"
+                [hidePageSize]="true"
+                [pageSizeOptions]="[5, 7, 10]"
+                (page)="onPageChangeExt($event)"
+              >
+              </mat-paginator>
+            </div>
+          </div>
+          <h3 class="text-center" *ngIf="this.extras.length === 0">
+            ¡Vaya! No existen extras registrados.
+          </h3>
         </div>
       </div>
     </div>

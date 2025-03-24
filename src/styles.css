@@ -15,6 +15,8 @@
     --color-peligro: #a60505;
     --color-peligroH: #c21c1c;
     --color-peligroA: rgb(114, 0, 0)5;
+
+
 }
 
 input,
@@ -41,6 +43,8 @@ select.form-select {
 option.form-select:hover {
     background-color: var(--color-secundario);
 }
+
+
 
 .icon {
     transition: transform 0.2s ease, background-color 0.2s ease, border-color 0.2s ease;
@@ -247,6 +251,22 @@ option.form-select:hover {
     border-color: var(--color-peligroA);
     transform: scale(0.95);
     /* Reduce el tamaño en un 5% para efecto de presionado */
+}
+
+/* Desactivar el rango si quisieras ocultarlo con CSS en lugar de MatPaginatorIntl */
+.mat-paginator-range-label {
+    display: none;
+}
+
+/* Hover y active en los botones de paginación */
+.mat-paginator-navigation-previous .mat-icon-button:hover,
+.mat-paginator-navigation-next .mat-icon-button:hover {
+    background-color: var(--color-botonPH) !important;
+}
+
+.mat-paginator-navigation-previous .mat-icon-button:active,
+.mat-paginator-navigation-next .mat-icon-button:active {
+    background-color: var(--color-botonPA) !important;
 }
 
 @font-face {
