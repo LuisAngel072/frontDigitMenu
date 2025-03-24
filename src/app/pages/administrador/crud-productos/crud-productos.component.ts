@@ -10,7 +10,8 @@ import Swal from 'sweetalert2'
   styleUrl: './crud-productos.component.css'
 })
 export class CrudProductosComponent {
-  @Output() cambiarComponente = new EventEmitter<string>();
+ @Output() cambiarComponente = new EventEmitter<string>();
+
 
   newProduct (nombre: string, categoria: string, precio: string, descripcion: string)  {
     // Creamos un nuevo ID basado en la longitud del arreglo

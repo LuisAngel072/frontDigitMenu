@@ -48,4 +48,13 @@ export type UsuariosDTO = {
     nombre_opcion: string;
     porcentaje: number;
   };
+
+ export type CategoriasDTO  = {
+   nombre_cat: string;
+  };
+  
+  export type SubcategoriasDTO  = {
+    nombre_subcat: string;
+    categoria_id: number;
+   };
   

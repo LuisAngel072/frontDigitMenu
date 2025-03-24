@@ -66,7 +66,10 @@
     <app-crud-productos (cambiarComponente)="cambiarComponente($event)"></app-crud-productos>
   </div>
   <div *ngIf="selectedSection === 'seccion3'">
-    <app-categorias></app-categorias>
+    <app-crud-categorias
+    [categorias]="categorias"
+    [subcategorias]="subcategorias">
+  </app-crud-categorias>
   </div>
   <div *ngIf="selectedSection === 'seccion4'">
     <app-crud-ingredientes [ingredientes]="ingredientes"></app-crud-ingredientes>
