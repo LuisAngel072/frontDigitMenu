@@ -12,7 +12,7 @@ export const environment = {
      */
     ApiEncontrarUsuario: "usuarios", //Get
     ApiCrearUsuario:"usuarios/registro", //Post
-    ApiEncontrarUnUsuario: "usuarios/:codigo",
+    ApiEncontrarUnUsuario: "usuarios/",
     ApiEncontrarRolesYUsuario: "roles/getUsuarios",
     ApiActualizarUsuario: "usuarios/actualizar/",
     ApiDesactivarUsuario: "usuarios/desactivar/",

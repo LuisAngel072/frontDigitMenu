@@ -26,14 +26,16 @@ export class UsuariosService {
 
   async obtenerUnUsuario(codigo: string) {
     try {
-      const response = this.http.get<any>(
-        environment.ApiIP + environment.ApiEncontrarUsuario + codigo,
+      const response$ = this.http.get<any>(
+        environment.ApiIP + environment.ApiEncontrarUsuario + '/' +codigo,
         {
           headers: {
             Authorization: `Bearer ${this.authService.getToken()}`,
           },
         }
       );
+      const response = lastValueFrom(response$);
+      console.log(response)
       return response;
     } catch (error) {
       console.error(

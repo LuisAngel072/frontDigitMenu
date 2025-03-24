@@ -54,6 +54,17 @@
             data-bs-toggle="dropdown"
             aria-expanded="false"
           >
+            <img
+              [src]="profileImageUrl"
+              alt="Perfil"
+              class="img-fluid rounded-circle"
+              style="
+                width: 40px;
+                height: 40px;
+                object-fit: cover;
+                margin-right: 8px;
+              "
+            />
             {{ username }} {{ usercode }}
           </a>
           <ul
