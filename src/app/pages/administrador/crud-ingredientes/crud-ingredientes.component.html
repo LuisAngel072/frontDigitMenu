@@ -64,12 +64,22 @@
               </tr>
             </tbody>
           </table>
-          <h3 class="text-center" *ngIf="ingredientes.length === 0">
+          <div class="pagination-container row">
+            <div class="col-12 d-flex justify-content-center">
+              <mat-paginator
+                *ngIf="this.ingredientes.length > 0"
+                [length]="this.ingredientes.length"
+                [pageSize]="this.pageSize"
+                [hidePageSize]="true"
+                [pageSizeOptions]="[5, 7, 10]"
+                (page)="onPageChangeIngr($event)"
+              >
+              </mat-paginator>
+            </div>
+          </div>
+          <h3 class="text-center" *ngIf="this.ingredientes.length === 0">
             ¡Vaya! No existen ingredientes registrados.
           </h3>
-        </div>
-        <div class="col-12 d-flex justify-content-center">
-          <pagination-controls (pageChange)="onPageChange($event)" class="pagination"  previousLabel="Anterior" nextLabel="Siguiente"></pagination-controls>
         </div>
       </div>
 
@@ -131,10 +141,23 @@
                 </td>
               </tr>
             </tbody>
-            <h3 class="text-center" *ngIf="opciones.length === 0">
-              ¡Vaya! No existen opciones registradas.
-            </h3>
           </table>
+          <div class="pagination-container row">
+            <div class="col-12 d-flex justify-content-center">
+              <mat-paginator
+                *ngIf="this.opciones.length > 0"
+                [length]="this.opciones.length"
+                [pageSize]="this.pageSize"
+                [hidePageSize]="true"
+                [pageSizeOptions]="[5, 7, 10]"
+                (page)="onPageChangeOpc($event)"
+              >
+              </mat-paginator>
+            </div>
+          </div>
+          <h3 class="text-center" *ngIf="this.opciones.length === 0">
+            ¡Vaya! No existen opciones registradas.
+          </h3>
         </div>
       </div>
 
@@ -197,7 +220,20 @@
               </tr>
             </tbody>
           </table>
-          <h3 class="text-center" *ngIf="extras.length === 0">
+          <div class="pagination-container row">
+            <div class="col-12 d-flex justify-content-center">
+              <mat-paginator
+                *ngIf="this.extras.length > 0"
+                [length]="this.extras.length"
+                [pageSize]="this.pageSize"
+                [hidePageSize]="true"
+                [pageSizeOptions]="[5, 7, 10]"
+                (page)="onPageChangeExt($event)"
+              >
+              </mat-paginator>
+            </div>
+          </div>
+          <h3 class="text-center" *ngIf="this.extras.length === 0">
             ¡Vaya! No existen extras registrados.
           </h3>
         </div>
