@@ -24,6 +24,6 @@ export class MesasComponent {
   }
 
   generarURL(mesa: number): string {
-    return `http://localhost:4200/clientes?mesa=${mesa}`;
+    return `http://localhost:4200/clientes-menu?mesa=${mesa}`;
   }
 }

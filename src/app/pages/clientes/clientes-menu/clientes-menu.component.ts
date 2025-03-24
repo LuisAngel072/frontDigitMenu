@@ -17,7 +17,7 @@ export class ClientesMenuComponent implements OnInit {
   ngOnInit(): void {
     this.route.queryParams.subscribe(params => {
       this.mesaId = params['mesa'];
-      alert(this.mesaId);
+      // alert(this.mesaId);
     });
   }
 
