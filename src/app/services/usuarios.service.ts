@@ -122,6 +122,30 @@ export class UsuariosService {
       throw error;
     }
   }
+
+  async reactivarUsuario(id_usuario: number) {
+    try {
+      const response = await this.http
+        .patch<any>(
+          environment.ApiIP + environment.ApiReactivarUsuario + id_usuario,
+          {},
+          {
+            headers: { Authorization: `Bearer ${this.authService.getToken()}` },
+          }
+        )
+        .toPromise();
+      if (response !== null || response !== undefined) {
+        return response;
+      } else return undefined;
+    } catch (error) {
+      console.error(
+        'Error al desactivar al usuario. ERROR -> usuarios.service.ts -> desactivarUsuario()',
+        error
+      );
+      throw error;
+    }
+  }
+
   registrarUsuario(body: UsuariosDTO): Observable<any> {
     try {
       const response$ = this.http.post<any>(

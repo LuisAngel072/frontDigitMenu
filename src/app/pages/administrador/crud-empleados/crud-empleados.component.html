@@ -76,10 +76,18 @@
               edit_square
             </span>
             <span
+              *ngIf="usuario.usuario_id.activo === true"
               (click)="desactivarEmpleado(usuario.usuario_id.id_usuario)"
               class="material-symbols-outlined icon icon-trash"
             >
               delete
+            </span>
+            <span
+              *ngIf="usuario.usuario_id.activo === false"
+              (click)="reactivarEmpleado(usuario.usuario_id.id_usuario)"
+              class="material-symbols-outlined icon icon-react"
+            >
+              autorenew
             </span>
           </td>
         </tr>
