@@ -7,7 +7,7 @@ import { CategoriasComponent } from '../../pages/administrador/categorias/catego
 import { CrudIngredientesComponent } from './crud-ingredientes/crud-ingredientes.component';
 import { MesasComponent } from './mesas/mesas.component';
 import { VentasComponent } from './ventas/ventas.component';
-import { Ingredientes, Roles, Usuarios_has_roles, Categorias } from '../../types';
+import { Ingredientes, Roles, Usuarios_has_roles, Categorias, Extras, Opciones } from '../../types';
 import { UsuariosService } from '../../services/usuarios.service';
 import { RolesService } from '../../services/roles.service';
 import { CrudAgregarProductosComponent } from './crud-productos/crud-agregar-productos/crud-agregar-productos.component';
@@ -38,6 +38,8 @@ export class AdministradorComponent {
   public usuarios: Usuarios_has_roles[] = [];
   public roles: Roles[] = [];
   public ingredientes: Ingredientes[] = [];
+  public extras: Extras[] = [];
+  public opciones: Opciones[] = [];
   categorias: Categorias[] = [];
   subcategorias: any[] = [];  // Arreglo para almacenar las subcategorías
 
@@ -55,6 +57,7 @@ export class AdministradorComponent {
     this.roles = await this.rolesService.obtenerRoles();
     this.usuarios = await this.usuariosService.obtenerUsuariosYRoles();
     this.ingredientes = await this.ingredientesService.getIngredientes();
+    
     this.categorias = await this.categoriasService.getCategorias(); 
 
     // Inicializa las subcategorías
