@@ -14,6 +14,10 @@ import {
   PageEvent,
 } from '@angular/material/paginator';
 import { CustomPaginatorIntl } from '../../../../matPaginator';
+import { HeaderComponent } from '../../comun-componentes/header/header.component';
+import { ChangeDetectorRef } from '@angular/core';
+import { SharedService } from '../../../services/shared.service';
+import { environment } from '../../../../environment';
 
 @Component({
   selector: 'app-crud-empleados',
@@ -42,7 +46,9 @@ export class CrudEmpleadosComponent {
 
   constructor(
     private adminComponente: AdministradorComponent,
-    private readonly usuariosService: UsuariosService
+    private readonly usuariosService: UsuariosService,
+    private cdr: ChangeDetectorRef,
+    private readonly sharedService: SharedService
   ) {
     this.usuarios = this.adminComponente.usuarios;
     this.roles = this.adminComponente.roles;
@@ -107,22 +113,22 @@ export class CrudEmpleadosComponent {
     this.activo = Number(element.value);
     switch (this.activo) {
       case 0:
-        this.usuarios = this.adminComponente.usuarios;
+        this.usuariosFiltrados = this.adminComponente.usuarios;
         break;
       case 1:
         this.usuarios = this.adminComponente.usuarios;
-        this.usuarios = this.usuarios.filter(
+        this.usuariosFiltrados = this.usuarios.filter(
           (usuario) => usuario.usuario_id.activo === true
         );
         break;
       case 2:
         this.usuarios = this.adminComponente.usuarios;
-        this.usuarios = this.usuarios.filter(
+        this.usuariosFiltrados = this.usuarios.filter(
           (usuario) => usuario.usuario_id.activo === false
         );
         break;
       default:
-        this.usuarios = this.adminComponente.usuarios;
+        this.usuariosFiltrados = this.adminComponente.usuarios;
         break;
     }
   }
@@ -270,6 +276,11 @@ export class CrudEmpleadosComponent {
   
         `,
         confirmButtonText: 'Agregar',
+        customClass: {
+          confirmButton: 'btn btn-terc',
+          cancelButton: 'btn btn-peligro',
+        },
+        cancelButtonText: 'Cancelar',
         showCancelButton: true,
         preConfirm: () => {
           // Para cada relación, usamos el valor del input y agregamos el id original del objeto (si se requiere actualización)
@@ -420,7 +431,7 @@ export class CrudEmpleadosComponent {
             nss: {
               nss,
             },
-            img_us: { img_perfil: file ? file.name : '' },
+            img_perfil: { img_ruta: file ? file.name : '' },
             domicilio: {
               calle,
               colonia,
@@ -470,9 +481,10 @@ export class CrudEmpleadosComponent {
                 .pipe(
                   switchMap((res) => {
                     console.log('Ruta de la imagen subida:', res.img_ruta);
-                    this.formData.img_us.img_ruta =
+                    this.formData.img_perfil.img_ruta =
                       'img-us/' + String(res.img_ruta);
                     // Una vez que la imagen se ha subido y la ruta se ha asignado, registramos al usuario
+                    console.log('HOLAAAAAAAAAAAAAAAAAAAA')
                     console.log(this.formData);
                     return this.usuariosService.registrarUsuario(this.formData);
                   })
@@ -510,6 +522,7 @@ export class CrudEmpleadosComponent {
                       await this.usuariosService.obtenerUsuariosYRoles();
 
                     this.adminComponente.usuarios = this.usuarios;
+                    this.cdr.detectChanges();
                   },
                 });
             } else {
@@ -527,6 +540,7 @@ export class CrudEmpleadosComponent {
                   // Actualiza la lista de usuarios después del registro exitoso
                   this.usuarios =
                     await this.usuariosService.obtenerUsuariosYRoles();
+                  this.cdr.detectChanges();
 
                   this.adminComponente.usuarios = this.usuarios;
                 },
@@ -1004,7 +1018,6 @@ export class CrudEmpleadosComponent {
         },
       }).then(async (result) => {
         if (result.isConfirmed) {
-          
           const confirmacion = await Swal.fire({
             title: '¿Estás seguro de editar el empleado?',
             showDenyButton: true,
@@ -1055,6 +1068,7 @@ export class CrudEmpleadosComponent {
                       timer: 2000,
                     });
                     // Actualiza la lista de usuarios después del registro exitoso
+                    //this.headerComponente.profileImageUrl = this.formData.img_perfil.img_ruta;
                     this.usuariosService
                       .obtenerUsuariosYRoles()
                       .then((usuarios) => {
@@ -1062,6 +1076,15 @@ export class CrudEmpleadosComponent {
                         this.adminComponente.usuarios = this.usuarios;
                         this.formData = {};
                       });
+
+                    // Verificar si el empleado editado es el usuario autenticado
+                    this.sharedService.usercode$.subscribe((usercode) => {
+                      if (this.formData.codigo === usercode) {
+                        const newProfileImgUrl =
+                          environment.ApiIP + this.formData.img_perfil.img_ruta;
+                        this.sharedService.setProfileImg(newProfileImgUrl);
+                      }
+                    });
                   },
                   error: async (err) => {
                     console.error('Error al actualizar el usuario:', err);
@@ -1094,7 +1117,8 @@ export class CrudEmpleadosComponent {
                     // Actualiza la lista de usuarios después del registro exitoso
                     this.usuarios =
                       await this.usuariosService.obtenerUsuariosYRoles();
-
+                    this.sharedService;
+                    this.cdr.detectChanges();
                     this.adminComponente.usuarios = this.usuarios;
                   },
                   error: (err) => {
@@ -1152,6 +1176,12 @@ export class CrudEmpleadosComponent {
               title: 'Cargando...',
               html: 'Por favor, espere mientras se procesa la información.',
               allowOutsideClick: false, // Evita que se pueda cerrar
+              allowEscapeKey: false, // Evita que se cierre con la tecla Escape
+              allowEnterKey: false, // Evita que se cierre con Enter
+              showConfirmButton:false,
+              didOpen: () => {
+                Swal.showLoading(); // Muestra el spinner de carga
+              },
             });
             await this.usuariosService.desactivarUsuario(id_usuario);
             Swal.close();
@@ -1181,6 +1211,79 @@ export class CrudEmpleadosComponent {
     } catch (error) {
       console.error(
         'Error al desactivar al usuario. ERROR -> usuarios.service.ts -> desactivarUsuario()',
+        error
+      );
+      throw error;
+    }
+  }
+
+  async reactivarEmpleado(id_usuario: number) {
+    try {
+      const usF = this.usuarios.find(
+        (us) => us.usuario_id.id_usuario === id_usuario
+      );
+      if (!usF) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Oops...',
+          text: 'No se encontró el usuario en la base de datos, intenta más tarde.',
+          timer: 2000,
+        });
+        return;
+      }
+      Swal.fire({
+        icon: 'warning',
+        title: 'Activar empleado',
+        text: '¿Estás seguro de reactivar el empleado?',
+        showDenyButton: true,
+        confirmButtonText: 'Continuar',
+        cancelButtonText: 'Cancelar',
+        customClass: {
+          confirmButton: 'btn btn-prim',
+          denyButton: 'btn btn-peligro',
+        },
+      }).then(async (result) => {
+        if (result.isConfirmed) {
+          try {
+            Swal.fire({
+              title: 'Cargando...',
+              html: 'Por favor, espere mientras se procesa la información.',
+              allowOutsideClick: false, // Evita que se pueda cerrar
+              allowEscapeKey: false, // Evita que se cierre con la tecla Escape
+              allowEnterKey: false, // Evita que se cierre con Enter
+              didOpen: () => {
+                Swal.showLoading(); // Muestra el spinner de carga
+              },
+            });
+            await this.usuariosService.reactivarUsuario(id_usuario);
+            Swal.close();
+            Swal.fire({
+              title: 'Empleado reactivado correctamente',
+              icon: 'success',
+              timer: 2000,
+              showConfirmButton:false,
+            });
+            this.usuarios = await this.usuariosService.obtenerUsuariosYRoles();
+
+            this.adminComponente.usuarios = this.usuarios;
+          } catch (error) {
+            this.usuarios = await this.usuariosService.obtenerUsuariosYRoles();
+
+            this.adminComponente.usuarios = this.usuarios;
+            Swal.close();
+            Swal.fire({
+              icon: 'error',
+              title: 'Error',
+              text: 'No se pudo reactivar el empleado.',
+            });
+          }
+        } else {
+          return;
+        }
+      });
+    } catch (error) {
+      console.error(
+        'Error al reactivar al usuario. ERROR -> usuarios.service.ts -> reactivarUsuario()',
         error
       );
       throw error;

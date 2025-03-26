@@ -8,6 +8,9 @@
     --color-terciario: #79b4d9;
     --color-terciarioH: #99d3f7;
     --color-terciarioA: #5fafe0;
+    --color-aceptar: #8fd979;
+    --color-aceptarH: #b4f799;
+    --color-aceptarA: #83e05f;
     --color-nrosc: #d96b0b;
     --color-eliminar: #F26113;
     --color-eliminarH: #ff823f;
@@ -110,6 +113,10 @@ option.form-select:hover {
     color: var(--color-eliminar);
 }
 
+.icon-react {
+    color: var(--color-aceptar);
+}
+
 .icon-eye {
     color: var(--color-secundario);
 }
@@ -147,6 +154,10 @@ option.form-select:hover {
     color: var(--color-secundarioH);
 }
 
+.icon-react:hover {
+    color: var(--color-aceptarH);
+}
+
 .icon-edit:hover {
     color: var(--color-terciarioH);
 }
@@ -162,6 +173,9 @@ option.form-select:hover {
 
 .icon-edit:active {
     color: var(--color-terciarioA);
+}
+.icon-react:active {
+    color: var(--color-aceptarA);
 }
 
 .table-striped {
