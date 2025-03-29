@@ -21,26 +21,28 @@ import { CustomPaginatorIntl } from '../../../../matPaginator';
   imports: [CommonModule, NgxPaginationModule, MatPaginatorModule],
   templateUrl: './crud-ingredientes.component.html',
   styleUrl: './crud-ingredientes.component.css',
-  providers: [
-    { provide: MatPaginatorIntl, useClass: CustomPaginatorIntl }
-  ],
+  providers: [{ provide: MatPaginatorIntl, useClass: CustomPaginatorIntl }],
 })
 export class CrudIngredientesComponent {
   @Input() ingredientes: Ingredientes[] = [];
   @Input() extras: Extras[] = [];
   @Input() opciones: Opciones[] = [];
 
+  ingredientesFiltrados: Ingredientes[] = [];
+
   @ViewChild(MatPaginator) paginator!: MatPaginator;
 
-  currentPage: number = 1;
-  pageSize: number = 7;
+  currentPage: number = 0;
+  pageSize: number = 5;
 
   constructor(
     private readonly ingrServices: IngredientesService,
     private readonly opcionesService: OpcionesService,
     private readonly extrasService: ExtrasService,
     private adminComponente: AdministradorComponent
-  ) {}
+  ) {
+    this.ingredientesFiltrados = this.ingredientes;
+  }
 
   async ngOnInit() {
     this.ingredientes = this.adminComponente.ingredientes;
@@ -83,7 +85,7 @@ export class CrudIngredientesComponent {
   updateIngredientesFiltrados() {
     const startIndex = this.currentPage * this.pageSize;
     const endIndex = startIndex + this.pageSize;
-    this.ingredientes = this.adminComponente.ingredientes.slice(
+    this.ingredientesFiltrados = this.ingredientes.slice(
       startIndex,
       endIndex
     );
@@ -94,10 +96,7 @@ export class CrudIngredientesComponent {
   updateOpcionesFiltradas() {
     const startIndex = this.currentPage * this.pageSize;
     const endIndex = startIndex + this.pageSize;
-    this.opciones = this.adminComponente.opciones.slice(
-      startIndex,
-      endIndex
-    );
+    this.opciones = this.adminComponente.opciones.slice(startIndex, endIndex);
   }
   /**
    * Permite paginar los extras
@@ -105,10 +104,7 @@ export class CrudIngredientesComponent {
   updateExtrasFiltrados() {
     const startIndex = this.currentPage * this.pageSize;
     const endIndex = startIndex + this.pageSize;
-    this.extras = this.adminComponente.extras.slice(
-      startIndex,
-      endIndex
-    );
+    this.extras = this.adminComponente.extras.slice(startIndex, endIndex);
   }
 
   /**
@@ -274,9 +270,11 @@ export class CrudIngredientesComponent {
                 },
               });
               await this.ingrServices.crearIngrediente(formData);
-              Swal.close();
               this.ingredientes = await this.ingrServices.getIngredientes();
+              this.ingredientesFiltrados = this.ingredientes;
               this.adminComponente.ingredientes = this.ingredientes;
+              console.log(this.ingredientes);
+              Swal.close();
               Swal.fire({
                 icon: 'success',
                 title: 'Ingrediente registrado',
@@ -284,9 +282,9 @@ export class CrudIngredientesComponent {
                 timer: 2000,
               });
             } catch (error) {
-              Swal.close();
               this.ingredientes = await this.ingrServices.getIngredientes();
               this.adminComponente.ingredientes = this.ingredientes;
+              Swal.close();
               Swal.fire({
                 icon: 'error',
                 title: 'Error',
@@ -981,9 +979,9 @@ export class CrudIngredientesComponent {
                 },
               });
               await this.extrasService.crearExtra(formData);
-              Swal.close();
               this.extras = await this.extrasService.getExtras();
               this.adminComponente.extras = this.extras;
+              Swal.close();
               Swal.fire({
                 icon: 'success',
                 title: 'Extra registrado',
@@ -991,9 +989,9 @@ export class CrudIngredientesComponent {
                 timer: 2000,
               });
             } catch (error) {
-              Swal.close();
               this.extras = await this.extrasService.getExtras();
               this.adminComponente.extras = this.extras;
+              Swal.close();
               Swal.fire({
                 icon: 'error',
                 title: 'Error',
@@ -1100,19 +1098,18 @@ export class CrudIngredientesComponent {
               });
 
               this.extrasService.upExtra(id_extra, formData);
-              Swal.close();
-
               this.extras = await this.extrasService.getExtras();
               this.adminComponente.extras = this.extras;
+              Swal.close();
               Swal.fire({
                 icon: 'success',
                 text: 'Extra actualizado con éxito',
                 timer: 2000,
               });
             } catch (error) {
-              Swal.close();
               this.extras = await this.extrasService.getExtras();
               this.adminComponente.extras = this.extras;
+              Swal.close();
               Swal.fire({
                 icon: 'error',
                 title: 'Error',

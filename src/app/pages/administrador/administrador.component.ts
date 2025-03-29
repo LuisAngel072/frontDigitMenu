@@ -14,6 +14,8 @@ import { CrudAgregarProductosComponent } from './crud-productos/crud-agregar-pro
 import { IngredientesService } from '../../services/ingredientes.service';
 import { CategoriasService } from '../../services/categorias.service';
 import { SubcategoriaService } from '../../services/subcategoria.service'; // Asegúrate de importar el servicio de subcategorías
+import { OpcionesService } from '../../services/opciones.service';
+import { ExtrasService } from '../../services/extras.service';
 
 @Component({
   selector: 'app-administrador',
@@ -47,6 +49,8 @@ export class AdministradorComponent {
     private readonly usuariosService: UsuariosService,
     private readonly rolesService: RolesService,
     private readonly ingredientesService: IngredientesService,
+    private readonly opcionesService: OpcionesService,
+    private readonly extrasService: ExtrasService,
     private readonly categoriasService: CategoriasService,
     private readonly subcategoriaService: SubcategoriaService,  
   ) {}
@@ -57,7 +61,8 @@ export class AdministradorComponent {
     this.roles = await this.rolesService.obtenerRoles();
     this.usuarios = await this.usuariosService.obtenerUsuariosYRoles();
     this.ingredientes = await this.ingredientesService.getIngredientes();
-    
+    this.opciones = await this.opcionesService.getOpciones();
+    this.extras = await this.extrasService.getExtras();
     this.categorias = await this.categoriasService.getCategorias(); 
 
     // Inicializa las subcategorías
