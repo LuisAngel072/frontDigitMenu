@@ -59,7 +59,6 @@ export class CrudEmpleadosComponent {
   async ngOnInit() {
     this.usuarios = this.adminComponente.usuarios;
     this.roles = this.adminComponente.roles;
-    console.log(this.usuarios);
     this.updateUsuariosFiltrados();
   }
 
@@ -83,7 +82,7 @@ export class CrudEmpleadosComponent {
 
   filtrarUsuarios(event: any) {
     const valor = event.target.lowerCase();
-    this.usuarios = this.adminComponente.usuarios.filter((usuario) => {
+    this.usuariosFiltrados = this.adminComponente.usuarios.filter((usuario) => {
       const codigo = usuario.usuario_id.codigo.toLowerCase() || '';
       const nombres = usuario.usuario_id.nombres.toLowerCase() || '';
       const primer_apellido =
@@ -484,14 +483,12 @@ export class CrudEmpleadosComponent {
                     this.formData.img_perfil.img_ruta =
                       'img-us/' + String(res.img_ruta);
                     // Una vez que la imagen se ha subido y la ruta se ha asignado, registramos al usuario
-                    console.log('HOLAAAAAAAAAAAAAAAAAAAA')
                     console.log(this.formData);
                     return this.usuariosService.registrarUsuario(this.formData);
                   })
                 )
                 .subscribe({
                   next: (response) => {
-                    console.log(this.formData);
                     Swal.close();
                     Swal.fire({
                       title: 'Empleado registrado correctamente',
@@ -1081,7 +1078,7 @@ export class CrudEmpleadosComponent {
                     this.sharedService.usercode$.subscribe((usercode) => {
                       if (this.formData.codigo === usercode) {
                         const newProfileImgUrl =
-                          environment.ApiIP + this.formData.img_perfil.img_ruta;
+                          environment.ApiUp + this.formData.img_perfil.img_ruta;
                         this.sharedService.setProfileImg(newProfileImgUrl);
                       }
                     });

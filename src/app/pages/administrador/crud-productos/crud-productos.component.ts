@@ -1,6 +1,7 @@
-import { Component, EventEmitter, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { CommonModule, PercentPipe } from '@angular/common';
 import Swal from 'sweetalert2'
+import { Extras, Ingredientes } from '../../../types';
 
 @Component({
   selector: 'app-crud-productos',
@@ -16,18 +17,18 @@ export class CrudProductosComponent {
   newProduct (nombre: string, categoria: string, precio: string, descripcion: string)  {
     // Creamos un nuevo ID basado en la longitud del arreglo
     const newId = this.products.length + 1;
-  
+
     // Creamos el nuevo usuario y lo agregamos al arreglo
     const newProduct = {nombre, categoria, precio, descripcion };
     this.products.push(newProduct);
-  
+
     // Mostrar en consola para verificar
     console.log(this.products);
   };
-  
+
   agregarProductosBoton() {
     this.cambiarComponente.emit('seccion7'); // Emite el nombre del componente que se debe mostrar
-    
+
   }
 
   products = [

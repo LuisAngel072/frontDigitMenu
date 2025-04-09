@@ -1,6 +1,7 @@
 export const environment = {
     production: false,
     ApiIP: "http://localhost:3000/api/",
+    ApiUp: "http://localhost:3000/uploads/",
 
     /**
      * General
@@ -29,7 +30,7 @@ export const environment = {
     ApiObtenerCategorias: "categorias",//GET
     ApiObtenerCategoria: "categorias/",//GET
     ApiRegistrarCategoria: "categorias/registrar",//POST
-    ApiEditarCategoria: "categorias/editar/", //PATCH
+    ApiEditarCategoria: "categorias/actualizar/", //PATCH
     ApitEliminarCategoria: "categorias/eliminar/",//DELETE
 
     /**

@@ -6,19 +6,29 @@
       <!-- Información del producto -->
       <div class="mb-3">
         <label class="form-label">Nombre del Producto</label>
-        <textarea class="form-control" placeholder="Ingrese el nombre del producto"></textarea>
+        <input
+          class="form-control"
+          placeholder="Ingrese el nombre del producto"
+        />
       </div>
 
       <!-- Descripción del producto -->
       <div class="mb-3">
         <label class="form-label">Descripción</label>
-        <textarea class="form-control" placeholder="Ingrese la descripción del producto"></textarea>
+        <textarea
+          class="form-control"
+          placeholder="Ingrese la descripción del producto"
+        ></textarea>
       </div>
 
       <!-- Imagen del producto -->
       <div class="mb-3">
         <label class="form-label">Imagen del Producto</label>
-        <input type="file" class="form-control" (change)="onFileSelected($event)">
+        <input
+          type="file"
+          class="form-control"
+          (change)="onFileSelected($event)"
+        />
       </div>
 
       <!-- Subcategorías -->
@@ -38,44 +48,119 @@
           <div class="card p-3">
             <h5>Extras</h5>
             <div class="form-check">
-              <input class="form-check-input" type="checkbox" value="queso extra" id="extra1">
-              <label class="form-check-label" for="extra1">Queso Extra</label>
-            </div>
-            <div class="form-check">
-              <input class="form-check-input" type="checkbox" value="salsa" id="extra2">
-              <label class="form-check-label" for="extra2">Salsa Especial</label>
+              <ul *ngFor="let extra of extrasFiltrados">
+                <input
+                  type="checkbox"
+                  class="form-check-input"
+                  [value]="extra.id_extra"
+                  id="extra_{{ extra.id_extra }}"
+                />
+                <label
+                  for="extra_{{ extra.id_extra }}"
+                  class="form-check-label"
+                >
+                  {{ extra.nombre_extra }}</label
+                >
+              </ul>
             </div>
           </div>
+          <div class="pagination-container row">
+            <div class="col-12 d-flex justify-content-center">
+              <mat-paginator
+                *ngIf="this.extras.length > 5"
+                [length]="this.extras.length"
+                [pageSize]="this.pageSizeExt"
+                [hidePageSize]="true"
+                [pageSizeOptions]="[5, 7, 10]"
+                (page)="onPageChangeExt($event)"
+              >
+              </mat-paginator>
+            </div>
+          </div>
+          <h3 class="text-center" *ngIf="this.extras.length === 0">
+            ¡Vaya! No existen extras registrados.
+          </h3>
         </div>
         <div class="col-md-4">
           <div class="card p-3">
             <h5>Opciones</h5>
-            <select class="form-select">
-              <option selected>Seleccione una opción</option>
-              <option value="1">Pequeña</option>
-              <option value="2">Mediana</option>
-              <option value="3">Grande</option>
-            </select>
+            <ul *ngFor="let opcion of opcionesFiltradas">
+              <input
+                class="form-check-input"
+                type="checkbox"
+                [value]="opcion.id_opcion"
+                id="opcion_{{ opcion.id_opcion }}"
+              />
+              <label
+                class="form-check-label"
+                for="opcion_{{ opcion.id_opcion }}"
+              >
+                {{ opcion.nombre_opcion }}</label
+              >
+            </ul>
           </div>
+          <div class="pagination-container row">
+            <div class="col-12 d-flex justify-content-center">
+              <mat-paginator
+                *ngIf="this.opciones.length > 5"
+                [length]="this.opciones.length"
+                [pageSize]="this.pageSizeOpc"
+                [hidePageSize]="true"
+                [pageSizeOptions]="[5, 7, 10]"
+                (page)="onPageChangeOpc($event)"
+              >
+              </mat-paginator>
+            </div>
+          </div>
+          <h3 class="text-center" *ngIf="this.opciones.length === 0">
+            ¡Vaya! No existen opciones registradas.
+          </h3>
         </div>
         <div class="col-md-4">
           <div class="card p-3">
             <h5>Ingredientes</h5>
             <div class="form-check">
-              <input class="form-check-input" type="checkbox" value="pepperoni" id="ingrediente1">
-              <label class="form-check-label" for="ingrediente1">Pepperoni</label>
+              <ul *ngFor="let ingr of ingredientesFiltrados">
+                <input
+                  class="form-check-input"
+                  type="checkbox"
+                  [value]="ingr.id_ingr"
+                  id="ingr_{{ ingr.id_ingr }}"
+                />
+                <label class="form-check-label" for="ingr_{{ ingr.id_ingr }}">{{
+                  ingr.nombre_ingrediente
+                }}</label>
+              </ul>
             </div>
-            <div class="form-check">
-              <input class="form-check-input" type="checkbox" value="champiñones" id="ingrediente2">
-              <label class="form-check-label" for="ingrediente2">Champiñones</label>
+            <div class="pagination-container row">
+              <div class="col-12 d-flex justify-content-center">
+                <mat-paginator
+                  *ngIf="this.ingredientes.length > 6"
+                  [length]="this.ingredientes.length"
+                  [pageSize]="this.pageSizeIngr"
+                  [hidePageSize]="true"
+                  [pageSizeOptions]="[5, 7, 10]"
+                  (page)="onPageChangeIngr($event)"
+                >
+                </mat-paginator>
+              </div>
             </div>
+            <h3 class="text-center" *ngIf="this.ingredientes.length === 0">
+              ¡Vaya! No existen ingredientes registrados.
+            </h3>
           </div>
         </div>
       </div>
 
       <div class="mb-3">
         <label class="form-label">Precio</label>
-        <input type="number" class="form-control" placeholder="Ingrese el precio del producto" min="0" step="0.01">
+        <input
+          type="number"
+          class="form-control"
+          placeholder="Ingrese el precio del producto"
+          min="0"
+          step="0.01"
+        />
       </div>
 
       <!-- Botón para agregar producto -->

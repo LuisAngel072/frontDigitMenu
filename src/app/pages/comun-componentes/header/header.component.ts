@@ -34,7 +34,7 @@ export class HeaderComponent {
 
   async ngOnInit() {
     this.usuario = await this.usuariosService.obtenerUnUsuario(String(this.usercode));
-    this.profileImageUrl = environment.ApiIP + (this.usuario?.img_perfil.img_ruta || '');
+    this.profileImageUrl = environment.ApiUp + (this.usuario?.img_perfil.img_ruta || '');
 
     // Suscribirse a los cambios en la imagen de perfil
     const profileImgSubscription = this.sharedService.profileImg.subscribe((newProfileImg) => {

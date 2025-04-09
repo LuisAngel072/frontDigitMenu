@@ -7,3 +7,9 @@
     border-color: var(--color-botonP);
     font-family: 'cocogoose',sans-serif;
 }
+label, h5 {
+  font-family: 'cocogoose-letter',sans-serif;
+}
+textarea, input, .form-check-label, option, select {
+  font-family: 'cocogoose',sans-serif;
+}

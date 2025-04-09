@@ -5,8 +5,8 @@ import { MatPaginatorIntl } from '@angular/material/paginator';
 export class CustomPaginatorIntl extends MatPaginatorIntl {
 
   override itemsPerPageLabel = 'Ítems por página';
-  override nextPageLabel = 'Siguiente';
-  override previousPageLabel = 'Anterior';
+  override nextPageLabel = '';
+  override previousPageLabel = '';
 
   // Para el texto del rango, si deseas ocultarlo por completo, puedes retornar una cadena vacía:
   override getRangeLabel = (page: number, pageSize: number, length: number) => {
@@ -17,5 +17,5 @@ export class CustomPaginatorIntl extends MatPaginatorIntl {
     return '';
   };
 
-  
+
 }

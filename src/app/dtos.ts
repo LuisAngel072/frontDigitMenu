@@ -51,10 +51,12 @@ export type UsuariosDTO = {
 
  export type CategoriasDTO  = {
    nombre_cat: string;
+   ruta_img: string;
   };
   
   export type SubcategoriasDTO  = {
     nombre_subcat: string;
     categoria_id: number;
+    ruta_img: string;
    };
   
