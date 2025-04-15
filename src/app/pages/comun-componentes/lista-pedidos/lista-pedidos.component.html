@@ -1,0 +1,142 @@
+<!-- lista-pedidos.component.html -->
+<div class="order-system-container">
+  <!-- Navbar -->
+  <nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <div class="container-fluid d-flex justify-content-between">
+      <!-- Logo (20% width) -->
+      <div class="navbar-logo" style="width: 20%">
+        <a class="navbar-brand" href="#">
+          <span class="logo">
+            <span class="logo-digit">DIGIT</span>
+            <span class="logo-menu">MENU</span>
+          </span>
+        </a>
+      </div>
+      
+      <!-- Spacer (60% width) -->
+      <div style="width: 60%"></div>
+      
+      <!-- Navbar icons (20% width) -->
+      <div class="navbar-icons d-flex justify-content-end" style="width: 20%">
+        <!-- Main hamburger menu (always visible) -->
+        <button class="btn navbar-icon" (click)="toggleNavigation()">
+          <i class="bi bi-list" style="color: #333; font-size: 24px;"></i>
+        </button>
+        
+        <!-- Order list icon -->
+        <button class="btn navbar-icon" (click)="toggleSidebar()">
+          <i class="bi bi-list-ul" style="color: #ff8800; font-size: 24px;"></i>
+        </button>
+        
+        <!-- Notifications icon -->
+        <button class="btn navbar-icon notification-btn" (click)="toggleNotifications()">
+          <i class="bi bi-bell" style="color: #3498db; font-size: 24px;"></i>
+          <span *ngIf="unreadNotifications > 0" class="notification-badge">{{unreadNotifications}}</span>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <div class="content-container">
+    <!-- Navigation Sidebar -->
+    <div class="sidebar nav-sidebar" [class.open]="navOpen">
+      <div class="sidebar-header">
+        <h4 class="m-3">Menú</h4>
+      </div>
+      <div class="nav-items-container">
+        <div class="nav-item" *ngFor="let item of navItems" (click)="navigate(item.route)">
+          <i class="bi {{ item.icon }}"></i>
+          <span>{{ item.name }}</span>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Orders Sidebar -->
+    <div class="sidebar orders-sidebar" [class.open]="sidebarOpen">
+      <div class="sidebar-header">
+        <h4 class="m-3">Pedidos Activos</h4>
+      </div>
+      <div class="orders-container">
+        <div class="order-accordion" *ngFor="let order of orders" id="order-{{order.id}}">
+          <div class="order-header" (click)="toggleOrderExpanded(order)">
+            <div class="d-flex justify-content-between align-items-center w-100 px-3 py-2">
+              <h5 class="mb-0">PEDIDO {{ order.id }}</h5>
+              <i class="bi" [ngClass]="{'bi-chevron-up': order.expanded, 'bi-chevron-down': !order.expanded}" style="font-size: 18px;"></i>
+            </div>
+          </div>
+          
+          <div class="order-content" [ngClass]="{'show': order.expanded}">
+            <div class="p-3">
+              <div class="table-info mb-3 d-flex justify-content-between align-items-center">
+                <span class="fw-bold">No de mesa: {{ order.tableNumber }}</span>
+                <div class="mark-delivered-btn">
+                  <button class="btn btn-sm btn-outline-success" (click)="markAllAsDelivered(order)">
+                    Marcar todo como entregado
+                  </button>
+                </div>
+              </div>
+              
+              <div class="order-items">
+                <div class="order-item d-flex justify-content-between align-items-center mb-2" *ngFor="let item of order.items">
+                  <div>
+                    <span class="item-name">{{ item.name }}</span>
+                    <small [ngClass]="getStatusClass(item.status)" class="d-block status-text">
+                      {{ getStatusText(item.status) }}
+                    </small>
+                  </div>
+                  <div class="status-controls">
+                    <div class="form-check">
+                      <input 
+                        type="checkbox" 
+                        class="form-check-input" 
+                        [checked]="item.status === 'delivered'"
+                        (change)="toggleItemStatus(order, item)"
+                        id="item-{{order.id}}-{{item.name}}">
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Notifications Sidebar -->
+    <div class="sidebar notifications-sidebar" [class.open]="notificationsOpen">
+      <div class="sidebar-header">
+        <h4 class="m-3">Notificaciones</h4>
+      </div>
+      <div class="notifications-container">
+        <div *ngIf="notifications.length === 0" class="text-center p-3">
+          <p>No hay notificaciones</p>
+        </div>
+        
+        <div class="notification-item" *ngFor="let notification of notifications" 
+             [class.unread]="!notification.read"
+             (click)="goToOrder(notification.tableNumber)">
+          <div class="notification-content">
+            <div class="notification-header d-flex justify-content-between">
+              <span class="notification-table fw-bold">Mesa {{ notification.tableNumber }}</span>
+              <span class="notification-time">{{ formatTime(notification.time) }}</span>
+            </div>
+            <div class="notification-message">
+              {{ notification.message }}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main content -->
+    <div class="main-content" [class.shifted]="sidebarOpen || notificationsOpen || navOpen">
+      <div class="tables-container">
+        <!-- Tables visualization would go here -->
+        <div class="text-center my-5">
+          <h3>Visualización de mesas</h3>
+          <p>El componente de visualización de mesas iría aquí</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -5,6 +5,7 @@ import { CrudEmpleadosComponent } from './pages/administrador/crud-empleados/cru
 import { CrudProductosComponent } from './pages/administrador/crud-productos/crud-productos.component';
 import { ClientesComponent } from './pages/clientes/clientes.component';
 import { ClientesMenuComponent } from './pages/clientes/clientes-menu/clientes-menu.component';
+import { ListaPedidosComponent } from './pages/comun-componentes/lista-pedidos/lista-pedidos.component';
 
 export const routes: Routes = [
     {
@@ -30,5 +31,9 @@ export const routes: Routes = [
     {
         path: "clientes-menu",
         component: ClientesMenuComponent
+    },
+    {
+        path: "lista",
+        component: ListaPedidosComponent
     },
 ];
