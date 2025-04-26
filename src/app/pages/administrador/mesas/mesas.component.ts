@@ -15,6 +15,27 @@ export class MesasComponent {
   constructor(private http: HttpClient) {}
   mesas: { id: number; qrData: string }[] = [];
 
+  ngOnInit() {
+    this.obtenerMesas();
+  }
+
+  obtenerMesas() {
+    this.http.get<any[]>('http://localhost:3000/api/mesas')
+      .subscribe({
+        next: (data) => {
+          this.mesas = data.map(mesa => ({
+            id: mesa.no_mesa, // Ajusta según cómo tu backend regrese los datos
+            qrData: mesa.qr_code_url
+          }));
+          console.log('✅ Mesas cargadas:', this.mesas);
+        },
+        error: (error) => {
+          console.error('❌ Error al obtener mesas:', error);
+          Swal.fire('Error', 'No se pudieron cargar las mesas.', 'error');
+        }
+      });
+  }
+
   agregarQR() {
     const nuevoId = this.mesas.length > 0 ? Math.max(...this.mesas.map(m => m.id)) + 1 : 1;
   
