@@ -4,36 +4,32 @@
   <nav class="navbar navbar-expand-lg navbar-light bg-light">
     <div class="container-fluid d-flex justify-content-between">
       <!-- Logo (20% width) -->
-      <div class="navbar-logo" style="width: 20%">
+      <div class="navbar-icons-head">
         <a class="navbar-brand" href="#">
           <span class="logo">
             <span class="logo-digit">DIGIT</span>
             <span class="logo-menu">MENU</span>
           </span>
         </a>
-      </div>
-      
-      <!-- Spacer (60% width) -->
-      <div style="width: 60%"></div>
-      
-      <!-- Navbar icons (20% width) -->
-      <div class="navbar-icons d-flex justify-content-end" style="width: 20%">
-        <!-- Main hamburger menu (always visible) -->
-        <button class="btn navbar-icon" (click)="toggleNavigation()">
-          <i class="bi bi-list" style="color: #333; font-size: 24px;"></i>
-        </button>
         
-        <!-- Order list icon -->
-        <button class="btn navbar-icon" (click)="toggleSidebar()">
-          <i class="bi bi-list-ul" style="color: #ff8800; font-size: 24px;"></i>
-        </button>
+          <!-- Order list icon -->
+          <button class="btn navbar-icon" (click)="toggleSidebar()">
+            <span class="material-symbols-outlined" style="color: #ff8800; font-size: 24px;">chef_hat</span>
+          </button>
+          
+          <!-- Notifications icon -->
+          <button class="btn navbar-icon notification-btn" (click)="toggleNotifications()">
+            <i class="bi bi-bell" style="color: #3498db; font-size: 24px;"></i>
+            <span *ngIf="unreadNotifications > 0" class="notification-badge">{{unreadNotifications}}</span>
+          </button>
+          
+          <!-- Main hamburger menu (always visible) -->
+          <button class="btn navbar-icon" (click)="toggleNavigation()">
+            <span class="material-symbols-outlined">menu</span>
+          </button>
         
-        <!-- Notifications icon -->
-        <button class="btn navbar-icon notification-btn" (click)="toggleNotifications()">
-          <i class="bi bi-bell" style="color: #3498db; font-size: 24px;"></i>
-          <span *ngIf="unreadNotifications > 0" class="notification-badge">{{unreadNotifications}}</span>
-        </button>
       </div>
+
     </div>
   </nav>
 
@@ -131,11 +127,8 @@
     <!-- Main content -->
     <div class="main-content" [class.shifted]="sidebarOpen || notificationsOpen || navOpen">
       <div class="tables-container">
-        <!-- Tables visualization would go here -->
-        <div class="text-center my-5">
-          <h3>Visualización de mesas</h3>
-          <p>El componente de visualización de mesas iría aquí</p>
-        </div>
+        <!-- Add ng-content here to project content from parent component -->
+        <ng-content></ng-content>
       </div>
     </div>
   </div>
