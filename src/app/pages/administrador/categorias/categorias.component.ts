@@ -41,6 +41,13 @@ export class CategoriasComponent {
   // Categorías
   async verCategoria(id_cat: number) {
     try {
+      Swal.fire({
+        title: 'Cargando...',
+        html: 'Por favor, espere mientras se procesa la información.',
+        allowOutsideClick: false, // Evita que se pueda cerrar
+        allowEscapeKey: false, // Evita que se cierre con la tecla Escape
+        allowEnterKey: false, // Evita que se cierre con Enter
+      });
       const categoria = this.categorias.find((cat) => cat.id_cat === id_cat);
       this.imgCatUrl = environment.ApiUp + categoria?.ruta_img;
       if (!categoria) {
@@ -52,24 +59,15 @@ export class CategoriasComponent {
         });
         return;
       }
+      Swal.close();
       Swal.fire({
         title: 'Ver categoría',
+        imageUrl: environment.ApiUp + categoria.ruta_img,
         html: `
           <div class="input-group mt-2 mb-3 center-content me-3">
             <span class="input-group-text border-secondary">Nombre de la categoría</span>
             <input type="text" class="form-control border-secondary" value="${categoria?.nombre_cat}" id="nombre_cat" disabled>
           </div>
-          <img
-              [src]="${this.imgCatUrl}"
-              alt="Perfil"
-              class="img-fluid rounded-circle"
-              style="
-                width: 40px;
-                height: 40px;
-                object-fit: cover;
-                margin-right: 8px;
-              "
-            />
         `,
         confirmButtonText: `Continuar`,
         customClass: {
@@ -96,7 +94,11 @@ export class CategoriasComponent {
         return;
       }
 
-      if (this.subcategorias.find((cat) => cat.categoria_id.id_cat === categoria.id_cat)) {
+      if (
+        this.subcategorias.find(
+          (cat) => cat.categoria_id.id_cat === categoria.id_cat
+        )
+      ) {
         Swal.fire({
           icon: 'error',
           title: 'Error',
@@ -201,7 +203,7 @@ export class CategoriasComponent {
             ruta_img: ruta_img ? ruta_img.name : '',
           };
           this.formData = body;
-          console.log(this.formData)
+          console.log(this.formData);
           return body;
         },
       }).then(async (result) => {
@@ -379,7 +381,10 @@ export class CategoriasComponent {
                       this.formData.ruta_img =
                         '/categorias/' + String(res.ruta_img);
                       console.log(this.formData);
-                      return this.catServices.upCategoria(id_cat, this.formData);
+                      return this.catServices.upCategoria(
+                        id_cat,
+                        this.formData
+                      );
                     })
                   )
                   .subscribe({
@@ -448,9 +453,17 @@ export class CategoriasComponent {
         });
         return;
       }
-
+      Swal.fire({
+        title: 'Cargando...',
+        html: 'Por favor, espere mientras se procesa la información.',
+        allowOutsideClick: false, // Evita que se pueda cerrar
+        allowEscapeKey: false, // Evita que se cierre con la tecla Escape
+        allowEnterKey: false, // Evita que se cierre con Enter
+      });
+      Swal.close();
       Swal.fire({
         title: 'Ver subcategoría',
+        imageUrl: environment.ApiUp + subcategoria.ruta_img,
         html: `
           <div class="input-group mt-2 mb-3 center-content me-3">
             <span class="input-group-text border-secondary">Nombre de la subcategoría</span>
@@ -493,7 +506,9 @@ export class CategoriasComponent {
         html: `
         <div class="input-group mt-2 mb-3 center-content me-3">
           <span class="input-group-text border-secondary">Nombre de la subcategoría</span>
-          <input type="text" class="form-control border-secondary" value="${subcategoria?.nombre_subcat}" id="nombre_subcat">
+          <input type="text" class="form-control border-secondary" value="${
+            subcategoria?.nombre_subcat
+          }" id="nombre_subcat">
         </div>
         <div class="input-group mt-2 mb-3 center-content me-3">
             <span class="input-group-text border-secondary">Selecciona una categoría</span>
@@ -508,7 +523,9 @@ export class CategoriasComponent {
             </select>
           </div>
         <div class="input-group mt-2 mb-3 center-content me-3">
-            <input type="file" class="form-control border-secondary" value="${subcategoria?.ruta_img}"id="ruta_img">
+            <input type="file" class="form-control border-secondary" value="${
+              subcategoria?.ruta_img
+            }"id="ruta_img">
         </div>
         `,
         focusConfirm: false,
@@ -524,7 +541,8 @@ export class CategoriasComponent {
             document.getElementById('nombre_subcat') as HTMLInputElement
           ).value.trim();
           const categoria_id = parseInt(
-            (document.getElementById('categoria_select') as HTMLInputElement).value
+            (document.getElementById('categoria_select') as HTMLInputElement)
+              .value
           );
           const fileInput = document.getElementById(
             'ruta_img'
@@ -535,7 +553,7 @@ export class CategoriasComponent {
           this.selectedFile =
             fileInput?.files && fileInput.files[0] ? fileInput.files[0] : null;
 
-          if (!nombre_subcat|| !categoria_id || !fileInput) {
+          if (!nombre_subcat || !categoria_id || !fileInput) {
             Swal.showValidationMessage(
               'Por favor, complete todos los campos obligatorios.'
             );
@@ -750,7 +768,7 @@ export class CategoriasComponent {
             ruta_img: ruta_img ? ruta_img.name : '',
           };
           this.formData = body;
-          console.log(this.formData)
+          console.log(this.formData);
           return body;
         },
       }).then(async (result) => {

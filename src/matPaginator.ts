@@ -3,19 +3,21 @@ import { MatPaginatorIntl } from '@angular/material/paginator';
 
 @Injectable()
 export class CustomPaginatorIntl extends MatPaginatorIntl {
+  constructor() {
+    super();
+    // Sobrescribes los labels
+    this.itemsPerPageLabel = 'Ítems por página';
+    this.nextPageLabel     = '';      // deja vacío
+    this.previousPageLabel = '';      // deja vacío
+    this.firstPageLabel    = '';      // opcional, para ocultar “First page”
+    this.lastPageLabel     = '';      // opcional, para ocultar “Last page”
 
-  override itemsPerPageLabel = 'Ítems por página';
-  override nextPageLabel = '';
-  override previousPageLabel = '';
+    // Le indicas a Angular Material que re-renderice el paginador
+    this.changes.next();  // sin esto, los cambios no se reflejan :contentReference[oaicite:0]{index=0}
+  }
 
-  // Para el texto del rango, si deseas ocultarlo por completo, puedes retornar una cadena vacía:
   override getRangeLabel = (page: number, pageSize: number, length: number) => {
-    if (length === 0 || pageSize === 0) {
-      return '';
-    }
-    // Para ocultar completamente el texto, simplemente retorna ''.
+    // Oculta por completo el texto de rango
     return '';
   };
-
-
 }

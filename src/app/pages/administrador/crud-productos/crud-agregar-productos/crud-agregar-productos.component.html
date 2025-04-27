@@ -2,14 +2,25 @@
   <!-- Formulario para agregar productos -->
   <div class="card p-4">
     <h3 class="text-center">Agregar Producto</h3>
-    <form (submit)="mostrarAlerta($event)">
+    <form [formGroup]="form" *ngIf="form" (ngSubmit)="onSubmit()">
       <!-- Información del producto -->
       <div class="mb-3">
         <label class="form-label">Nombre del Producto</label>
         <input
           class="form-control"
+          formControlName="nombre_prod"
           placeholder="Ingrese el nombre del producto"
+          required
+          [class.is-invalid]="
+            form.get('nombre_prod')?.invalid && form.get('nombre_prod')?.touched
+          "
         />
+        <div
+          class="invalid-feedback"
+          *ngIf="form.get('nombre_prod')?.hasError('required')"
+        >
+          El nombre es obligatorio.
+        </div>
       </div>
 
       <!-- Descripción del producto -->
@@ -17,8 +28,19 @@
         <label class="form-label">Descripción</label>
         <textarea
           class="form-control"
+          formControlName="descripcion"
           placeholder="Ingrese la descripción del producto"
+          required
+          [class.is-invalid]="
+            form.get('descripcion')?.invalid && form.get('descripcion')?.touched
+          "
         ></textarea>
+        <div
+          class="invalid-feedback"
+          *ngIf="form.get('descripcion')?.hasError('required')"
+        >
+          La descripción es obligatoria.
+        </div>
       </div>
 
       <!-- Imagen del producto -->
@@ -27,19 +49,41 @@
         <input
           type="file"
           class="form-control"
-          (change)="onFileSelected($event)"
+          required
+          [class.is-invalid]="
+            form.get('img_prod')?.invalid && form.get('img_prod')?.touched
+          "
         />
+        <div
+          class="invalid-feedback"
+          *ngIf="form.get('img_prod')?.hasError('required')"
+        >
+          La imagen es obligatoria.
+        </div>
       </div>
 
       <!-- Subcategorías -->
       <div class="mb-3">
         <label class="form-label">Subcategoría</label>
-        <select class="form-select">
-          <option selected>Seleccione una subcategoría</option>
-          <option value="1">Comida Salada</option>
-          <option value="2">Pizzas</option>
-          <option value="3">Bebidas</option>
+        <select formControlName="sub_cat_id" class="form-select">
+          <option [ngValue]="null" disabled>Seleccione una subcategoría</option>
+          <option
+            *ngFor="let sub_cat of sub_categorias"
+            [value]="sub_cat.id_subcat"
+            required
+            [class.is-invalid]="
+              form.get('sub_cat_id')?.invalid && form.get('sub_cat_id')?.touched
+            "
+          >
+            {{ sub_cat.nombre_subcat }}
+          </option>
         </select>
+        <div
+          class="invalid-feedback"
+          *ngIf="form.get('sub_cat_id')?.hasError('required')"
+        >
+          Debe elegir una subcategoría.
+        </div>
       </div>
 
       <!-- Sección de ingredientes, opciones y extras -->
@@ -47,13 +91,14 @@
         <div class="col-md-4">
           <div class="card p-3">
             <h5>Extras</h5>
-            <div class="form-check">
-              <ul *ngFor="let extra of extrasFiltrados">
+            <div class="form-check" formArrayName="extras">
+              <ul *ngFor="let extra of extrasFiltrados; let i = index">
                 <input
                   type="checkbox"
                   class="form-check-input"
-                  [value]="extra.id_extra"
+                  [value]="extra"
                   id="extra_{{ extra.id_extra }}"
+                  [formControlName]="i"
                 />
                 <label
                   for="extra_{{ extra.id_extra }}"
@@ -84,20 +129,23 @@
         <div class="col-md-4">
           <div class="card p-3">
             <h5>Opciones</h5>
-            <ul *ngFor="let opcion of opcionesFiltradas">
-              <input
-                class="form-check-input"
-                type="checkbox"
-                [value]="opcion.id_opcion"
-                id="opcion_{{ opcion.id_opcion }}"
-              />
-              <label
-                class="form-check-label"
-                for="opcion_{{ opcion.id_opcion }}"
-              >
-                {{ opcion.nombre_opcion }}</label
-              >
-            </ul>
+            <div class="form-check" formArrayName="opciones">
+              <ul *ngFor="let opcion of opcionesFiltradas; let i = index">
+                <input
+                  class="form-check-input"
+                  type="checkbox"
+                  [value]="opcion"
+                  id="opcion_{{ opcion.id_opcion }}"
+                  [formControlName]="i"
+                />
+                <label
+                  class="form-check-label"
+                  for="opcion_{{ opcion.id_opcion }}"
+                >
+                  {{ opcion.nombre_opcion }}</label
+                >
+              </ul>
+            </div>
           </div>
           <div class="pagination-container row">
             <div class="col-12 d-flex justify-content-center">
@@ -119,13 +167,14 @@
         <div class="col-md-4">
           <div class="card p-3">
             <h5>Ingredientes</h5>
-            <div class="form-check">
-              <ul *ngFor="let ingr of ingredientesFiltrados">
+            <div class="form-check" formArrayName="ingredientes">
+              <ul *ngFor="let ingr of ingredientesFiltrados; let i = index">
                 <input
                   class="form-check-input"
                   type="checkbox"
-                  [value]="ingr.id_ingr"
+                  [value]="ingr"
                   id="ingr_{{ ingr.id_ingr }}"
+                  [formControlName]="i"
                 />
                 <label class="form-check-label" for="ingr_{{ ingr.id_ingr }}">{{
                   ingr.nombre_ingrediente
@@ -160,12 +209,15 @@
           placeholder="Ingrese el precio del producto"
           min="0"
           step="0.01"
+          formControlName="precio"
         />
       </div>
 
       <!-- Botón para agregar producto -->
       <div class="text-end mt-3">
-        <button type="submit" class="btn btn-primary">Agregar producto</button>
+        <button type="submit" class="btn btn-primary" [disabled]="form.invalid">
+          Agregar producto
+        </button>
       </div>
     </form>
   </div>

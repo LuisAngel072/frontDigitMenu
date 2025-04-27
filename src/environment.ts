@@ -67,4 +67,17 @@ export const environment = {
     ApiCrearOpcion: "opciones/registrar", //POST
     ApiActualizarOpcion: "opciones/actualizar/", //PATCH
     ApiEliminarOpcion: "opciones/eliminar/", //DELETE
+
+    /**
+     * Productos
+     */
+    ApiObtenerProductos: "productos", //GET
+    ApiObtenerProducto: "productos/", // GET /:id_producto
+    ApiObtenerExtrasDeProducto: "productos/extras/", //GET /:id_producto
+    ApiObtenerOpcionesDeProducto: "productos/opciones/", //GET /:id_producto
+    ApiObtenerIngredientesDeProducto: "productos/ingredientes/", //GET /:id_producto
+    ApiRegistrarProducto: "productos/registrar", //POST
+    ApiActualizarProducto: "productos/actualizar/", //PATCH /:id_producto
+    ApiEliminarProducto: "productos/eliminar/", //DELETE /:id_producto
+    ApiSubirImgProducto: "productos/subir-img_prod", //POST
 }

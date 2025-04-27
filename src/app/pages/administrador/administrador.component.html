@@ -65,6 +65,7 @@
   <div *ngIf="selectedSection === 'seccion2'">
     <app-crud-productos
       (cambiarComponente)="cambiarComponente($event)"
+      [productos]="productos"
     ></app-crud-productos>
   </div>
   <div *ngIf="selectedSection === 'seccion3'">
