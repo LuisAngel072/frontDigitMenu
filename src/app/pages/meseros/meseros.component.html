@@ -22,7 +22,12 @@
               <div class="card-body">
                 <h5 class="card-title">Mesa {{ mesa.no_mesa }}</h5>
                 <div class="qr-code" *ngIf="mesa.qr_code_url">
-                  <img [src]="mesa.qr_code_url" alt="QR Code Mesa {{ mesa.no_mesa }}" class="img-fluid mb-3">
+                  <qrcode 
+                    [qrdata]="mesa.qr_code_url" 
+                    [width]="150" 
+                    [errorCorrectionLevel]="'M'"
+                    class="img-fluid mb-3">
+                  </qrcode>
                 </div>
                 <div class="card-text mb-3">
                   <span class="badge rounded-pill" [ngClass]="{'bg-success': tieneOrdenesActivas(mesa), 'bg-secondary': !tieneOrdenesActivas(mesa)}">

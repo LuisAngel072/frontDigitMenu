@@ -6,13 +6,12 @@ import Swal from 'sweetalert2'; // Importar SweetAlert2
 import { MesasService, Mesa } from '../../services/mesas.service'; // Importar tu service
 import { QRCodeModule } from 'angularx-qrcode';
 
-
 @Component({
   selector: 'app-meseros',
   templateUrl: './meseros.component.html',
   styleUrls: ['./meseros.component.scss'],
   standalone: true,
-  imports: [CommonModule, ListaPedidosComponent]
+  imports: [CommonModule, ListaPedidosComponent, QRCodeModule]
 })
 export class MeserosComponent implements OnInit {
   @ViewChild(ListaPedidosComponent) listaPedidos!: ListaPedidosComponent;
