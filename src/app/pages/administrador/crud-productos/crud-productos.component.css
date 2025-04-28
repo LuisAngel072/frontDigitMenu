@@ -10,7 +10,7 @@
 .form-select {
     width: 180px;
     border: 1px solid #dee2e6;
-}       
+}
 
 .boton-agregar {
     background-color: var(--color-botonP);
@@ -37,7 +37,7 @@ justify-content: space-evenly;
 }
 /* hover */
 .icon-trash:hover {
-    color: var(color-eliminarH);
+    color: var(--color-eliminarH);
 }
 .icon-eye:hover {
     color: var(--color-secundarioH);
@@ -55,10 +55,7 @@ justify-content: space-evenly;
 .icon-edit:active {
     color: var(--color-terciarioA);
 }
-th {
-    background-color: var(--color-terciarioA);
-    color: white;
-}
+
 .table-striped {
     table-layout: fixed;
 }

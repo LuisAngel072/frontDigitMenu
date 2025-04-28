@@ -12,7 +12,6 @@ import { JwtHelperService } from '@auth0/angular-jwt';
   imports: [FormsModule],
   templateUrl: './login.component.html',
   styleUrl: './login.component.css',
-  
 })
 export class LoginComponent {
   codigo: string = '';
@@ -21,16 +20,24 @@ export class LoginComponent {
 
   constructor(
     private readonly authService: AuthService,
-    private readonly router: Router,
-  ){}
+    private readonly router: Router
+  ) {}
 
   async onSubmit() {
-    
     const data = {
       codigo: this.codigo,
       contrasena: this.contrasena,
     };
-
+    Swal.fire({
+      title: 'Cargando...',
+      html: 'Por favor, espere mientras se procesa la información.',
+      allowOutsideClick: false, // Evita que se pueda cerrar
+      allowEscapeKey: false, // Evita que se cierre con la tecla Escape
+      allowEnterKey: false, // Evita que se cierre con Enter
+      didOpen: () => {
+        Swal.showLoading(); // Muestra el spinner de carga
+      },
+    });
     this.authService
       .autenticar(data)
       .then((isSuccessful: boolean) => {
@@ -39,7 +46,7 @@ export class LoginComponent {
             title: 'Uy algo salió mal...',
             text: 'Credenciales inválidas o usuario desactivado',
             icon: 'warning',
-            customClass: { confirmButton: 'btn btn-terc',}
+            customClass: { confirmButton: 'btn btn-terc' },
           });
         } else {
           Swal.fire({
@@ -50,7 +57,7 @@ export class LoginComponent {
             timer: 1500,
           });
           this.authService.getInfo();
-          this.router.navigateByUrl('/'+this.authService.getRol());
+          this.router.navigateByUrl('/' + this.authService.getRol());
         }
       })
       .catch((error) => {
@@ -59,4 +66,3 @@ export class LoginComponent {
       });
   }
 }
-

@@ -22,6 +22,17 @@
 
 }
 
+input.ng-touched.ng-invalid,
+textarea.ng-touched.ng-invalid,
+select.ng-touched.ng-invalid {
+  border-color: #dc3545;
+}
+
+th  {
+  background-color: var(--color-terciarioA) !important;
+  color: white !important;
+}
+
 input,
 td,
 option,
@@ -63,7 +74,10 @@ option.form-select:hover {
     padding-top: 20vh;
     margin: 0 8vw 0 8vw;
 }
-
+.invalid-feedback {
+  color: #dc3545;
+  display: block;
+}
 .icon:hover {
     transform: scale(1.05);
 }
