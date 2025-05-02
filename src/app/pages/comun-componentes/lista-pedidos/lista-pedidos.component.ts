@@ -1,6 +1,6 @@
 // lista-pedidos.component.ts
 import { Component, OnInit } from '@angular/core';
-import { OrderService } from './order.service';
+import { PedidosService } from '../../../services/pedidos.service';
 import Swal from 'sweetalert2';
 import { CommonModule } from '@angular/common';
 
@@ -47,7 +47,7 @@ export class ListaPedidosComponent implements OnInit {
   unreadNotifications = 0;
   navItems: NavItem[] = [];
 
-  constructor(private orderService: OrderService) {}
+  constructor(private pedidosService: PedidosService) {}
 
   ngOnInit(): void {
     // Load all required data

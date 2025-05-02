@@ -1,102 +1,46 @@
 <div class="container">
-    <input type="text" class="search-bar" placeholder="Buscar platillo...">
-    <div class="accordion" id="menuAccordion">
-        
-        <!-- Comidas -->
-        <div class="accordion-item">
-            <h2 class="accordion-header" id="headingComidas">
-                <button class="accordion-button custom-button" type="button" data-bs-toggle="collapse" 
-                    data-bs-target="#collapseComidas" aria-expanded="true" aria-controls="collapseComidas">
-                    Comidas
-                </button>
-            </h2>
-            <div id="collapseComidas" class="accordion-collapse collapse show" aria-labelledby="headingComidas" data-bs-parent="#menuAccordion">
-                <div class="accordion-body">
-                    <div class="list-group">
-                        <button class="list-group-item list-group-item-action" data-bs-toggle="collapse" data-bs-target="#burritos">Burritos</button>
-                        <div class="collapse" id="burritos">
-                            <button class="list-group-item list-group-item-action">Burrito Clásico</button>
-                            <button class="list-group-item list-group-item-action">Burrito Especial</button>
-                        </div>
-                        <button class="list-group-item list-group-item-action" data-bs-toggle="collapse" data-bs-target="#pizzas">Pizzas</button>
-                        <div class="collapse" id="pizzas">
-                            <button class="list-group-item list-group-item-action">Pizza Hawaiana</button>
-                            <button class="list-group-item list-group-item-action">Pizza Mexicana</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+  <input type="text" class="search-bar" placeholder="Buscar platillo...">
+  <div class="accordion" id="menuAccordion">
+    <div *ngFor="let cat of categorias; let i = index" class="accordion-item">
+      <h2 class="accordion-header" [id]="'heading' + i">
+        <button class="accordion-button custom-button" type="button" data-bs-toggle="collapse"
+          [attr.data-bs-target]="'#collapse' + i" aria-expanded="false"
+          [attr.aria-controls]="'collapse' + i">
+          {{ cat.nombre_cat }}
+        </button>
+      </h2>
+      <div [id]="'collapse' + i" class="accordion-collapse collapse"
+        [attr.aria-labelledby]="'heading' + i" data-bs-parent="#menuAccordion">
+        <div class="accordion-body">
+          <div class="list-group">
+            <div *ngFor="let sub of cat.subcategorias">
+              <button class="list-group-item list-group-item-action" data-bs-toggle="collapse"
+                [attr.data-bs-target]="'#subcat-' + sub.id_subcat">
+                {{ sub.nombre_subcat }}
+              </button>
 
-        <!-- Bebidas -->
-        <div class="accordion-item">
-            <h2 class="accordion-header" id="headingBebidas">
-                <button class="accordion-button custom-button" type="button" data-bs-toggle="collapse" 
-                    data-bs-target="#collapseBebidas" aria-expanded="true" aria-controls="collapseBebidas">
-                    Bebidas
-                </button>
-            </h2>
-            <div id="collapseBebidas" class="accordion-collapse collapse" aria-labelledby="headingBebidas" data-bs-parent="#menuAccordion">
-                <div class="accordion-body">
-                    <div class="list-group">
-                        <button class="list-group-item list-group-item-action">Jugo Natural</button>
-                        <button class="list-group-item list-group-item-action">Café</button>
-                    </div>
+              <div class="collapse" [id]="'subcat-' + sub.id_subcat">
+                <div *ngIf="sub.productos?.length > 0">
+                  <button
+                    *ngFor="let prod of sub.productos"
+                    class="list-group-item list-group-item-action"
+                    (click)="showProduct(prod.nombre_prod)">
+                    {{ prod.nombre_prod }} - ${{ prod.precio }}
+                  </button>
                 </div>
-            </div>
-        </div>
-
-        <!-- Especiales -->
-        <div class="accordion-item">
-            <h2 class="accordion-header" id="headingEspeciales">
-                <button class="accordion-button custom-button" type="button" data-bs-toggle="collapse" 
-                    data-bs-target="#collapseEspeciales" aria-expanded="true" aria-controls="collapseEspeciales">
-                    Especiales
-                </button>
-            </h2>
-            <div id="collapseEspeciales" class="accordion-collapse collapse" aria-labelledby="headingEspeciales" data-bs-parent="#menuAccordion">
-                <div class="accordion-body">
-                    <div class="list-group">    
-                        <button class="list-group-item list-group-item-action" data-bs-toggle="collapse" data-bs-target="#especiales-pez">Peces</button>
-                        <div class="collapse" id="especiales-pez">
-                            <button class="list-group-item list-group-item-action">pez madrazo</button>
-                            <button class="list-group-item list-group-item-action">pez al ajo</button>
-                        </div>
-                        <button class="list-group-item list-group-item-action" data-bs-toggle="collapse" data-bs-target="#especiales-papa">Papas</button>
-                        <div class="collapse" id="especiales-papa">
-                            <button class="list-group-item list-group-item-action">Papa arrachera</button>
-                            <button class="list-group-item list-group-item-action">Papa con camaron</button>
-                        </div>
-                    </div>
+                <div *ngIf="!sub.productos || sub.productos.length === 0">
+                  <p class="text-muted ms-3">Sin productos</p>
                 </div>
+              </div>
             </div>
-        </div>
 
-        <!-- Postres -->
-        <div class="accordion-item">
-            <h2 class="accordion-header" id="headingPostres">
-                <button class="accordion-button custom-button" type="button" data-bs-toggle="collapse" 
-                    data-bs-target="#collapsePostres" aria-expanded="true" aria-controls="collapsePostres">
-                    Postres
-                </button>
-            </h2>
-            <div id="collapsePostres" class="accordion-collapse collapse" aria-labelledby="headingPostres" data-bs-parent="#menuAccordion">
-                <div class="accordion-body">
-                    <div class="list-group">    
-                        <button class="list-group-item list-group-item-action" data-bs-toggle="collapse" data-bs-target="#postres-pastel">Pastel</button>
-                        <div class="collapse" id="postres-pastel">
-                            <button class="list-group-item list-group-item-action">Pastel chocolate</button>
-                            <button class="list-group-item list-group-item-action">Pastel Especial</button>
-                        </div>
-                        <button class="list-group-item list-group-item-action" data-bs-toggle="collapse" data-bs-target="#postres-pay">Pay</button>
-                        <div class="collapse" id="postres-pay">
-                            <button class="list-group-item list-group-item-action">Pay queso</button>
-                            <button class="list-group-item list-group-item-action">Pay limon</button>
-                        </div>
-                    </div>
-                </div>
+            <div *ngIf="cat.subcategorias.length === 0">
+              <p class="text-muted">No hay subcategorías</p>
             </div>
-        </div>
 
+          </div>
+        </div>
+      </div>
     </div>
+  </div>
 </div>

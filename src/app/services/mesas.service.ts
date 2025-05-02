@@ -18,7 +18,7 @@ export class MesasService {
   constructor(private http: HttpClient) { }
 
   async obtenerMesas(): Promise<Mesa[]> {
-    console.log(`${environment.ApiIP}/mesas`);
+    console.log(`${environment.ApiIP}mesas`);
     
     try {
       // Usando firstValueFrom para convertir el Observable a Promise
