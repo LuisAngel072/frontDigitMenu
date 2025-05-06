@@ -1,59 +1,83 @@
-<div class="main-container">    
-    <main>
-        <h1 class="mb-4">Productos</h1>
-        <div class="row mb-3">
-        <div class="col-auto">
-            <button class="btn btn-prim" (click)="agregarProductosBoton()">Agregar productos</button>
-            </div>
-            <div class="col">
-                <input type="search" class="form-control" placeholder="Buscar productos">
-            </div>
-            <div class="col-auto">
-                <select class="form-select btn">
-                    <option selected>Filtrar por categoria</option>
-                    <option>Cortes finos</option>
-                    <option>Especialidad</option>
-                    <option>Comida de mar</option>
-                </select>
-            </div>
-        </div>
+<div class="main-container">
+  <main>
+    <h1 class="mb-4">Productos</h1>
+    <div class="row mb-3">
+      <div class="col-auto">
+        <button class="btn btn-prim" (click)="agregarProductosBoton()">
+          Agregar productos
+        </button>
+      </div>
+      <div class="col">
+        <input
+          type="search"
+          class="form-control"
+          placeholder="Buscar productos"
+        />
+      </div>
+      <div class="col-auto">
+        <select class="form-select btn">
+          <option selected>Filtrar por categoria</option>
+          <option>Cortes finos</option>
+          <option>Especialidad</option>
+          <option>Comida de mar</option>
+        </select>
+      </div>
+    </div>
 
-        <table class="table table-striped">
-            <thead>
-              <tr>
-                <th>Nombre</th>
-                <th>Categoria</th>
-                <th>Precio</th>
-                <th>Descripcion</th>
-                <th>Acciones</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr *ngFor="let product of products">
-                <!-- <td>{{ product.id }}</td> -->
-                <td>{{ product.nombre }}</td>
-                <td>{{ product.categoria }}</td>
-                <td>{{ product.precio }}</td>
-                <td>{{ product.descripcion }}</td>
-                <td class="icons-space">
-                    <button class="btn">
-                        <span class="material-symbols-outlined icon-eye">
-                            visibility
-                        </span>
-                    </button>
-                    <button class="btn">
-                        <span class="material-symbols-outlined icon-edit">
-                            edit_square
-                        </span>
-                    </button>
-                    <button class="btn">
-                        <span class="material-symbols-outlined icon-trash">
-                            delete
-                        </span>
-                    </button>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-    </main>
+    <table class="table table-striped">
+      <thead>
+        <tr>
+          <th>Nombre</th>
+          <th>Categoría</th>
+          <th>Sub categoría</th>
+          <th>Precio</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let producto of productosFiltrados">
+          <!-- <td>{{ product.id }}</td> -->
+          <td>{{ producto.nombre_prod }}</td>
+          <td>{{ producto.sub_cat_id.categoria_id.nombre_cat }}</td>
+          <td>{{ producto.sub_cat_id.nombre_subcat }}</td>
+          <td>{{ producto.precio }}</td>
+          <td class="icons-space">
+            <button class="btn">
+              <span
+                class="material-symbols-outlined icon-eye"
+                (click)="verProducto(producto.id_prod)"
+              >
+                visibility
+              </span>
+            </button>
+            <button class="btn">
+              <span class="material-symbols-outlined icon-edit">
+                edit_square
+              </span>
+            </button>
+            <button class="btn">
+              <span class="material-symbols-outlined icon-trash"> delete </span>
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="pagination-container row">
+      <div class="col-12 d-flex justify-content-center">
+        <mat-paginator
+          *ngIf="this.productos.length > 7"
+          [length]="this.productos.length"
+          [pageSize]="this.pageSize"
+          [hidePageSize]="true"
+          [pageSizeOptions]="[5, 7, 10]"
+          (page)="onPageChange($event)"
+        >
+        </mat-paginator>
+      </div>
+    </div>
+    <h3 class="text-center" *ngIf="this.productos.length === 0">
+      ¡Vaya! No existen productos registrados.
+    </h3>
+  </main>
 </div>

@@ -59,7 +59,6 @@ export class CrudEmpleadosComponent {
   async ngOnInit() {
     this.usuarios = this.adminComponente.usuarios;
     this.roles = this.adminComponente.roles;
-    console.log(this.usuarios);
     this.updateUsuariosFiltrados();
   }
 
@@ -83,7 +82,7 @@ export class CrudEmpleadosComponent {
 
   filtrarUsuarios(event: any) {
     const valor = event.target.lowerCase();
-    this.usuarios = this.adminComponente.usuarios.filter((usuario) => {
+    this.usuariosFiltrados = this.adminComponente.usuarios.filter((usuario) => {
       const codigo = usuario.usuario_id.codigo.toLowerCase() || '';
       const nombres = usuario.usuario_id.nombres.toLowerCase() || '';
       const primer_apellido =
@@ -221,51 +220,51 @@ export class CrudEmpleadosComponent {
                   </select>
                 </div>
               </div>
-  
+
               <div class="input-group mt-2 mb-3 center-content me-3">
                 <input type="file" id="img_ruta" class="form-control border-secondary"/>
               </div>
-  
+
               <div class="input-group mt-2 mb-3 center-content me-3">
                 <span class="input-group-text border-secondary">RFC</span>
                 <input id="nuevo_rfc" class="form-control border-secondary" maxlength="13"/>
               </div>
-  
+
               <div class="input-group mt-2 mb-3 center-content me-3">
                 <span class="input-group-text border-secondary">NSS</span>
                 <input id="nuevo_nss" class="form-control border-secondary" maxlength="11"/>
               </div>
-  
+
               <div class="input-group mt-2 mb-3 center-content me-3">
                 <span class="input-group-text border-secondary">Calle</span>
                 <input id="nuevo_calle" class="form-control border-secondary" />
               </div>
-  
+
               <div class="input-group mt-2 mb-3 center-content me-3">
                   <span class="input-group-text border-secondary">Colonia</span>
                   <input id="nuevo_colonia" class="form-control border-secondary"/>
               </div>
-  
+
               <div class="input-group mt-2 mb-3 center-content me-3">
                 <span class="input-group-text border-secondary">Postal</span>
                 <input id="nuevo_postal" class="form-control border-secondary" maxlength="5"/>
               </div>
-  
+
               <div class="input-group mt-2 mb-3 center-content me-3">
                 <span class="input-group-text border-secondary">Numero exterior</span>
                 <input id="nuevo_num_ext" class="form-control border-secondary maxlength="5""/>
               </div>
-  
+
               <div class="input-group mt-2 mb-3 center-content me-3">
                 <span class="input-group-text border-secondary">Numero interior</span>
                 <input id="nuevo_num_int" class="form-control border-secondary maxlength="5""/>
               </div>
-  
+
               <div class="input-group mt-2 mb-3 center-content me-3">
                 <span class="input-group-text border-secondary">Municipio</span>
                 <input id="nuevo_municipio" class="form-control border-secondary" /
               </div>
-  
+
               <div class="input-group mt-2 mb-3 center-content me-3">
                 <span class="input-group-text border-secondary">Contraseña</span>
                 <input id="nuevo_contrasena" class="form-control border-secondary" type="password" />
@@ -273,7 +272,7 @@ export class CrudEmpleadosComponent {
             </div>
            </div>
           </form>
-  
+
         `,
         confirmButtonText: 'Agregar',
         customClass: {
@@ -484,14 +483,12 @@ export class CrudEmpleadosComponent {
                     this.formData.img_perfil.img_ruta =
                       'img-us/' + String(res.img_ruta);
                     // Una vez que la imagen se ha subido y la ruta se ha asignado, registramos al usuario
-                    console.log('HOLAAAAAAAAAAAAAAAAAAAA')
                     console.log(this.formData);
                     return this.usuariosService.registrarUsuario(this.formData);
                   })
                 )
                 .subscribe({
                   next: (response) => {
-                    console.log(this.formData);
                     Swal.close();
                     Swal.fire({
                       title: 'Empleado registrado correctamente',
@@ -590,21 +587,21 @@ export class CrudEmpleadosComponent {
               usF?.usuario_id.codigo
             }" id="codigo" disabled>
           </div>
-      
+
           <div class="input-group mt-2 mb-3 center-content me-3">
             <span class="input-group-text border-secondary">Nombre(s)</span>
             <input type="text" class="form-control border-secondary" value="${
               usF?.usuario_id.nombres
             }" id="nombres" disabled>
           </div>
-      
+
           <div class="input-group mt-2 mb-3 center-content me-3">
             <span class="input-group-text border-secondary">Primer apellido</span>
             <input type="text" class="form-control border-secondary" value="${
               usF?.usuario_id.primer_apellido
             }" id="primer_apellido" disabled>
           </div>
-      
+
           <div class="input-group mb-3">
             <span class="input-group-text border-secondary">Segundo apellido</span>
             <input type="text" class="form-control border-secondary" value="${
@@ -618,21 +615,21 @@ export class CrudEmpleadosComponent {
               usF?.usuario_id.activo
             }" id="activo" disabled>
           </div>
-      
+
           <div class="input-group mt-2 mb-3 center-content me-3">
             <span class="input-group-text border-secondary">Teléfono</span>
             <input type="tel" class="form-control border-secondary" value="${
               usF?.usuario_id.telefono_id.telefono
             }" id="telefono_id" disabled>
           </div>
-      
+
           <div class="input-group mt-2 mb-3 center-content me-3">
             <span class="input-group-text border-secondary">Email</span>
             <input type="email" class="form-control border-secondary" value="${
               usF?.usuario_id.email_id.email
             }" id="email_id" disabled>
           </div>
-      
+
           <!-- Select para Sexo -->
           <div class="input-group mb-3">
             <span class="input-group-text border-secondary">Sexo</span>
@@ -640,7 +637,7 @@ export class CrudEmpleadosComponent {
               usF?.usuario_id.sexo
             }" id="sexo" disabled>
           </div>
-      
+
           <!-- Select para Rol -->
           <div class="input-group mb-3">
             <span class="input-group-text border-secondary">Rol</span>
@@ -648,42 +645,42 @@ export class CrudEmpleadosComponent {
               usF?.rol_id.rol
             }" id="rol" disabled>
           </div>
-              
+
           <div class="input-group mt-2 mb-3 center-content me-3">
             <span class="input-group-text border-secondary">RFC</span>
             <input type="text" class="form-control border-secondary" value="${
               usF?.usuario_id.rfc.rfc
             }" id="rfc" disabled>
           </div>
-      
+
           <div class="input-group mt-2 mb-3 center-content me-3">
             <span class="input-group-text border-secondary">NSS</span>
             <input type="text" class="form-control border-secondary" value="${
               usF?.usuario_id.nss.nss
             }" id="nss" disabled>
           </div>
-      
+
           <div class="input-group mt-2 mb-3 center-content me-3">
             <span class="input-group-text border-secondary">Calle</span>
             <input type="text" class="form-control border-secondary" value="${
               usF?.usuario_id.domicilio.calle
             }" id="calle" disabled>
           </div>
-      
+
           <div class="input-group mt-2 mb-3 center-content me-3">
             <span class="input-group-text border-secondary">Colonia</span>
             <input type="text" class="form-control border-secondary" value="${
               usF?.usuario_id.domicilio.colonia
             }" id="colonia" disabled>
           </div>
-      
+
           <div class="input-group mt-2 mb-3 center-content me-3">
             <span class="input-group-text border-secondary">No. exterior</span>
             <input type="text" class="form-control border-secondary" value="${
               usF?.usuario_id.domicilio.no_ext
             }" id="no_ext" disabled>
           </div>
-      
+
           <div class="input-group mt-2 mb-3 center-content me-3">
             <span class="input-group-text border-secondary">No. interior</span>
             <input type="text" class="form-control border-secondary" value="${
@@ -692,14 +689,14 @@ export class CrudEmpleadosComponent {
                 : ''
             }" id="no_int" disabled>
           </div>
-      
+
           <div class="input-group mt-2 mb-3 center-content me-3">
             <span class="input-group-text border-secondary">Municipio</span>
             <input type="text" class="form-control border-secondary" value="${
               usF?.usuario_id.domicilio.municipio
             }" id="municipio" disabled>
           </div>
-      
+
         `,
         confirmButtonText: 'Continuar',
         customClass: {
@@ -736,42 +733,42 @@ export class CrudEmpleadosComponent {
               usF?.usuario_id.codigo
             }" id="codigo" required>
           </div>
-      
+
           <div class="input-group mt-2 mb-3 center-content me-3">
             <span class="input-group-text border-secondary">Nombre(s)</span>
             <input type="text" class="form-control border-secondary" value="${
               usF?.usuario_id.nombres
             }" id="nombres" required>
           </div>
-      
+
           <div class="input-group mt-2 mb-3 center-content me-3">
             <span class="input-group-text border-secondary">Primer apellido</span>
             <input type="text" class="form-control border-secondary" value="${
               usF?.usuario_id.primer_apellido
             }" id="primer_apellido" required>
           </div>
-      
+
           <div class="input-group mb-3">
             <span class="input-group-text border-secondary">Segundo apellido</span>
             <input type="text" class="form-control border-secondary" value="${
               usF?.usuario_id.segundo_apellido
             }" id="segundo_apellido" required>
           </div>
-      
+
           <div class="input-group mt-2 mb-3 center-content me-3">
             <span class="input-group-text border-secondary">Teléfono</span>
             <input type="tel" class="form-control border-secondary"  maxlength="12" value="${
               usF?.usuario_id.telefono_id.telefono
             }" id="telefono_id" required>
           </div>
-      
+
           <div class="input-group mt-2 mb-3 center-content me-3">
             <span class="input-group-text border-secondary">Email</span>
             <input type="email" class="form-control border-secondary" value="${
               usF?.usuario_id.email_id.email
             }" id="email_id" required>
           </div>
-      
+
           <!-- Select para Sexo -->
           <div class="row">
             <div class="col-md-12 mb-3">
@@ -788,7 +785,7 @@ export class CrudEmpleadosComponent {
               </select>
             </div>
           </div>
-      
+
           <!-- Select para Rol -->
           <div class="row">
             <div class="col-md-12 mb-3">
@@ -819,21 +816,21 @@ export class CrudEmpleadosComponent {
               usF?.usuario_id.rfc.rfc
             }" id="rfc">
           </div>
-      
+
           <div class="input-group mt-2 mb-3 center-content me-3">
             <span class="input-group-text border-secondary">NSS</span>
             <input type="text" class="form-control border-secondary"  maxlength="11" value="${
               usF?.usuario_id.nss.nss
             }" id="nss">
           </div>
-      
+
           <div class="input-group mt-2 mb-3 center-content me-3">
             <span class="input-group-text border-secondary">Calle</span>
             <input type="text" class="form-control border-secondary" value="${
               usF?.usuario_id.domicilio.calle
             }" id="calle" required>
           </div>
-      
+
           <div class="input-group mt-2 mb-3 center-content me-3">
             <span class="input-group-text border-secondary">Colonia</span>
             <input type="text" class="form-control border-secondary" value="${
@@ -847,14 +844,14 @@ export class CrudEmpleadosComponent {
               usF?.usuario_id.domicilio.codigo_postal
             }" id="codigo_postal" required>
           </div>
-      
+
           <div class="input-group mt-2 mb-3 center-content me-3">
             <span class="input-group-text border-secondary">No. exterior</span>
             <input type="text" class="form-control border-secondary" maxlength="5" value="${
               usF?.usuario_id.domicilio.no_ext
             }" id="no_ext" required>
           </div>
-      
+
           <div class="input-group mt-2 mb-3 center-content me-3">
             <span class="input-group-text border-secondary">No. interior</span>
             <input type="text" class="form-control border-secondary" maxlength="5" value="${
@@ -863,14 +860,14 @@ export class CrudEmpleadosComponent {
                 : ''
             }" id="no_int">
           </div>
-      
+
           <div class="input-group mt-2 mb-3 center-content me-3">
             <span class="input-group-text border-secondary">Municipio</span>
             <input type="text" class="form-control border-secondary" value="${
               usF?.usuario_id.domicilio.municipio
             }" id="municipio" required>
           </div>
-      
+
           <div class="input-group mt-2 mb-3 center-content me-3">
             <span class="input-group-text border-secondary">Contraseña</span>
             <input type="password" class="form-control border-secondary" id="contrasena">
@@ -1081,7 +1078,7 @@ export class CrudEmpleadosComponent {
                     this.sharedService.usercode$.subscribe((usercode) => {
                       if (this.formData.codigo === usercode) {
                         const newProfileImgUrl =
-                          environment.ApiIP + this.formData.img_perfil.img_ruta;
+                          environment.ApiUp + this.formData.img_perfil.img_ruta;
                         this.sharedService.setProfileImg(newProfileImgUrl);
                       }
                     });

@@ -7,7 +7,7 @@ import { CommonModule } from '@angular/common';
 import { ExtrasDTO, IngredientesDTO, OpcionesDTO } from '../../../dtos';
 import { ExtrasService } from '../../../services/extras.service';
 import { OpcionesService } from '../../../services/opciones.service';
-import { NgxPaginationModule } from 'ngx-pagination';
+
 import {
   MatPaginator,
   MatPaginatorIntl,
@@ -18,7 +18,7 @@ import { CustomPaginatorIntl } from '../../../../matPaginator';
 @Component({
   selector: 'app-crud-ingredientes',
   standalone: true,
-  imports: [CommonModule, NgxPaginationModule, MatPaginatorModule],
+  imports: [CommonModule, MatPaginatorModule],
   templateUrl: './crud-ingredientes.component.html',
   styleUrl: './crud-ingredientes.component.css',
   providers: [{ provide: MatPaginatorIntl, useClass: CustomPaginatorIntl }],
@@ -29,12 +29,27 @@ export class CrudIngredientesComponent {
   @Input() opciones: Opciones[] = [];
 
   ingredientesFiltrados: Ingredientes[] = [];
+<<<<<<< HEAD
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
 
   currentPage: number = 0;
   pageSize: number = 5;
+=======
+  opcionesFiltradas: Opciones[] = [];
+  extrasFiltrados: Extras[] = [];
 
+  @ViewChild(MatPaginator) paginator!: MatPaginator;
+
+  currentPageIngr: number = 0;
+  pageSizeIngr: number = 5;
+>>>>>>> productos
+
+  currentPageExt: number = 0;
+  pageSizeExt: number = 5;
+
+  currentPageOpc: number = 0;
+  pageSizeOpc: number = 5;
   constructor(
     private readonly ingrServices: IngredientesService,
     private readonly opcionesService: OpcionesService,
@@ -48,43 +63,54 @@ export class CrudIngredientesComponent {
     this.ingredientes = this.adminComponente.ingredientes;
     this.extras = this.adminComponente.extras;
     this.opciones = this.adminComponente.opciones;
+
+
+
+    await this.updateIngredientesFiltrados()
+    await this.updateExtrasFiltrados()
+    await this.updateOpcionesFiltradas()
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes['ingredientes'] && this.ingredientes) {
+    if (changes['ingredientesFiltrados'] && this.ingredientes) {
       this.updateIngredientesFiltrados();
     }
-    if (changes['opciones'] && this.opciones) {
+    if (changes['opcionesFiltradas'] && this.opciones) {
       this.updateIngredientesFiltrados();
     }
-    if (changes['extras'] && this.extras) {
+    if (changes['extrasFiltrados'] && this.extras) {
       this.updateIngredientesFiltrados();
     }
   }
 
   onPageChangeIngr(event: PageEvent) {
-    this.currentPage = event.pageIndex;
-    this.pageSize = event.pageSize;
+    this.currentPageIngr = event.pageIndex;
+    this.pageSizeIngr = event.pageSize;
     this.updateIngredientesFiltrados();
   }
 
   onPageChangeOpc(event: PageEvent) {
-    this.currentPage = event.pageIndex;
-    this.pageSize = event.pageSize;
+    this.currentPageOpc = event.pageIndex;
+    this.pageSizeOpc = event.pageSize;
     this.updateOpcionesFiltradas();
   }
 
   onPageChangeExt(event: PageEvent) {
-    this.currentPage = event.pageIndex;
-    this.pageSize = event.pageSize;
+    this.currentPageExt = event.pageIndex;
+    this.pageSizeExt = event.pageSize;
     this.updateExtrasFiltrados();
   }
   /**
    * Permite paginar los ingredientes
    */
   updateIngredientesFiltrados() {
+<<<<<<< HEAD
     const startIndex = this.currentPage * this.pageSize;
     const endIndex = startIndex + this.pageSize;
+=======
+    const startIndex = this.currentPageIngr * this.pageSizeIngr;
+    const endIndex = startIndex + this.pageSizeIngr;
+>>>>>>> productos
     this.ingredientesFiltrados = this.ingredientes.slice(
       startIndex,
       endIndex
@@ -94,17 +120,35 @@ export class CrudIngredientesComponent {
    * Permite paginar las opciones
    */
   updateOpcionesFiltradas() {
+<<<<<<< HEAD
     const startIndex = this.currentPage * this.pageSize;
     const endIndex = startIndex + this.pageSize;
     this.opciones = this.adminComponente.opciones.slice(startIndex, endIndex);
+=======
+    const startIndex = this.currentPageOpc * this.pageSizeOpc;
+    const endIndex = startIndex + this.pageSizeOpc;
+    this.opcionesFiltradas = this.opciones.slice(
+      startIndex,
+      endIndex
+    );
+>>>>>>> productos
   }
   /**
    * Permite paginar los extras
    */
   updateExtrasFiltrados() {
+<<<<<<< HEAD
     const startIndex = this.currentPage * this.pageSize;
     const endIndex = startIndex + this.pageSize;
     this.extras = this.adminComponente.extras.slice(startIndex, endIndex);
+=======
+    const startIndex = this.currentPageExt * this.pageSizeExt;
+    const endIndex = startIndex + this.pageSizeExt;
+    this.extrasFiltrados = this.extras.slice(
+      startIndex,
+      endIndex
+    );
+>>>>>>> productos
   }
 
   /**
@@ -112,7 +156,7 @@ export class CrudIngredientesComponent {
    */
   filtrarIngredientes(event: any) {
     const valor = event.target.lowerCase();
-    this.ingredientes = this.adminComponente.ingredientes.filter(
+    this.ingredientesFiltrados = this.ingredientes.filter(
       (ingrediente) => {
         const nombre_ingr = ingrediente.nombre_ingrediente.toLowerCase() || '';
         const precio = ingrediente.precio.toString().toLowerCase() || '';
@@ -123,7 +167,7 @@ export class CrudIngredientesComponent {
   }
   filtrarOpciones(event: any) {
     const valor = event.target.lowerCase();
-    this.opciones = this.adminComponente.opciones.filter((opcion) => {
+    this.opcionesFiltradas = this.opciones.filter((opcion) => {
       const nombre_opcion = opcion.nombre_opcion.toLowerCase() || '';
       const porcentaje = opcion.porcentaje.toString().toLowerCase() || '';
 
@@ -132,7 +176,7 @@ export class CrudIngredientesComponent {
   }
   filtrarExtras(event: any) {
     const valor = event.target.lowerCase();
-    this.extras = this.adminComponente.extras.filter((extra) => {
+    this.extrasFiltrados = this.extras.filter((extra) => {
       const nombre_extra = extra.nombre_extra.toLowerCase() || '';
       const precio = extra.precio.toString().toLowerCase() || '';
 
@@ -173,7 +217,7 @@ export class CrudIngredientesComponent {
             <span class="input-group-text border-secondary">Nombre del ingrediente</span>
             <input type="text" class="form-control border-secondary" value="${ingrediente?.nombre_ingrediente}" id="nombre_ingr" disabled>
           </div>
-      
+
           <div class="input-group mt-2 mb-3 center-content me-3">
             <span class="input-group-text border-secondary">Precio</span>
             <input type="number" class="form-control border-secondary" value="${ingrediente?.precio}" id="precio" disabled>
@@ -207,7 +251,7 @@ export class CrudIngredientesComponent {
               <span class="input-group-text border-secondary">Nombre del ingrediente</span>
               <input type="text" class="form-control border-secondary" id="nombre_ingrediente">
             </div>
-  
+
             <div class="input-group mt-2 mb-3 center-content me-3">
               <span class="input-group-text border-secondary">Precio</span>
               <input type="number" step="0.01" min="0.00" max="999.99" class="form-control border-secondary" id="precio">
@@ -331,7 +375,7 @@ export class CrudIngredientesComponent {
             <span class="input-group-text border-secondary">Nombre del ingrediente</span>
             <input type="text" class="form-control border-secondary" value="${ingrediente?.nombre_ingrediente}" id="nombre_ingr">
           </div>
-      
+
           <div class="input-group mt-2 mb-3 center-content me-3">
             <span class="input-group-text border-secondary">Precio</span>
             <input type="number" class="form-control border-secondary" step="0.01" min="0.00" max="999.99" value="${ingrediente?.precio}" id="precio">
@@ -533,7 +577,7 @@ export class CrudIngredientesComponent {
             <span class="input-group-text border-secondary">Nombre del extra</span>
             <input type="text" class="form-control border-secondary" value="${opcionF?.nombre_opcion}" id="nombre_opcion" disabled>
           </div>
-      
+
           <div class="input-group mt-2 mb-3 center-content me-3">
             <span class="input-group-text border-secondary">Precio</span>
             <input type="number" class="form-control border-secondary" value="${opcionF?.porcentaje}" id="porcentaje" disabled>
@@ -559,7 +603,7 @@ export class CrudIngredientesComponent {
               <span class="input-group-text border-secondary">Nombre de la opcion</span>
               <input type="text" class="form-control border-secondary" id="nombre_opcion">
             </div>
-  
+
             <div class="input-group mt-2 mb-3 center-content me-3">
               <span class="input-group-text border-secondary">Porcentaje</span>
               <input type="number" step="0.01" min="0.00" max="100.00" class="form-control border-secondary" id="porcentaje">
@@ -682,7 +726,7 @@ export class CrudIngredientesComponent {
             <span class="input-group-text border-secondary">Nombre del ingrediente</span>
             <input type="text" class="form-control border-secondary" value="${opcionF?.nombre_opcion}" id="nombre_opcion">
           </div>
-      
+
           <div class="input-group mt-2 mb-3 center-content me-3">
             <span class="input-group-text border-secondary">Precio</span>
             <input type="number" class="form-control border-secondary" step="0.01" min="0.00" max="999.99" value="${opcionF?.porcentaje}" id="porcentaje">
@@ -890,7 +934,7 @@ export class CrudIngredientesComponent {
             <span class="input-group-text border-secondary">Nombre del extra</span>
             <input type="text" class="form-control border-secondary" value="${extraF?.nombre_extra}" id="nombre_extra" disabled>
           </div>
-      
+
           <div class="input-group mt-2 mb-3 center-content me-3">
             <span class="input-group-text border-secondary">Precio</span>
             <input type="number" class="form-control border-secondary" value="${extraF?.precio}" id="precio" disabled>
@@ -916,7 +960,7 @@ export class CrudIngredientesComponent {
               <span class="input-group-text border-secondary">Nombre del extra</span>
               <input type="text" class="form-control border-secondary" id="nombre_extra">
             </div>
-  
+
             <div class="input-group mt-2 mb-3 center-content me-3">
               <span class="input-group-text border-secondary">Precio</span>
               <input type="number" step="0.01" min="0.00" max="999.99" class="form-control border-secondary" id="precio">
@@ -1036,7 +1080,7 @@ export class CrudIngredientesComponent {
             <span class="input-group-text border-secondary">Nombre del extra</span>
             <input type="text" class="form-control border-secondary" value="${extraF?.nombre_extra}" id="nombre_extra">
           </div>
-      
+
           <div class="input-group mt-2 mb-3 center-content me-3">
             <span class="input-group-text border-secondary">Precio</span>
             <input type="number" class="form-control border-secondary" step="0.01" min="0.00" max="999.99" value="${extraF?.precio}" id="precio">

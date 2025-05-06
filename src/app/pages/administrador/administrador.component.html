@@ -65,6 +65,7 @@
   <div *ngIf="selectedSection === 'seccion2'">
     <app-crud-productos
       (cambiarComponente)="cambiarComponente($event)"
+      [productos]="productos"
     ></app-crud-productos>
   </div>
   <div *ngIf="selectedSection === 'seccion3'">
@@ -88,6 +89,10 @@
     <app-ventas></app-ventas>
   </div>
   <div *ngIf="selectedSection === 'seccion7'">
-    <app-crud-agregar-productos></app-crud-agregar-productos>
+    <app-crud-agregar-productos
+      [ingredientes]="ingredientes"
+      [extras]="extras"
+      [opciones]="opciones"
+    ></app-crud-agregar-productos>
   </div>
 </div>

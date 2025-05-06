@@ -7,15 +7,17 @@ import { CategoriasComponent } from '../../pages/administrador/categorias/catego
 import { CrudIngredientesComponent } from './crud-ingredientes/crud-ingredientes.component';
 import { MesasComponent } from './mesas/mesas.component';
 import { VentasComponent } from './ventas/ventas.component';
-import { Ingredientes, Roles, Usuarios_has_roles, Categorias, Extras, Opciones } from '../../types';
+import { Ingredientes, Roles, Usuarios_has_roles, Categorias, Extras, Opciones, Sub_categorias, Productos } from '../../types';
 import { UsuariosService } from '../../services/usuarios.service';
 import { RolesService } from '../../services/roles.service';
 import { CrudAgregarProductosComponent } from './crud-productos/crud-agregar-productos/crud-agregar-productos.component';
 import { IngredientesService } from '../../services/ingredientes.service';
 import { CategoriasService } from '../../services/categorias.service';
-import { SubcategoriaService } from '../../services/subcategoria.service'; // Asegúrate de importar el servicio de subcategorías
-import { OpcionesService } from '../../services/opciones.service';
+import { SubcategoriasService } from '../../services/subcategorias.service';
 import { ExtrasService } from '../../services/extras.service';
+import { OpcionesService } from '../../services/opciones.service';
+import { ProductosService } from '../../services/productos.service';
+
 
 @Component({
   selector: 'app-administrador',
@@ -42,17 +44,19 @@ export class AdministradorComponent {
   public ingredientes: Ingredientes[] = [];
   public extras: Extras[] = [];
   public opciones: Opciones[] = [];
-  categorias: Categorias[] = [];
-  subcategorias: any[] = [];  // Arreglo para almacenar las subcategorías
+  public categorias: Categorias[] = [];
+  public subcategorias: Sub_categorias[] = [];  // Arreglo para almacenar las subcategorías
+  public productos: Productos[] = [];
 
   constructor(
     private readonly usuariosService: UsuariosService,
     private readonly rolesService: RolesService,
     private readonly ingredientesService: IngredientesService,
-    private readonly opcionesService: OpcionesService,
     private readonly extrasService: ExtrasService,
+    private readonly opcionesService: OpcionesService,
     private readonly categoriasService: CategoriasService,
-    private readonly subcategoriaService: SubcategoriaService,  
+    private readonly subcategoriaService: SubcategoriasService,
+    private readonly productosService: ProductosService,
   ) {}
   cambiarComponente(componente:string) {
     this.selectedSection = componente;
@@ -61,12 +65,13 @@ export class AdministradorComponent {
     this.roles = await this.rolesService.obtenerRoles();
     this.usuarios = await this.usuariosService.obtenerUsuariosYRoles();
     this.ingredientes = await this.ingredientesService.getIngredientes();
-    this.opciones = await this.opcionesService.getOpciones();
     this.extras = await this.extrasService.getExtras();
-    this.categorias = await this.categoriasService.getCategorias(); 
-
+    this.opciones = await this.opcionesService.getOpciones();
+    this.categorias = await this.categoriasService.getCategorias();
+    this.subcategorias = await this.subcategoriaService.obtenerSubcategorias();
     // Inicializa las subcategorías
     this.subcategorias = await this.subcategoriaService.obtenerSubcategorias();
+    this.productos = await this.productosService.obtenerProductos();
   }
 
   selectSection(section: string): void {

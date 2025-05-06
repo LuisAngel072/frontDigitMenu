@@ -67,7 +67,7 @@ export type Productos = {
   nombre_prod: string;
   descripcion: string;
   img_prod: string; //Ruta
-  subcat_id: Sub_categorias;
+  sub_cat_id: Sub_categorias;
   precio: number;
 };
 
@@ -102,4 +102,26 @@ export type Opciones = {
   porcentaje: number;
 };
 
+//Productos_has_extras
+export type P_H_E = {
+  producto_extra_id: number;
+  precio: number;
+  extra_id: Extras;
+  producto_id?: Productos;
+}
 
+//Productos_has_opciones
+export type P_H_O = {
+  producto_opc_id: number;
+  porcentaje: number;
+  opcion_id: Opciones;
+  producto_id?: Productos;
+}
+
+//Productos_has_ingredientes
+export type P_H_I = {
+  producto_ingr_id: number;
+  precio: number;
+  ingrediente_id: Ingredientes;
+  producto_id?: Productos;
+}

@@ -67,9 +67,9 @@
           <div class="pagination-container row">
             <div class="col-12 d-flex justify-content-center">
               <mat-paginator
-                *ngIf="this.ingredientes.length > 0"
+                *ngIf="this.ingredientes.length > 5"
                 [length]="this.ingredientes.length"
-                [pageSize]="this.pageSize"
+                [pageSize]="this.pageSizeIngr"
                 [hidePageSize]="true"
                 [pageSizeOptions]="[5, 7, 10]"
                 (page)="onPageChangeIngr($event)"
@@ -116,7 +116,7 @@
               </tr>
             </thead>
             <tbody>
-              <tr *ngFor="let opcion of opciones">
+              <tr *ngFor="let opcion of opcionesFiltradas">
                 <td>{{ opcion.nombre_opcion }}</td>
                 <td>{{ opcion.porcentaje }}</td>
                 <td>
@@ -145,9 +145,9 @@
           <div class="pagination-container row">
             <div class="col-12 d-flex justify-content-center">
               <mat-paginator
-                *ngIf="this.opciones.length > 0"
+                *ngIf="this.opciones.length > 5"
                 [length]="this.opciones.length"
-                [pageSize]="this.pageSize"
+                [pageSize]="this.pageSizeOpc"
                 [hidePageSize]="true"
                 [pageSizeOptions]="[5, 7, 10]"
                 (page)="onPageChangeOpc($event)"
@@ -194,7 +194,7 @@
               </tr>
             </thead>
             <tbody>
-              <tr *ngFor="let extra of extras">
+              <tr *ngFor="let extra of extrasFiltrados">
                 <td>{{ extra.nombre_extra }}</td>
                 <td>{{ extra.precio }}</td>
                 <td>
@@ -223,9 +223,9 @@
           <div class="pagination-container row">
             <div class="col-12 d-flex justify-content-center">
               <mat-paginator
-                *ngIf="this.extras.length > 0"
+                *ngIf="this.extras.length > 5"
                 [length]="this.extras.length"
-                [pageSize]="this.pageSize"
+                [pageSize]="this.pageSizeExt"
                 [hidePageSize]="true"
                 [pageSizeOptions]="[5, 7, 10]"
                 (page)="onPageChangeExt($event)"
