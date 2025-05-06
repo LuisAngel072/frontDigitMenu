@@ -1,0 +1,102 @@
+/* Estilos generales del contenedor */
+.cocinero-container {
+  padding: 2rem;
+}
+
+.modal-panel {
+  background-color: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+h1 {
+  color: #333;
+  font-family: 'cocogoose-letter', sans-serif;
+}
+
+/* Estilos para las mesas y los pedidos */
+.columna-pedidos {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.mesa {
+  padding: 1rem;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background-color: #f9f9f9;
+}
+
+.mesa-titulo {
+  font-size: 1.5rem;
+  color: #333;
+  font-family: 'cocogoose', sans-serif;
+  margin-bottom: 1rem;
+}
+
+.tickets {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.ticket {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #fff;
+  padding: 1rem;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+}
+
+.ticket-info p {
+  margin: 0;
+  font-size: 1rem;
+  color: #333;
+}
+
+/* Estilo de los botones */
+button {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-family: 'cocogoose', sans-serif;
+}
+
+.btn-realizado {
+  background-color: var(--color-aceptar);
+  color: white;
+  transition: background-color 0.3s ease;
+}
+
+.btn-realizado:hover {
+  background-color: var(--color-aceptarH);
+}
+
+.btn-realizado:active {
+  background-color: var(--color-aceptarA);
+}
+
+.btn-confirmar {
+  background-color: var(--color-botonP);
+  color: white;
+  transition: background-color 0.3s ease;
+  margin-top: 15px;
+}
+
+.btn-confirmar:hover {
+  background-color: var(--color-botonPH);
+}
+
+.btn-confirmar:active {
+  background-color: var(--color-botonPA);
+}
+
+/* Estilos de sombra para los botones */
+button:focus {
+  outline: none;
+}

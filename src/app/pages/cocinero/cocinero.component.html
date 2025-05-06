@@ -1,0 +1,32 @@
+<div class="cocinero-container">
+  <!-- Panel de pedidos -->
+  <div class="modal-panel">
+    <h1 class="text-center">Pedidos</h1>
+
+    <!-- Mostrar los pedidos de cada mesa -->
+    <div class="columna-pedidos">
+      <div *ngFor="let mesa of mesas" class="mesa">
+        <h2 class="mesa-titulo">Mesa {{ mesa.numero }}</h2>
+        
+        <!-- Mostrar los pedidos de la mesa -->
+        <div class="tickets">
+          <ng-container *ngFor="let pedido of mesa.pedidos">
+            <div *ngIf="!pedido.elaborado" class="ticket">
+              <div class="ticket-info">
+                <p>{{ pedido.nombre }} (Cantidad: {{ pedido.cantidad }})</p>
+              </div>
+              <button class="btn-realizado" (click)="marcarComoElaborado(pedido.id, mesa.numero)">
+                Marcar como realizado
+              </button>
+            </div>
+          </ng-container>
+        </div>
+
+        <!-- Confirmar todos los pedidos elaborados de la mesa -->
+        <button class="btn-confirmar" (click)="confirmarElaborado(mesa.numero)">
+          Confirmar pedidos de la mesa
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
