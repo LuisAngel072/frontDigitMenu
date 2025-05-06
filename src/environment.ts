@@ -1,6 +1,7 @@
 export const environment = {
     production: false,
     ApiIP: "http://localhost:3000/api/",
+    ApiUp: "http://localhost:3000/uploads/",
 
     /**
      * General
@@ -16,6 +17,7 @@ export const environment = {
     ApiEncontrarRolesYUsuario: "roles/getUsuarios",
     ApiActualizarUsuario: "usuarios/actualizar/",
     ApiDesactivarUsuario: "usuarios/desactivar/",
+    ApiReactivarUsuario: "usuarios/reactivar/",
 
     /**
      * Roles
@@ -28,7 +30,7 @@ export const environment = {
     ApiObtenerCategorias: "categorias",//GET
     ApiObtenerCategoria: "categorias/",//GET
     ApiRegistrarCategoria: "categorias/registrar",//POST
-    ApiEditarCategoria: "categorias/editar/", //PATCH
+    ApiEditarCategoria: "categorias/actualizar/", //PATCH
     ApitEliminarCategoria: "categorias/eliminar/",//DELETE
 
     /**
@@ -65,4 +67,17 @@ export const environment = {
     ApiCrearOpcion: "opciones/registrar", //POST
     ApiActualizarOpcion: "opciones/actualizar/", //PATCH
     ApiEliminarOpcion: "opciones/eliminar/", //DELETE
+
+    /**
+     * Productos
+     */
+    ApiObtenerProductos: "productos", //GET
+    ApiObtenerProducto: "productos/", // GET /:id_producto
+    ApiObtenerExtrasDeProducto: "productos/extras/", //GET /:id_producto
+    ApiObtenerOpcionesDeProducto: "productos/opciones/", //GET /:id_producto
+    ApiObtenerIngredientesDeProducto: "productos/ingredientes/", //GET /:id_producto
+    ApiRegistrarProducto: "productos/registrar", //POST
+    ApiActualizarProducto: "productos/actualizar/", //PATCH /:id_producto
+    ApiEliminarProducto: "productos/eliminar/", //DELETE /:id_producto
+    ApiSubirImgProducto: "productos/subir-img_prod", //POST
 }

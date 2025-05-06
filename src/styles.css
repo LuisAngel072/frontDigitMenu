@@ -8,6 +8,9 @@
     --color-terciario: #79b4d9;
     --color-terciarioH: #99d3f7;
     --color-terciarioA: #5fafe0;
+    --color-aceptar: #8fd979;
+    --color-aceptarH: #b4f799;
+    --color-aceptarA: #83e05f;
     --color-nrosc: #d96b0b;
     --color-eliminar: #F26113;
     --color-eliminarH: #ff823f;
@@ -19,9 +22,23 @@
 
 }
 
+input.ng-touched.ng-invalid,
+textarea.ng-touched.ng-invalid,
+select.ng-touched.ng-invalid {
+  border-color: #dc3545;
+}
+
+th  {
+  background-color: var(--color-terciarioA) !important;
+  color: white !important;
+}
+
 input,
 td,
-option {
+option,
+p,
+label,
+input {
     font-family: 'cocogoose', sans-serif;
 }
 
@@ -57,7 +74,10 @@ option.form-select:hover {
     padding-top: 20vh;
     margin: 0 8vw 0 8vw;
 }
-
+.invalid-feedback {
+  color: #dc3545;
+  display: block;
+}
 .icon:hover {
     transform: scale(1.05);
 }
@@ -110,6 +130,10 @@ option.form-select:hover {
     color: var(--color-eliminar);
 }
 
+.icon-react {
+    color: var(--color-aceptar);
+}
+
 .icon-eye {
     color: var(--color-secundario);
 }
@@ -147,6 +171,10 @@ option.form-select:hover {
     color: var(--color-secundarioH);
 }
 
+.icon-react:hover {
+    color: var(--color-aceptarH);
+}
+
 .icon-edit:hover {
     color: var(--color-terciarioH);
 }
@@ -162,6 +190,9 @@ option.form-select:hover {
 
 .icon-edit:active {
     color: var(--color-terciarioA);
+}
+.icon-react:active {
+    color: var(--color-aceptarA);
 }
 
 .table-striped {

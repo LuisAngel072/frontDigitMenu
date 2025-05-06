@@ -5,26 +5,26 @@
     transition: transform 0.2s ease;
     margin-bottom: 100px;
   }
-  
+
   #logo-desktop:hover {
     transform: scale(1.05);
   }
-  
+
   #logo-desktop:active {
     transform: scale(0.95);
   }
-  
+
   /* Estilos para el isotipo en pantallas pequeñas */
   #logo-mobile {
     max-width: 22%;
     height: auto;
     transition: transform 0.2s ease;
   }
-  
+
   #logo-mobile:hover {
     transform: scale(1.05);
   }
-  
+
   #logo-mobile:active {
     transform: scale(0.95);
   }
@@ -42,19 +42,20 @@
 .navbar {
     height: 14%;
     min-height: 14%;
+    background-color: white;
 }
 .material-symbols-outlined {
     margin-right: 2vw;
     height: 14%;
     min-height: 14%;
   }
-  
+
   /* Alineación de elementos en la barra de navegación */
   .headerMenuButtonsContainer {
     transition: width 0.5s;
     margin-left: 20px;
   }
-  
+
   /* Estilos para el botón de cerrar sesión en dispositivos pequeños */
   .btn-logout {
     width: 12vw;
@@ -66,4 +67,4 @@
   .dropdown-item {
     font-family: 'cocogoose',sans-serif;
   }
-  
+

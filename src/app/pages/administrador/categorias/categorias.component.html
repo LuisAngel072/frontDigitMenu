@@ -1,78 +1,114 @@
 <div class="main-container">
-    <main>
-        <h1 class="mb-4">Gestión de Categorías</h1>
-  
-        <div class="tablas-container">
-            <!-- Contenedor de la tabla de Categorías -->
-            <div class="tabla-categorias">
-                <h2 class="mb-3">Categorías</h2>
-  
-                <div class="row mb-3">
-                    <div class="col-auto">
-                        <!-- <button class="btn btn-prim" (click)="agregarCategoria()">Agregar categoría</button> -->
-                    </div>
-                    <div class="col">
-                        <!-- <input type="search" class="form-control search" placeholder="Buscar categoría" [(ngModel)]="searchCategoria" /> -->
-                    </div>
-                </div>
-  
-                <table class="table table-striped">
-                    <thead>
-                        <tr>
-                            <th>Nombre</th>
-                            <th>Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <!--
-                        <tr *ngFor="let categoria of categoriasFiltradas">
-                            <td>{{ categoria.nombre }}</td>
-                            <td class="icons-space">
-                                <!-- <span (click)="editarCategoria(categoria)" class="material-symbols-outlined icon icon-edit">edit</span>
-                                <span (click)="eliminarCategoria(categoria.id)" class="material-symbols-outlined icon icon-trash">delete</span> 
-                            </td>
-                        </tr>
-                        -->
-                    </tbody>
-                </table>
-            </div>
-  
-            <!-- Contenedor de la tabla de Subcategorías -->
-            <div class="tabla-subcategorias">
-                <h2 class="mb-3">Subcategorías</h2>
-  
-                <div class="row mb-3">
-                    <div class="col-auto">
-                        <!-- <button class="btn btn-prim" (click)="agregarSubcategoria()">Agregar subcategoría</button> -->
-                    </div>
-                    <div class="col">
-                        <!-- <input type="search" class="form-control search" placeholder="Buscar subcategoría" [(ngModel)]="searchSubcategoria" /> -->
-                    </div>
-                </div>
-  
-                <table class="table table-striped">
-                    <thead>
-                        <tr>
-                            <th>Nombre</th>
-                            <th>Categoría</th>
-                            <th>Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <!-- 
-                        <tr *ngFor="let subcategoria of subcategoriasFiltradas">
-                            <td>{{ subcategoria.nombre }}</td>
-                            <td>{{ subcategoria.categoria.nombre }}</td>
-                            <td class="icons-space">
-                                <span (click)="editarCategoria(subcategoria)" class="material-symbols-outlined icon icon-edit">edit</span>
-                                <span (click)="eliminarCategoria(subcategoria.id)" class="material-symbols-outlined icon icon-trash">delete</span> 
-                            </td>
-                        </tr>
-                        -->
-                    </tbody>
-                </table>
-            </div>
+  <main>
+    <h1 class="mb-4 text-center">Categorías y Subcategorías</h1>
+    <div class="row">
+      <!-- Categorías -->
+      <div class="col-lg-6 col-md-12">
+        <h3 class="text-center">Categorías</h3>
+        <div class="row mb-3 align-items-center">
+          <!-- Campo de búsqueda -->
+          <div class="col">
+            <input
+              type="search"
+              class="form-control"
+              placeholder="Buscar categoría"
+            />
+          </div>
+
+          <!-- Botón agregar -->
+          <div class="col-auto">
+            <button class="btn icon icon-add d-flex align-items-center" (click)="crearCategoria()">
+              <span class="material-symbols-outlined">add</span>
+            </button>
+          </div>
         </div>
-    </main>
-  </div>
-  
+
+        <!-- Tabla de Categorías -->
+        <div class="table-responsive">
+          <table class="table table-striped categorias-table">
+            <thead>
+              <tr>
+                <th>Nombre</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let cat of categorias">
+                <td>{{ cat.nombre_cat }}</td>
+                <td>
+                  <span class="material-symbols-outlined icon icon-eye" (click)="verCategoria(cat.id_cat)">
+                    visibility
+                  </span>
+                  <span class="material-symbols-outlined icon icon-edit" (click)="actualizarCategoria(cat.id_cat)">
+                    edit_square
+                  </span>
+                  <span class="material-symbols-outlined icon icon-trash" (click)="delCategoria(cat.id_cat)">
+                    delete
+                  </span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <h3 class="text-center" *ngIf="categorias.length === 0">
+            ¡Vaya! No existen categorías registradas.
+          </h3>
+        </div>
+      </div>
+
+      <!-- Subcategorías -->
+      <div class="col-lg-6 col-md-12">
+        <h3 class="text-center">Subcategorías</h3>
+        <div class="row mb-3 align-items-center">
+          <!-- Campo de búsqueda -->
+          <div class="col">
+            <input
+              type="search"
+              class="form-control"
+              placeholder="Buscar subcategoría"
+            />
+          </div>
+
+          <!-- Botón agregar -->
+          <div class="col-auto">
+            <button class="btn icon icon-add d-flex align-items-center" (click)="crearSubcategoria()">
+              <span class="material-symbols-outlined">add</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Tabla de Subcategorías -->
+        <div class="table-responsive">
+          <table class="table table-striped subcategorias-table">
+            <thead>
+              <tr>
+                <th>Nombre</th>
+                <th>Categoría</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let sub of subcategorias">
+                <td>{{ sub.nombre_subcat }}</td>
+                <td>{{ sub.categoria_id.nombre_cat }}</td>
+                <td>
+                  <span class="material-symbols-outlined icon icon-eye" (click)="verSubcategoria(sub.id_subcat)">
+                    visibility
+                  </span>
+                  <span class="material-symbols-outlined icon icon-edit" (click)="actualizarSubcategoria(sub.id_subcat)">
+                    edit_square
+                  </span>
+                  <span class="material-symbols-outlined icon icon-trash" (click)="delSubcategoria(sub.id_subcat)">
+                    delete
+                  </span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <h3 class="text-center" *ngIf="subcategorias.length === 0">
+            ¡Vaya! No existen subcategorías registradas.
+          </h3>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>

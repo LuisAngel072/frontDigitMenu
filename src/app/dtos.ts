@@ -1,51 +1,74 @@
-export type UsuariosDTO = {
-    codigo: string;
-    nombres: string;
-    primer_apellido: string;
-    segundo_apellido: string;
-    telefono_id: {
-      telefono: string;
-    };
-    email_id: {
-      email: string;
-    };
-    sexo: string; // Pienso en un ENUM: Masc, Fem, Otro
-    rfc: {
-      rfc: string;
-    };
-    nss: {
-      nss: string;
-    };
-    domicilio: {
-      calle: string;
-      colonia: string;
-      codigo_postal: string; //Solo 5 caracteres
-      no_ext: string; //Solo 5 caracteres
-      no_int?: string; //Opcional, posible undefined, no mas de 5 caracteres
-      municipio: string;
-    };
-    img_us: { img_perfil: string };
-    rol: {
-      id_rol: number;
-      rol: string;
-      descripcion: string;
-    }[];
-    contrasena: string;
-    activo: boolean; //El valor es entre 1 y 0. 1 activo, 0 inactivo
-  };
+import { Extras, Ingredientes, Opciones } from "./types";
 
-  export type IngredientesDTO = {
-    nombre_ingrediente: string;
-    precio: number;
+export type UsuariosDTO = {
+  codigo: string;
+  nombres: string;
+  primer_apellido: string;
+  segundo_apellido: string;
+  telefono_id: {
+    telefono: string;
   };
-  
-  export type ExtrasDTO = {
-    nombre_extra: string;
-    precio: number;
+  email_id: {
+    email: string;
   };
-  
-  export type OpcionesDTO = {
-    nombre_opcion: string;
-    porcentaje: number;
+  sexo: string; // Pienso en un ENUM: Masc, Fem, Otro
+  rfc: {
+    rfc: string;
   };
-  
+  nss: {
+    nss: string;
+  };
+  domicilio: {
+    calle: string;
+    colonia: string;
+    codigo_postal: string; //Solo 5 caracteres
+    no_ext: string; //Solo 5 caracteres
+    no_int?: string; //Opcional, posible undefined, no mas de 5 caracteres
+    municipio: string;
+  };
+  img_perfil: { img_ruta: string };
+  rol: {
+    id_rol: number;
+    rol: string;
+    descripcion: string;
+  }[];
+  contrasena: string;
+  activo: boolean; //El valor es entre 1 y 0. 1 activo, 0 inactivo
+};
+
+export type IngredientesDTO = {
+  nombre_ingrediente: string;
+  precio: number;
+};
+
+export type ExtrasDTO = {
+  nombre_extra: string;
+  precio: number;
+};
+
+export type OpcionesDTO = {
+  nombre_opcion: string;
+  porcentaje: number;
+};
+
+export type CategoriasDTO = {
+  nombre_cat: string;
+  ruta_img: string;
+};
+
+export type SubcategoriasDTO = {
+  nombre_subcat: string;
+  categoria_id: number;
+  ruta_img: string;
+};
+
+export type ProductosDto = {
+  nombre_prod: string;
+  descripcion: string;
+  img_prod: string;
+  precio: number;
+  sub_cat_id: number;
+  extras: Extras[];
+  opciones: Opciones[];
+  ingredientes: Ingredientes[];
+}

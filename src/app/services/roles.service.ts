@@ -20,7 +20,6 @@ export class RolesService {
         { headers: { Authorization: `Bearer ${this.authService.getToken()}` } }
       );
       const response = await lastValueFrom(response$);
-      console.log(response);
       return response;
     } catch (error) {
       console.error(

@@ -7,3 +7,28 @@
     border-color: var(--color-botonP);
     font-family: 'cocogoose',sans-serif;
 }
+label, h5 {
+  font-family: 'cocogoose-letter',sans-serif;
+}
+textarea, input, .form-check-label, option, select {
+  font-family: 'cocogoose',sans-serif;
+}
+
+.form-check {
+  /* Alto fijo aproximado al requerido */
+  /* :contentReference[oaicite:0]{index=0} */
+  height: 287px;
+  max-height: 287px;
+  overflow-y: auto;        /* habilita scroll vertical :contentReference[oaicite:1]{index=1} */
+  padding: 0.5rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+
+/* Asegura que cada ítem tenga un poco de espacio */
+.form-check li {
+  display: flex;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}

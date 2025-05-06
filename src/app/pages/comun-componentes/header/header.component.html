@@ -55,6 +55,7 @@
             aria-expanded="false"
           >
             <img
+              *ngIf="usuario?.img_perfil?.img_ruta !== 'Pendiente'"
               [src]="profileImageUrl"
               alt="Perfil"
               class="img-fluid rounded-circle"
