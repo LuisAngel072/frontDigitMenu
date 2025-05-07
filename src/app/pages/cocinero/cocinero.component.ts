@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { CommonModule } from '@angular/common';  // Importa CommonModule para usar *ngFor y *ngIf
 
 export interface Pedido {
   id: number;
@@ -14,9 +15,10 @@ export interface Mesa {
 
 @Component({
   selector: 'app-cocinero',
-  standalone: true,
+  standalone: true,  // Esto asegura que el componente sea independiente
   templateUrl: './cocinero.component.html',
-  styleUrls: ['./cocinero.component.css']
+  styleUrls: ['./cocinero.component.css'],
+  imports: [CommonModule]  // Agrega CommonModule para habilitar *ngFor y *ngIf
 })
 export class CocineroComponent {
   mesas: Mesa[] = [
