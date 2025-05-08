@@ -91,7 +91,8 @@
 .boton-categoria[aria-expanded="true"] {
     border: 2px solid var(--color-botonPH); /* Borde llamativo */
     font-weight: bold; /* Texto más fuerte */
-    transform: scale(1.05); /* Aumenta ligeramente el tamaño */
+    transform: scale(1.02); /* Aumenta ligeramente el tamaño */
     transition: transform 0.3s ease-in-out;
     margin-bottom: 1%;
 }
+
