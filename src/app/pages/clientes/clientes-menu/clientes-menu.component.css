@@ -1,6 +1,3 @@
-body {
-    font-family: Arial, sans-serif;
-}
 .container {
     margin: 0;
     padding: 0;
@@ -17,7 +14,6 @@ body {
 .custom-button {
     width: 100%;
     height: 15vh;
-    background-image: url('../../../../assets/images/Pizza-3007395.jpg');
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
@@ -31,4 +27,29 @@ body {
 }
 .accordion-item {
     width: 100%;
+}
+
+.img-cat, .img-subcat, .img-prod {
+    width: 60px;
+    height: 60px;
+    object-fit: cover;
+    border-radius: 8px;
+    margin-right: 10px;
+    vertical-align: middle;
+}
+
+.prod-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.header {
+    display: flex;
+    margin: 1%;
+}
+
+.header button {
+    margin-left: 1%;
+    padding-bottom: 1%;
 }
