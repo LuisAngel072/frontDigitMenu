@@ -1,8 +1,9 @@
 .container {
-    margin: 0;
-    padding: 0;
+    width: 100%;
     max-width: 100vw;
+    padding: 0 5%;
 }
+
 .search-bar {
     width: 100%;
     padding: 10px;
@@ -46,10 +47,51 @@
 
 .header {
     display: flex;
-    margin: 1%;
+    justify-content: space-between;
+    align-items: center;
 }
+
 
 .header button {
     margin-left: 1%;
     padding-bottom: 1%;
+}
+
+.btn-prim {
+    background-color: var(--color-botonP);
+    color: white;
+    border-color: var(--color-botonP);
+    font-family: 'cocogoose', sans-serif;
+    width: 90%;
+}
+
+.btn-prim:hover {
+    background-color: var(--color-botonPH);
+    color: white;
+    border-color: var(--color-botonPH);
+    transform: scale(1.05);
+    /* Aumenta el tamaño en un 5% */
+}
+
+.btn-prim:active {
+    background-color: var(--color-botonPA);
+    color: white;
+    border-color: var(--color-botonPA);
+    transform: scale(0.95);
+    /* Reduce el tamaño en un 5% para efecto de presionado */
+}
+
+@media (min-width: 768px) {
+    .custom-button {
+        height: 10vh;
+        font-size: 2rem;
+    }
+}
+
+.boton-categoria[aria-expanded="true"] {
+    border: 2px solid var(--color-botonPH); /* Borde llamativo */
+    font-weight: bold; /* Texto más fuerte */
+    transform: scale(1.05); /* Aumenta ligeramente el tamaño */
+    transition: transform 0.3s ease-in-out;
+    margin-bottom: 1%;
 }

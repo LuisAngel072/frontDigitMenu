@@ -22,7 +22,7 @@
         <div class="accordion-body">
           <div class="list-group">
             <div *ngFor="let sub of cat.subcategorias">
-              <button class="list-group-item list-group-item-action" data-bs-toggle="collapse"
+              <button class="list-group-item list-group-item-action boton-categoria" data-bs-toggle="collapse"
                 [attr.data-bs-target]="'#subcat-' + sub.id_subcat">
                 <img [src]="baseUrl + sub.ruta_img" alt="{{ sub.nombre_subcat }}" class="img-subcat">
                 {{ sub.nombre_subcat }}
@@ -35,7 +35,7 @@
                     <img [src]="baseUrl + prod.img_prod" alt="{{ prod.nombre_prod }}" class="img-prod">
                     <div>
                       <strong>{{ prod.nombre_prod }}</strong> - ${{ prod.precio }}
-                      <p class="text-muted small">{{ prod.descripcion }}</p>
+                      <!-- <p class="text-muted small">{{ prod.descripcion }}</p> -->
                     </div>
                   </div>
                 </div>
@@ -83,7 +83,9 @@
         </div>
 
         <h5 class="mt-4">Precio total: ${{ precioTotal }}</h5>
-        <button class="btn btn-warning w-100 mt-2" (click)="agregarACuenta()">Agregar a la cuenta</button>
+        <div class="text-center">
+          <button class="btn btn-prim mt-2" (click)="agregarACuenta()">Agregar a la cuenta</button>
+        </div>
       </div>
     </div>
   </div>
