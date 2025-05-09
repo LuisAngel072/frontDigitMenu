@@ -5,6 +5,7 @@ import { CrudEmpleadosComponent } from './pages/administrador/crud-empleados/cru
 import { CrudProductosComponent } from './pages/administrador/crud-productos/crud-productos.component';
 import { ClientesComponent } from './pages/clientes/clientes.component';
 import { ClientesMenuComponent } from './pages/clientes/clientes-menu/clientes-menu.component';
+import { CocineroComponent } from './pages/cocinero/cocinero.component'; // Importar CocineroComponent
 
 export const routes: Routes = [
     {
@@ -31,4 +32,8 @@ export const routes: Routes = [
         path: "clientes-menu",
         component: ClientesMenuComponent
     },
+    {
+        path: "cocinero", // Agregar ruta para el componente cocinero
+        component: CocineroComponent
+    }
 ];
