@@ -1,35 +1,45 @@
-<div class="cocinero-container">
-  <div class="modal-panel">
-    <h1 class="text-center">Pedidos</h1>
+<div class="container mt-4">
+  <!-- Título principal -->
+  <div class="row mb-4">
+    <div class="col text-center">
+      <h1>Pedidos</h1>  <!-- Título principal de la sección -->
+    </div>
+  </div>
 
-    <!-- Contenedor con 4 columnas fijas para mostrar las mesas -->
+  <!-- Verificar si hay mesas -->
+  <div *ngIf="mesas && mesas.length > 0; else noData">
+    <!-- Contenedor de columnas de mesas -->
     <div class="columna-pedidos">
-      <ng-container *ngFor="let mesa of mesas">
-        <div class="columna">
-          <div *ngIf="!mesa.todosCompletados" class="mesa">
-            <h2 class="mesa-titulo">Mesa {{ mesa.numero }}</h2>
+      <!-- Lista de mesas -->
+      <div *ngFor="let mesa of mesas" class="columna">
+        <!-- Diseño de cada mesa -->
+        <div class="mesa">
+          <!-- Título de la mesa -->
+          <div class="mesa-titulo">
+            <h3>Mesa #{{ mesa.no_mesa }}</h3>
+          </div>
 
-            <div class="tickets">
-              <ng-container *ngFor="let pedido of mesa.pedidos">
-                <div class="ticket">
-                  <div class="ticket-info">
-                    <p>{{ pedido.nombre }} (Cantidad: {{ pedido.cantidad }})</p>
-
-                    <p><strong>Ingredientes:</strong> {{ pedido.ingredientes.join(', ') }}</p>
-                    <p><strong>Opciones:</strong> {{ pedido.opciones.join(', ') }}</p>
-                    <p><strong>Extras:</strong> {{ pedido.extras.join(', ') }}</p>
-                  </div>
-                </div>
-              </ng-container>
-            </div>
-
-            <!-- Botón de Realizado para confirmar los pedidos de la mesa -->
-            <button class="btn-realizado" (click)="confirmarElaborado(mesa.numero)">
-              Realizado
+          <!-- Lista de pedidos de la mesa -->
+          <div *ngFor="let pedido of mesa.pedidos" class="ticket-info">
+            <p><strong>Pedido #{{ pedido.id_pedido }}</strong></p>
+            <p><strong>Estado:</strong> {{ pedido.estado }}</p>
+            <!-- Botón para marcar como elaborado -->
+            <button 
+              *ngIf="pedido.estado !== 'preparado'" 
+              class="btn-realizado" 
+              (click)="marcarComoElaborado(pedido.id_pedido, mesa.no_mesa)">
+              Marcar como elaborado
             </button>
           </div>
         </div>
-      </ng-container>
+      </div>
     </div>
   </div>
+
+  <!-- Template para mostrar mensaje si no hay datos -->
+  <ng-template #noData>
+    <div class="alert alert-warning text-center" role="alert">
+      No hay pedidos disponibles en este momento.
+    </div>
+  </ng-template>
 </div>

@@ -80,4 +80,14 @@ export const environment = {
     ApiActualizarProducto: "productos/actualizar/", //PATCH /:id_producto
     ApiEliminarProducto: "productos/eliminar/", //DELETE /:id_producto
     ApiSubirImgProducto: "productos/subir-img_prod", //POST
+
+      /**
+   * Pedidos
+   */
+  ApiObtenerPedidos: "pedidos", // GET
+  ApiObtenerProductosDePedido: "pedidos/productos/", // GET /:id_pedido
+  ApiCrearPedido: "pedidos/registrar", // POST
+  ApiAgregarProductoAlPedido: "pedidos/registrar/productos", // POST
+  ApiActualizarPedido: "pedidos/actualizar/", // PATCH /:id_pedido
+  ApiCambiarEstadoProducto: "pedidos/actualizar/", // PATCH /:pedido_prod_id
 }
