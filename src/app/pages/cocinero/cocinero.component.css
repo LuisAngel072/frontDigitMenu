@@ -1,102 +1,69 @@
-/* Estilos generales del contenedor */
-.cocinero-container {
-  padding: 2rem;
-}
-
-.modal-panel {
-  background-color: white;
-  padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
-}
-
-h1 {
-  color: #333;
-  font-family: 'cocogoose-letter', sans-serif;
-}
-
-/* Estilos para las mesas y los pedidos */
+/* Contenedor de las columnas de las mesas */
 .columna-pedidos {
   display: flex;
-  flex-direction: column;
-  gap: 20px;
+  flex-wrap: wrap; /* Permite que las mesas se ajusten a nuevas filas si es necesario */
+  gap: 20px; /* Espaciado entre las mesas */
+  justify-content: space-evenly; /* Asegura que el espacio entre columnas se reparta equitativamente */
 }
 
+/* Cada columna tiene un ancho fijo y un tamaño mínimo */
+.columna {
+  flex: 1 1 23%; /* Asigna un tamaño flexible para las columnas, siempre 4 por fila */
+  min-width: 200px; /* Establece un tamaño mínimo para las columnas */
+  max-width: 300px; /* Limita el tamaño máximo de las columnas */
+  display: flex;
+  flex-direction: column; /* Organiza los elementos de cada mesa de forma vertical */
+  justify-content: space-between; /* Asegura que el contenido se distribuya de manera equitativa */
+}
+
+/* Diseño de cada mesa */
 .mesa {
-  padding: 1rem;
-  border: 1px solid #ddd;
+  background-color: #fff;
+  border: 2px solid #ccc;
+  padding: 15px;
   border-radius: 8px;
-  background-color: #f9f9f9;
-}
-
-.mesa-titulo {
-  font-size: 1.5rem;
-  color: #333;
-  font-family: 'cocogoose', sans-serif;
-  margin-bottom: 1rem;
-}
-
-.tickets {
   display: flex;
   flex-direction: column;
-  gap: 15px;
+  justify-content: space-between; /* Asegura que el botón se mantenga en la parte inferior */
+  min-height: 300px; /* Define una altura mínima */
+  text-align: center;
+  box-sizing: border-box; /* Incluye el padding en el cálculo del tamaño total */
 }
 
-.ticket {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background-color: #fff;
-  padding: 1rem;
-  border: 1px solid #ddd;
-  border-radius: 8px;
+/* Cambiar la fuente de "Pedidos" */
+h1 {
+  font-family: 'cocogoose-letter', sans-serif;
+  font-weight: bold;
+  font-size: 2rem; /* Tamaño de la fuente para "Pedidos" */
+  text-align: center;
+  margin-bottom: 20px;
 }
+
+/* Cambiar la fuente de "Mesa" */
+.mesa-titulo {
+  font-family: 'cocogoose', sans-serif;  /* Fuente para el título de la mesa */
+  font-weight: bold;
+  font-size: 1.5rem; /* Ajusta el tamaño de la fuente */
+  margin-bottom: 15px;
+  text-align: center;  /* Centra el título */
+}
+
 
 .ticket-info p {
-  margin: 0;
-  font-size: 1rem;
-  color: #333;
+  margin: 5px 0;
 }
 
-/* Estilo de los botones */
-button {
+.btn-realizado {
+  background-color: var(--color-botonP);
+  color: white;
   padding: 10px 20px;
   border: none;
   border-radius: 5px;
   cursor: pointer;
-  font-family: 'cocogoose', sans-serif;
-}
-
-.btn-realizado {
-  background-color: var(--color-aceptar);
-  color: white;
-  transition: background-color 0.3s ease;
+  width: 100%;
+  margin-top: 20px; /* Margen superior para separar el botón de los pedidos */
 }
 
 .btn-realizado:hover {
-  background-color: var(--color-aceptarH);
-}
-
-.btn-realizado:active {
-  background-color: var(--color-aceptarA);
-}
-
-.btn-confirmar {
-  background-color: var(--color-botonP);
-  color: white;
-  transition: background-color 0.3s ease;
-  margin-top: 15px;
-}
-
-.btn-confirmar:hover {
   background-color: var(--color-botonPH);
-}
-
-.btn-confirmar:active {
-  background-color: var(--color-botonPA);
-}
-
-/* Estilos de sombra para los botones */
-button:focus {
-  outline: none;
 }

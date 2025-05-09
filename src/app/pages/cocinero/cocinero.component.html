@@ -1,32 +1,34 @@
 <div class="cocinero-container">
-  <!-- Panel de pedidos -->
   <div class="modal-panel">
     <h1 class="text-center">Pedidos</h1>
 
-    <!-- Mostrar los pedidos de cada mesa -->
+    <!-- Contenedor con 4 columnas fijas para mostrar las mesas -->
     <div class="columna-pedidos">
-      <div *ngFor="let mesa of mesas" class="mesa">
-        <h2 class="mesa-titulo">Mesa {{ mesa.numero }}</h2>
-        
-        <!-- Mostrar los pedidos de la mesa -->
-        <div class="tickets">
-          <ng-container *ngFor="let pedido of mesa.pedidos">
-            <div *ngIf="!pedido.elaborado" class="ticket">
-              <div class="ticket-info">
-                <p>{{ pedido.nombre }} (Cantidad: {{ pedido.cantidad }})</p>
-              </div>
-              <button class="btn-realizado" (click)="marcarComoElaborado(pedido.id, mesa.numero)">
-                Marcar como realizado
-              </button>
-            </div>
-          </ng-container>
-        </div>
+      <ng-container *ngFor="let mesa of mesas">
+        <div class="columna">
+          <div *ngIf="!mesa.todosCompletados" class="mesa">
+            <h2 class="mesa-titulo">Mesa {{ mesa.numero }}</h2>
 
-        <!-- Confirmar todos los pedidos elaborados de la mesa -->
-        <button class="btn-confirmar" (click)="confirmarElaborado(mesa.numero)">
-          Confirmar pedidos de la mesa
-        </button>
-      </div>
+            <div class="tickets">
+              <ng-container *ngFor="let pedido of mesa.pedidos">
+                <div class="ticket">
+                  <div class="ticket-info">
+                    <p>{{ pedido.nombre }} (Cantidad: {{ pedido.cantidad }})</p>
+
+                    <p><strong>Ingredientes:</strong> {{ pedido.ingredientes.join(', ') }}</p>
+                    <p><strong>Opciones:</strong> {{ pedido.opciones.join(', ') }}</p>
+                    <p><strong>Extras:</strong> {{ pedido.extras.join(', ') }}</p>
+                  </div>
+                </div>
+              </ng-container>
+            </div>
+
+            <button class="btn-realizado" (click)="confirmarElaborado(mesa.numero)">
+              Realizado
+            </button>
+          </div>
+        </div>
+      </ng-container>
     </div>
   </div>
 </div>
