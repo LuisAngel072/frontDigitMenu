@@ -2,32 +2,26 @@
   <!-- Título principal -->
   <div class="row mb-4">
     <div class="col text-center">
-      <h1>Pedidos</h1>  <!-- Título principal de la sección -->
+      <h1>Pedidos Pendientes</h1>
     </div>
   </div>
 
-  <!-- Verificar si hay mesas -->
-  <div *ngIf="mesas && mesas.length > 0; else noData">
-    <!-- Contenedor de columnas de mesas -->
-    <div class="columna-pedidos">
-      <!-- Lista de mesas -->
-      <div *ngFor="let mesa of mesas" class="columna">
-        <!-- Diseño de cada mesa -->
-        <div class="mesa">
-          <!-- Título de la mesa -->
-          <div class="mesa-titulo">
-            <h3>Mesa #{{ mesa.no_mesa }}</h3>
+  <!-- Verificar si hay pedidos -->
+  <div *ngIf="pedidos && pedidos.length > 0; else noData">
+    <div class="row">
+      <div class="col-md-4 mb-4" *ngFor="let pedido of pedidos">
+        <div class="card">
+          <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">Pedido #{{ pedido.id_pedido }}</h5>
           </div>
-
-          <!-- Lista de pedidos de la mesa -->
-          <div *ngFor="let pedido of mesa.pedidos" class="ticket-info">
-            <p><strong>Pedido #{{ pedido.id_pedido }}</strong></p>
-            <p><strong>Estado:</strong> {{ pedido.estado }}</p>
-            <!-- Botón para marcar como elaborado -->
-            <button 
-              *ngIf="pedido.estado !== 'preparado'" 
-              class="btn-realizado" 
-              (click)="marcarComoElaborado(pedido.id_pedido, mesa.no_mesa)">
+          <div class="card-body">
+            <p><strong>Fecha:</strong> {{ pedido.fecha_pedido | date:'dd/MM/yyyy HH:mm' }}</p>
+            <p><strong>Total:</strong> {{ pedido.total ? (pedido.total | currency) : 'Pendiente' }}</p>
+            <p><strong>Estado:</strong> <span class="badge" [ngClass]="{'bg-warning': pedido.estado === 'Iniciado', 'bg-success': pedido.estado === 'preparado'}">{{ pedido.estado }}</span></p>
+            
+            <button *ngIf="pedido.estado !== 'preparado'" 
+                    class="btn btn-success w-100 mt-2" 
+                    (click)="marcarComoElaborado(pedido.id_pedido)">
               Marcar como elaborado
             </button>
           </div>
