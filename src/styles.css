@@ -35,7 +35,10 @@ th  {
 
 input,
 td,
-option {
+option,
+p,
+label,
+input {
     font-family: 'cocogoose', sans-serif;
 }
 
