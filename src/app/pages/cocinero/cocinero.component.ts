@@ -39,7 +39,7 @@ export class CocineroComponent implements OnInit {
         this.pedidosAgrupados = Object.entries(agrupados).map(([id, productos]) => ({
           pedidoId: productos[0].pedido_id,
           productos,
-          expandido: false
+          expandido: true
         }));
       },
       error: (error) => {
