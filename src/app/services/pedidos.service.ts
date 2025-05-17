@@ -1,24 +1,21 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { environment } from '../../environment';
+import { Producto_extras_ingrSel } from '../types';
 
 @Injectable({
   providedIn: 'root'
 })
 export class PedidosService {
+  private apiUrl = 'http://localhost:3000/api/pedidos';
 
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient) {}
 
-  getPedidos(): Observable<any[]> {
-    return this.http.get<any[]>(`${environment.ApiIP}pedidos`);
+  getExtrasIngrDeProducto(p_h_pr_id: number): Observable<Producto_extras_ingrSel> {
+    return this.http.get<Producto_extras_ingrSel>(`${this.apiUrl}/productos/extrasIngrs/${p_h_pr_id}`);
   }
 
-  createPedido(pedido: any): Observable<any> {
-    return this.http.post(`${environment.ApiIP}pedidos`, pedido);
-  }
-
-  cambiarEstadoProducto(pedidoId: number, datos: any): Observable<any> {
-    return this.http.patch(`${environment.ApiIP}pedidos/actualizar/${pedidoId}`, datos);
+  cambiarEstadoProducto(pedidoProdId: number, estado: { estado: string }): Observable<any> {
+    return this.http.patch<any>(`${this.apiUrl}/actualizar/producto/${pedidoProdId}`, estado);
   }
 }

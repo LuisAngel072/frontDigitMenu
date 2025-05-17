@@ -86,6 +86,7 @@ export const environment = {
    */
   ApiObtenerPedidos: "pedidos", // GET
   ApiObtenerProductosDePedido: "pedidos/productos/", // GET /:id_pedido
+   ApiObtenerExtrasIngrProducto: "pedidos/productos/extrasIngrs", // GET /pedidos/productos/extrasIngrs/:p_h_pr_id
   ApiCrearPedido: "pedidos/registrar", // POST
   ApiAgregarProductoAlPedido: "pedidos/registrar/productos", // POST
   ApiActualizarPedido: "pedidos/actualizar/", // PATCH /:id_pedido

@@ -1,13 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { PedidosService } from '../../services/pedidos.service';
+import { Producto_extras_ingrSel } from '../../types';  // Ajusta la ruta según tu proyecto
 import { CommonModule } from '@angular/common';
-
-interface Pedido {
-  id_pedido: number;
-  fecha_pedido: string;
-  total: string | null;
-  estado: string;
-}
 
 @Component({
   selector: 'app-cocinero',
@@ -17,34 +11,36 @@ interface Pedido {
   imports: [CommonModule]
 })
 export class CocineroComponent implements OnInit {
-  pedidos: Pedido[] = [];
+  pedidosConDetalle: Producto_extras_ingrSel[] = [];
 
   constructor(private pedidosService: PedidosService) {}
 
   ngOnInit(): void {
-    this.cargarPedidos();
+    const productoId = 9; // Cambia esto al id que necesites cargar
+    this.cargarPedidosConExtras(productoId);
   }
 
-  cargarPedidos(): void {
-    this.pedidosService.getPedidos().subscribe({
+  cargarPedidosConExtras(productoId: number): void {
+    this.pedidosService.getExtrasIngrDeProducto(productoId).subscribe({
       next: (data) => {
-        this.pedidos = data;
-        console.log('Pedidos cargados:', this.pedidos);
+        this.pedidosConDetalle = Array.isArray(data) ? data : [data];
+        console.log('Pedidos con detalle cargados:', this.pedidosConDetalle);
       },
       error: (error) => {
-        console.error('Error al obtener los pedidos:', error);
+        console.error('Error al cargar pedidos con extras:', error);
       }
     });
   }
 
   marcarComoElaborado(pedidoId: number): void {
-    this.pedidosService.cambiarEstadoProducto(pedidoId, { estado: 'preparado' }).subscribe({
+    this.pedidosService.cambiarEstadoProducto(pedidoId, { estado: 'Preparado' }).subscribe({
       next: (response) => {
         console.log('Pedido marcado como elaborado:', response);
-        this.cargarPedidos(); // Recargamos los pedidos para actualizar la vista
+        // Puedes recargar los datos si quieres
+        // this.cargarPedidosConExtras(algúnProductoId);
       },
       error: (error) => {
-        console.error('Error al cambiar el estado del pedido:', error);
+        console.error('Error al cambiar estado:', error);
       }
     });
   }
