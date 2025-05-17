@@ -72,3 +72,13 @@ export type ProductosDto = {
   opciones: Opciones[];
   ingredientes: Ingredientes[];
 }
+
+//Solo manejar las llaves primarias
+export type Pedidos_has_ProductosDto = {
+  pedido_id: number;
+  producto_id: number;
+  precio: number;
+  opcion_id: number;
+  extras: number[]; //Llaves primarias de los extras
+  ingr: number[]; //Llaves primarias de los ingredientes
+}

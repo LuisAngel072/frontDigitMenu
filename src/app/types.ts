@@ -143,6 +143,7 @@ export type Mesas = {
   no_mesa: number;
   qr_code_url: string;
 };
+
 // Datos de un producto sobre un pedido
 export type Producto_extras_ingrSel = {
   pedido_id: Pedidos;

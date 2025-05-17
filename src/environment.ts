@@ -81,11 +81,12 @@ export const environment = {
     ApiEliminarProducto: "productos/eliminar/", //DELETE /:id_producto
     ApiSubirImgProducto: "productos/subir-img_prod", //POST
 
-      /**
+  /**
    * Pedidos
    */
   ApiObtenerPedidos: "pedidos", // GET
   ApiObtenerProductosDePedido: "pedidos/productos/", // GET /:id_pedido
+  ApiObtenerExtrasEIngredientesDeProducto: 'pedidos/productos/', //GET /:p_h_pr_id
   ApiCrearPedido: "pedidos/registrar", // POST
   ApiAgregarProductoAlPedido: "pedidos/registrar/productos", // POST
   ApiActualizarPedido: "pedidos/actualizar/", // PATCH /:id_pedido
