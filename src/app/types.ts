@@ -143,15 +143,16 @@ export type Mesas = {
   no_mesa: number;
   qr_code_url: string;
 };
-// Datos de un producto sobre un pedido
+
 export type Producto_extras_ingrSel = {
+  pedido_prod_id: number; // ← AÑADIDO para que puedas usarlo en (click)
   pedido_id: Pedidos;
   producto_id: Productos;
   estado: EstadoPedidoHasProductos;
   precio: number;
   opcion_id: Opciones;
-  extras?: Extras[];
-  ingredientes?: Ingredientes[];
+  extras: Extras[]; // ← Ya no es opcional para evitar errores de undefined
+  ingredientes: Ingredientes[]; // ← Igual aquí
 };
 
 export enum EstadoPedidoHasProductos {

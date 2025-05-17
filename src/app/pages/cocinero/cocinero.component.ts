@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { PedidosService } from '../../services/pedidos.service';
-import { Producto_extras_ingrSel } from '../../types';  // Ajusta la ruta según tu proyecto
+import { Producto_extras_ingrSel } from '../../types';
+import Swal from 'sweetalert2';
 import { CommonModule } from '@angular/common';
 
 @Component({
@@ -11,37 +12,83 @@ import { CommonModule } from '@angular/common';
   imports: [CommonModule]
 })
 export class CocineroComponent implements OnInit {
-  pedidosConDetalle: Producto_extras_ingrSel[] = [];
+  pedidosAgrupados: {
+    pedidoId: any,
+    productos: Producto_extras_ingrSel[],
+    expandido: boolean
+  }[] = [];
 
   constructor(private pedidosService: PedidosService) {}
 
   ngOnInit(): void {
-    const productoId = 9; // Cambia esto al id que necesites cargar
-    this.cargarPedidosConExtras(productoId);
-  }
-
-  cargarPedidosConExtras(productoId: number): void {
-    this.pedidosService.getExtrasIngrDeProducto(productoId).subscribe({
+    this.pedidosService.getPedidosConProductosDetalles().subscribe({
       next: (data) => {
-        this.pedidosConDetalle = Array.isArray(data) ? data : [data];
-        console.log('Pedidos con detalle cargados:', this.pedidosConDetalle);
+        const normalizado = data.map(p => ({
+          ...p,
+          extras: p.extras ?? [],
+          ingredientes: p.ingredientes ?? []
+        }));
+
+        const agrupados: { [id: number]: Producto_extras_ingrSel[] } = {};
+        normalizado.forEach(detalle => {
+          const id = detalle.pedido_id.id_pedido;
+          if (!agrupados[id]) agrupados[id] = [];
+          agrupados[id].push(detalle);
+        });
+
+        this.pedidosAgrupados = Object.entries(agrupados).map(([id, productos]) => ({
+          pedidoId: productos[0].pedido_id,
+          productos,
+          expandido: false
+        }));
       },
       error: (error) => {
-        console.error('Error al cargar pedidos con extras:', error);
+        console.error('Error cargando pedidos:', error);
       }
     });
   }
 
-  marcarComoElaborado(pedidoId: number): void {
-    this.pedidosService.cambiarEstadoProducto(pedidoId, { estado: 'Preparado' }).subscribe({
-      next: (response) => {
-        console.log('Pedido marcado como elaborado:', response);
-        // Puedes recargar los datos si quieres
-        // this.cargarPedidosConExtras(algúnProductoId);
-      },
-      error: (error) => {
-        console.error('Error al cambiar estado:', error);
+  toggleExpand(pedido: any): void {
+    pedido.expandido = !pedido.expandido;
+  }
+
+  marcarComoElaborado(pedidoProdId: number): void {
+    Swal.fire({
+      title: '¿Marcar como elaborado?',
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonText: 'Sí, marcar',
+      cancelButtonText: 'Cancelar'
+    }).then(result => {
+      if (result.isConfirmed) {
+        this.pedidosService.cambiarEstadoProducto(pedidoProdId, { estado: 'Preparado' }).subscribe({
+          next: () => {
+            Swal.fire('¡Marcado!', 'El producto fue marcado como preparado.', 'success');
+            this.ngOnInit(); // Recargar la lista
+          },
+          error: () => {
+            Swal.fire('Error', 'No se pudo cambiar el estado.', 'error');
+          }
+        });
       }
     });
   }
+
+  marcarPedidoComoElaborado(pedido: any): void {
+  // Lógica para marcar todos los productos del pedido como elaborados
+  for (let producto of pedido.productos) {
+    producto.estado = 'Preparado';
+  }
+
+  // Puedes integrar aquí una petición HTTP si necesitas hacerlo en backend
+
+  Swal.fire({
+    icon: 'success',
+    title: 'Pedido elaborado',
+    text: `El pedido #${pedido.pedidoId.id_pedido} ha sido marcado como elaborado.`,
+    timer: 2000,
+    showConfirmButton: false
+  });
+}
+
 }
