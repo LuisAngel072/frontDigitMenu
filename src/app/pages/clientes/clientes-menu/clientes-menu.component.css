@@ -96,3 +96,21 @@
     margin-bottom: 1%;
 }
 
+.modal-content {
+  background-color: #fff;
+  border-radius: 1rem;
+}
+
+.modal-header .modal-title {
+  font-family: 'cocogoose', sans-serif;
+}
+
+.form-check-label {
+  font-weight: 500;
+}
+
+@media (min-width: 992px) {
+  .modal-dialog {
+    max-width: 900px;
+  }
+}

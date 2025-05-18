@@ -26,6 +26,8 @@ export class ClientesMenuComponent implements OnInit {
   selectedExtras: any[] = [];
   precioTotal: number = 0;
   ingredientes: any[] = [];
+  searchTerm: string = '';
+  categoriasOriginales: any[] = []; // Nuevo arreglo para no perder datos originales
 
   constructor(  
     private route: ActivatedRoute,
@@ -156,12 +158,70 @@ async showProduct(prod: any) {
   
           // Asignamos subcategorías a cada categoría
           this.categorias = categorias.map(cat => {
-            const subcatFiltradas = subcategoriasConProductos.filter(
-              sub => sub.categoria_id?.id_cat === cat.id_cat
-            );
-            return { ...cat, subcategorias: subcatFiltradas };
-          });
+          const subcatFiltradas = subcategoriasConProductos.filter(
+            sub => sub.categoria_id?.id_cat === cat.id_cat
+          );
+          return { ...cat, subcategorias: subcatFiltradas };
         });
+        this.categoriasOriginales = JSON.parse(JSON.stringify(this.categorias)); // Clon profundo
+        });
+      });
+    });
+  }
+
+  filtrarProductos() {
+    const filtro = this.searchTerm.trim().toLowerCase();
+
+    if (!filtro) {
+      this.categorias = JSON.parse(JSON.stringify(this.categoriasOriginales));
+      return;
+    }
+
+    const resultado = this.categoriasOriginales
+      .map(cat => {
+        const subcategorias = cat.subcategorias
+          .map((sub: { productos: any[]; }) => {
+            const productos = sub.productos.filter((prod: { nombre_prod: string; }) =>
+              prod.nombre_prod.toLowerCase().includes(filtro)
+            );
+            return productos.length ? { ...sub, productos } : null;
+          })
+          .filter((sub: null) => sub !== null);
+
+        return subcategorias.length ? { ...cat, subcategorias } : null;
+      })
+      .filter(cat => cat !== null);
+
+    this.categorias = resultado;
+
+    // Expandir automáticamente las coincidencias en el DOM
+    setTimeout(() => {
+      this.expandirCoincidencias();
+    }, 0);
+  }
+
+  expandirCoincidencias() {
+    this.categorias.forEach((cat, i) => {
+      const collapseCat = document.getElementById(`collapse${i}`);
+      const buttonCat = document.querySelector(`[data-bs-target="#collapse${i}"]`);
+      if (collapseCat && buttonCat) {
+        const bsCollapse = new (window as any).bootstrap.Collapse(collapseCat, {
+          toggle: false,
+        });
+        bsCollapse.show();
+      }
+
+      cat.subcategorias.forEach((sub: { id_subcat: any; }) => {
+        const subEl = document.getElementById(`subcat-${sub.id_subcat}`);
+        const buttonSub = document.querySelector(
+          `[data-bs-target="#subcat-${sub.id_subcat}"]`
+        );
+        if (subEl && buttonSub) {
+          const bsCollapse = new (window as any).bootstrap.Collapse(subEl, {
+            toggle: false,
+          });
+          bsCollapse.show();
+        }
       });
     });
   }

@@ -1,6 +1,7 @@
 // meseros.component.ts
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
 import { ListaPedidosComponent } from '../comun-componentes/lista-pedidos/lista-pedidos.component';
 import Swal from 'sweetalert2';
 import { MesasService, Mesa } from '../../services/mesas.service';
@@ -20,7 +21,10 @@ export class MeserosComponent implements OnInit {
   isLoading = true;
   errorMessage = '';
 
-  constructor(private mesasService: MesasService) {}
+  constructor(
+    private mesasService: MesasService,
+    private router: Router
+  ) {}
 
   ngOnInit(): void {
     this.cargarMesas();
@@ -71,11 +75,19 @@ export class MeserosComponent implements OnInit {
       cancelButtonText: 'Cancelar'
     }).then((result) => {
       if (result.isConfirmed) {
-        Swal.fire(
-          '¡Pedido creado!',
-          `Se ha iniciado un nuevo pedido para la mesa ${mesa.no_mesa}.`,
-          'success'
-        );
+        // Navegar a la ruta del menú de clientes con el número de mesa
+        this.router.navigate(['/clientes-menu'], {
+          queryParams: { mesa: mesa.no_mesa }
+        });
+        
+        // Opcional: Mostrar mensaje de confirmación antes de navegar
+        Swal.fire({
+          title: '¡Redirigiendo!',
+          text: `Creando nuevo pedido para la mesa ${mesa.no_mesa}...`,
+          icon: 'success',
+          timer: 1500,
+          showConfirmButton: false
+        });
       }
     });
   }
