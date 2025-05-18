@@ -1,9 +1,10 @@
 // meseros.component.ts
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
 import { ListaPedidosComponent } from '../comun-componentes/lista-pedidos/lista-pedidos.component';
-import Swal from 'sweetalert2'; // Importar SweetAlert2
-import { MesasService, Mesa } from '../../services/mesas.service'; // Importar tu service
+import Swal from 'sweetalert2';
+import { MesasService, Mesa } from '../../services/mesas.service';
 import { QRCodeModule } from 'angularx-qrcode';
 
 @Component({
@@ -15,12 +16,15 @@ import { QRCodeModule } from 'angularx-qrcode';
 })
 export class MeserosComponent implements OnInit {
   @ViewChild(ListaPedidosComponent) listaPedidos!: ListaPedidosComponent;
-
+  
   mesas: Mesa[] = [];
   isLoading = true;
   errorMessage = '';
 
-  constructor(private mesasService: MesasService) {}
+  constructor(
+    private mesasService: MesasService,
+    private router: Router
+  ) {}
 
   ngOnInit(): void {
     this.cargarMesas();
@@ -38,7 +42,6 @@ export class MeserosComponent implements OnInit {
       .catch(error => {
         console.error('Error al cargar mesas:', error);
         this.errorMessage = 'No se pudieron cargar las mesas. Por favor, intente nuevamente.';
-        // Opcional: lanzar un Swal de error
         Swal.fire({
           icon: 'error',
           title: 'Error',
@@ -50,24 +53,15 @@ export class MeserosComponent implements OnInit {
       });
   }
 
-  tieneOrdenesActivas(mesa: Mesa): boolean {
-    // Para ahora, valor aleatorio
-    return Math.random() > 0.5;
-  }
+  // tieneOrdenesActivas(mesa: Mesa): boolean {
+  //   // Para ahora, valor aleatorio
+  //   return Math.random() > 0.5;
+  // }
 
   verPedidos(mesa: Mesa): void {
-    // Aquí debes traer los pedidos de la mesa
-    // Solo te muestro cómo sería el error con SweetAlert2
-
-    Swal.fire({
-      title: `Pedidos de Mesa ${mesa.no_mesa}`,
-      text: 'Aquí deberías cargar los pedidos activos.',
-      icon: 'info',
-      confirmButtonText: 'Ok'
-    });
-
+    // Usar el método existente del componente padre para ir al pedido específico
     if (this.listaPedidos) {
-      this.listaPedidos.toggleSidebar(); // Abrimos el sidebar
+      this.listaPedidos.goToOrder(mesa.no_mesa);
     }
   }
 
@@ -81,12 +75,19 @@ export class MeserosComponent implements OnInit {
       cancelButtonText: 'Cancelar'
     }).then((result) => {
       if (result.isConfirmed) {
-        // Aquí luego irías a la lógica de crear pedido
-        Swal.fire(
-          '¡Pedido creado!',
-          `Se ha iniciado un nuevo pedido para la mesa ${mesa.no_mesa}.`,
-          'success'
-        );
+        // Navegar a la ruta del menú de clientes con el número de mesa
+        this.router.navigate(['/clientes-menu'], {
+          queryParams: { mesa: mesa.no_mesa }
+        });
+        
+        // Opcional: Mostrar mensaje de confirmación antes de navegar
+        Swal.fire({
+          title: '¡Redirigiendo!',
+          text: `Creando nuevo pedido para la mesa ${mesa.no_mesa}...`,
+          icon: 'success',
+          timer: 1500,
+          showConfirmButton: false
+        });
       }
     });
   }
