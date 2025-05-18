@@ -21,11 +21,18 @@
     color: white;
     font-size: 1.5rem;
     font-weight: bold;
-    text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.7);
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
 }
+
 .accordion-button {
     width: 100%;
 }
+
 .accordion-item {
     width: 100%;
 }
@@ -83,18 +90,28 @@
 
 @media (min-width: 768px) {
     .custom-button {
-        height: 10vh;
+        height: 25vh;
         font-size: 2rem;
     }
 }
 
-.boton-categoria[aria-expanded="true"] {
-    border: 2px solid var(--color-botonPH); /* Borde llamativo */
-    font-weight: bold; /* Texto más fuerte */
-    transform: scale(1.02); /* Aumenta ligeramente el tamaño */
-    transition: transform 0.3s ease-in-out;
-    margin-bottom: 1%;
+.boton-categoria {
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    color: white;
+    font-size: 1.1rem;
+    font-weight: bold;
+    text-shadow: 1px 1px 3px rgba(0,0,0,0.6);
+    margin-top: 10px;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 20vh;
+    width: 100%;
 }
+
 
 .modal-content {
   background-color: #fff;
@@ -113,4 +130,24 @@
   .modal-dialog {
     max-width: 900px;
   }
+}
+
+.clientes-menu-wrapper {
+  background-image: url('https://image.freepik.com/free-photo/grunge-wood-background_1048-10047.jpg'); /* ruta de tu PNG */
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  min-height: 100vh;
+  padding: 20px;
+}
+
+
+.custom-modal-bg {
+  background-image: url('https://www.tullysgoodtimes.com/wp-content/uploads/CTT_WoodPanels-1.jpg'); /* tu PNG aquí */
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  color: white; /* si necesitas contraste con el texto */
+  border-radius: 12px;
+  padding: 20px;
 }
