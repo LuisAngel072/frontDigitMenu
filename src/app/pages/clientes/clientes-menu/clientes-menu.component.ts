@@ -24,6 +24,7 @@ export class ClientesMenuComponent implements OnInit {
   selectedOpcion: any = null;
   selectedExtras: any[] = [];
   precioTotal: number = 0;
+  ingredientes: any[] = [];
 
   constructor(  
     private route: ActivatedRoute,
@@ -39,32 +40,42 @@ export class ClientesMenuComponent implements OnInit {
     this.cargarCategoriasYSubcategorias();
   }
 
-  async showProduct(prod: any) {
-    this.selectedProduct = prod;
-    this.selectedExtras = [];
-    this.selectedOpcion = null;
-    this.precioTotal = parseFloat(prod.precio);
-  
-    try {
-      const [opciones, extras] = await Promise.all([
-        this.productosService.obtenerOpcionesDeProducto(prod.id_prod),
-        this.productosService.obtenerExtrasDeProducto(prod.id_prod)
-      ]);
-  
-      this.opciones = opciones;
-      this.extras = extras;
-  
-      setTimeout(() => {
-        const modal = new (window as any).bootstrap.Modal(
-          document.getElementById('productModal')
-        );
-        modal.show();
-      });
-  
-    } catch (error) {
-      console.error('Error cargando producto:', error);
-    }
+async showProduct(prod: any) {
+  this.selectedProduct = prod;
+  this.selectedExtras = [];
+  this.selectedOpcion = null;
+  this.precioTotal = parseFloat(prod.precio);
+  this.ingredientes = [];
+
+  try {
+    const [opciones, extras, ingRaw] = await Promise.all([
+      this.productosService.obtenerOpcionesDeProducto(prod.id_prod),
+      this.productosService.obtenerExtrasDeProducto(prod.id_prod),
+      this.http.get<any[]>(`${environment.ApiIP}productos/ingredientes/${prod.id_prod}`).toPromise()
+    ]);
+
+    this.opciones = opciones;
+    this.extras = extras;
+
+    // ✅ Solo asignamos si hay ingredientes
+    this.ingredientes = Array.isArray(ingRaw)
+      ? ingRaw.map(item => item.ingrediente_id)
+      : [];
+
+    setTimeout(() => {
+      const modal = new (window as any).bootstrap.Modal(
+        document.getElementById('productModal')
+      );
+      modal.show();
+    });
+
+  } catch (error) {
+    console.error('Error cargando producto:', error);
+    this.ingredientes = []; // fallback defensivo
   }
+}
+
+
   
   toggleExtra(extra: any) {
     const index = this.selectedExtras.indexOf(extra);
@@ -85,22 +96,79 @@ export class ClientesMenuComponent implements OnInit {
     this.precioTotal = base;
   }
   
-  agregarACuenta() {
-    const payload = {
-      productoId: this.selectedProduct.id_prod,
-      opcionId: this.selectedOpcion?.opcion_id?.id_opcion,
-      extras: this.selectedExtras.map(e => e.extra_id.id_extra),
-      precio: this.precioTotal,
-      mesa: this.mesaId
-    };
-  
-    this.http.post('http://localhost:3000/api/cuenta', payload).subscribe(() => {
-      Swal.fire('Agregado', 'Producto agregado a la cuenta', 'success');
+  async agregarACuenta() {
+    try {
+      // Mostrar indicador de carga
+      Swal.fire({
+        title: 'Procesando pedido...',
+        text: 'Por favor espera',
+        allowOutsideClick: false,
+        didOpen: () => {
+          Swal.showLoading();
+        }
+      });
+
+      // 1. Obtener todos los pedidos existentes
+      const pedidos: any[] = await this.http.get<any[]>(`${environment.ApiIP}pedidos`).toPromise() ?? [];
+
+      // 2. Buscar si hay uno activo para esta mesa
+      const pedidoExistente = pedidos.find(p =>
+        p.no_mesa?.no_mesa === parseInt(this.mesaId!) &&
+        p.estado === 'Iniciado'
+      );
+
+      let idPedido: number;
+
+      if (pedidoExistente) {
+        idPedido = pedidoExistente.id_pedido;
+      } else {
+        // 3. Crear nuevo pedido
+        await this.http.post<any>(
+          `${environment.ApiIP}pedidos/registrar`,
+          { no_mesa: parseInt(this.mesaId!) }
+        ).toPromise();
+
+        // 4. Obtener el nuevo pedido creado
+        const pedidosActualizados: any[] = await this.http.get<any[]>(`${environment.ApiIP}pedidos`).toPromise() ?? [];
+        const ultimoPedido = pedidosActualizados
+          .filter(p => p.no_mesa?.no_mesa === parseInt(this.mesaId!))
+          .sort((a, b) => b.id_pedido - a.id_pedido)[0];
+
+        idPedido = ultimoPedido.id_pedido;
+      }
+
+      // 5. Preparar el cuerpo para registrar el producto
+      const payloadProducto = {
+        pedido_id: idPedido,
+        producto_id: this.selectedProduct.id_prod,
+        opcion_id: this.selectedOpcion?.opcion_id?.id_opcion ?? null,
+        precio: this.precioTotal,
+        extras: this.selectedExtras.map(e => e.extra_id.id_extra),
+        ingr: this.ingredientes.map(i => i.id_ingr)
+      };
+
+      // 6. Registrar el producto al pedido
+      await this.http.post(`${environment.ApiIP}pedidos/registrar/productos`, payloadProducto).toPromise();
+
+      // Cerrar la alerta de carga
+      Swal.close();
+
+      // Mostrar éxito
+      Swal.fire('¡Agregado!', 'Producto agregado al pedido', 'success');
+
+      // Cerrar modal
       const modalEl = document.getElementById('productModal');
       const modal = (window as any).bootstrap.Modal.getInstance(modalEl);
       modal.hide();
-    });
+
+    } catch (error) {
+      console.error('Error al agregar producto al pedido:', error);
+      Swal.close(); // Asegúrate de cerrar cualquier loading
+      Swal.fire('Error', 'No se pudo agregar el producto', 'error');
+    }
   }
+
+
 
   cargarCategoriasYSubcategorias(): void {
     const cat$ = this.http.get<any[]>(`${environment.ApiIP}categorias`);

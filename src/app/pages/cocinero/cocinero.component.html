@@ -1,34 +1,76 @@
-<div class="cocinero-container">
-  <div class="modal-panel">
-    <h1 class="text-center">Pedidos</h1>
+<div class="container-fluid py-3">
+  <h2 class="text-center mb-4 fw-bold">Pedidos de Cocina</h2>
 
-    <!-- Contenedor con 4 columnas fijas para mostrar las mesas -->
-    <div class="columna-pedidos">
-      <ng-container *ngFor="let mesa of mesas">
-        <div class="columna">
-          <div *ngIf="!mesa.todosCompletados" class="mesa">
-            <h2 class="mesa-titulo">Mesa {{ mesa.numero }}</h2>
+  <div class="row gx-3 gy-4" style="max-height: 85vh; overflow-y: auto;">
+    <div class="col-md-6 col-xl-3" *ngFor="let pedido of pedidosAgrupados">
+      <div class="card shadow-sm border-0 h-100">
+        <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+          <div>
+            <strong>Pedido #{{ pedido.pedidoId.id_pedido }}</strong><br>
+            Mesa: {{ pedido.pedidoId.no_mesa.no_mesa }}
+          </div>
+          <button class="btn btn-sm btn-outline-light" (click)="toggleExpand(pedido)">
+            {{ pedido.expandido ? '−' : '+' }}
+          </button>
+        </div>
 
-            <div class="tickets">
-              <ng-container *ngFor="let pedido of mesa.pedidos">
-                <div class="ticket">
-                  <div class="ticket-info">
-                    <p>{{ pedido.nombre }} (Cantidad: {{ pedido.cantidad }})</p>
+        <div class="card-body" *ngIf="pedido.expandido; else resumenPedido">
+          <p class="text-muted mb-2"><i class="bi bi-clock"></i> {{ pedido.pedidoId.fecha_pedido | date:'short' }}</p>
 
-                    <p><strong>Ingredientes:</strong> {{ pedido.ingredientes.join(', ') }}</p>
-                    <p><strong>Opciones:</strong> {{ pedido.opciones.join(', ') }}</p>
-                    <p><strong>Extras:</strong> {{ pedido.extras.join(', ') }}</p>
-                  </div>
-                </div>
-              </ng-container>
+          <!-- Detalles de los productos -->
+          <div *ngFor="let detalle of pedido.productos" class="mb-3 border-bottom pb-2">
+            <h5 class="mb-1">{{ detalle.producto_id.nombre_prod }}</h5>
+            <p class="mb-1"><strong>Opción:</strong> {{ detalle.opcion_id.nombre_opcion }}</p>
+            <p class="mb-1">
+              <strong>Estado:</strong>
+              <span class="badge"
+                [ngClass]="{
+                  'bg-warning': detalle.estado === 'Sin preparar',
+                  'bg-success': detalle.estado === 'Preparado',
+                  'bg-info': detalle.estado === 'Entregado',
+                  'bg-secondary': detalle.estado === 'Pagado'
+                }">
+                {{ detalle.estado }}
+              </span>
+            </p>
+            <p class="mb-1"><strong>Precio:</strong> ${{ detalle.precio }}</p>
+
+            <div *ngIf="detalle.extras.length > 0">
+              <strong>Extras:</strong>
+              <ul class="mb-1">
+                <li *ngFor="let extra of detalle.extras">✅ {{ extra.nombre_extra }} - ${{ extra.precio }}</li>
+              </ul>
             </div>
 
-            <button class="btn-realizado" (click)="confirmarElaborado(mesa.numero)">
-              Realizado
+            <div *ngIf="detalle.ingredientes.length > 0">
+              <strong>Ingredientes:</strong>
+              <ul class="mb-1">
+                <li *ngFor="let ing of detalle.ingredientes">🧂 {{ ing.nombre_ingrediente }} - ${{ ing.precio }}</li>
+              </ul>
+            </div>
+          </div>
+
+          <!-- ✅ Botón único al final de la tarjeta expandida -->
+          <div class="text-center mt-3">
+            <button class="btn btn-success w-100"
+                    (click)="marcarPedidoComoElaborado(pedido)">
+              ✅ Marcar pedido como elaborado
             </button>
           </div>
         </div>
-      </ng-container>
+
+        <!-- Resumen cuando está contraído -->
+        <ng-template #resumenPedido>
+          <ul class="list-group list-group-flush">
+            <li *ngFor="let p of pedido.productos.slice(0, 3)" class="list-group-item">
+              🍽️ {{ p.producto_id.nombre_prod }}
+            </li>
+            <li *ngIf="pedido.productos.length > 3" class="list-group-item text-muted text-center small fst-italic">
+              ...{{ pedido.productos.length - 3 }} más
+            </li>
+          </ul>
+        </ng-template>
+      </div>
     </div>
   </div>
 </div>

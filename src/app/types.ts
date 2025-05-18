@@ -15,8 +15,6 @@ export type Usuarios = {
   activo: boolean; //El valor es entre 1 y 0. 1 activo, 0 inactivo
 };
 
-
-
 export type Telefonos = {
   id_telefono: number;
   telefono: string; //No mas de 12 caracteres
@@ -108,7 +106,7 @@ export type P_H_E = {
   precio: number;
   extra_id: Extras;
   producto_id?: Productos;
-}
+};
 
 //Productos_has_opciones
 export type P_H_O = {
@@ -116,7 +114,7 @@ export type P_H_O = {
   porcentaje: number;
   opcion_id: Opciones;
   producto_id?: Productos;
-}
+};
 
 //Productos_has_ingredientes
 export type P_H_I = {
@@ -124,4 +122,42 @@ export type P_H_I = {
   precio: number;
   ingrediente_id: Ingredientes;
   producto_id?: Productos;
+};
+
+export enum EstadoPedido {
+  iniciado = 'Iniciado',
+  pagado = 'Pagado',
+}
+
+//Tabla pedidos
+export type Pedidos = {
+  id_pedido: number;
+  no_mesa: Mesas;
+  fecha_pedido: Date;
+  total: number;
+  estado: EstadoPedido;
+};
+// Tabla mesas
+export type Mesas = {
+  id_mesa: number;
+  no_mesa: number;
+  qr_code_url: string;
+};
+
+export type Producto_extras_ingrSel = {
+  pedido_prod_id: number; // ← AÑADIDO para que puedas usarlo en (click)
+  pedido_id: Pedidos;
+  producto_id: Productos;
+  estado: EstadoPedidoHasProductos;
+  precio: number;
+  opcion_id: Opciones;
+  extras: Extras[]; // ← Ya no es opcional para evitar errores de undefined
+  ingredientes: Ingredientes[]; // ← Igual aquí
+};
+
+export enum EstadoPedidoHasProductos {
+  sin_preparar = 'Sin preparar',
+  preparado = 'Preparado',
+  entregado = 'Entregado',
+  pagado = 'Pagado',
 }

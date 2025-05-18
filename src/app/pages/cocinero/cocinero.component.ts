@@ -1,70 +1,94 @@
-import { Component } from '@angular/core';
-import { CommonModule } from '@angular/common';  
-import { FormsModule } from '@angular/forms';  
-
-export interface Pedido {
-  id: number;
-  nombre: string;
-  cantidad: number;
-  elaborado: boolean;
-  ingredientes: string[];
-  opciones: string[];
-  extras: string[];
-}
-
-export interface Mesa {
-  numero: number;
-  pedidos: Pedido[];
-  todosCompletados: boolean;
-}
+import { Component, OnInit } from '@angular/core';
+import { PedidosService } from '../../services/pedidos.service';
+import { Producto_extras_ingrSel } from '../../types';
+import Swal from 'sweetalert2';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-cocinero',
-  standalone: true,  
+  standalone: true,
   templateUrl: './cocinero.component.html',
   styleUrls: ['./cocinero.component.css'],
-  imports: [CommonModule, FormsModule]  
+  imports: [CommonModule]
 })
-export class CocineroComponent {
-  mesas = [
-    { numero: 1, pedidos: [{ id: 1, nombre: 'Pizza', cantidad: 2, elaborado: false, ingredientes: ['Mushrooms', 'Cheese'], opciones: ['Large', 'Thin Crust'], extras: ['Extra cheese', 'Garlic sauce'] }], todosCompletados: false },
-    { numero: 2, pedidos: [{ id: 2, nombre: 'Ensalada', cantidad: 1, elaborado: false, ingredientes: ['Lettuce', 'Tomato'], opciones: ['Small', 'Dressing on the side'], extras: ['Croutons'] }], todosCompletados: false },
-    { numero: 3, pedidos: [{ id: 3, nombre: 'Tacos', cantidad: 3, elaborado: false, ingredientes: ['Beef', 'Lettuce'], opciones: ['Soft'], extras: ['Salsa'] }], todosCompletados: false },
-    { numero: 4, pedidos: [{ id: 4, nombre: 'Sopa', cantidad: 1, elaborado: false, ingredientes: ['Broth', 'Vegetables'], opciones: ['Small'], extras: ['Lemon'] }], todosCompletados: false },
-    // Más mesas pueden agregarse dinámicamente cuando se confirmen
-  ];
+export class CocineroComponent implements OnInit {
+  pedidosAgrupados: {
+    pedidoId: any,
+    productos: Producto_extras_ingrSel[],
+    expandido: boolean
+  }[] = [];
 
-  marcarComoElaborado(pedidoId: number, numeroMesa: number) {
-    const mesa = this.mesas.find(m => m.numero === numeroMesa);
-    if (mesa) {
-      const pedido = mesa.pedidos.find(p => p.id === pedidoId);
-      if (pedido) {
-        pedido.elaborado = true;
+  constructor(private pedidosService: PedidosService) {}
+
+  ngOnInit(): void {
+    this.pedidosService.getPedidosConProductosDetalles().subscribe({
+      next: (data) => {
+        const normalizado = data.map(p => ({
+          ...p,
+          extras: p.extras ?? [],
+          ingredientes: p.ingredientes ?? []
+        }));
+
+        const agrupados: { [id: number]: Producto_extras_ingrSel[] } = {};
+        normalizado.forEach(detalle => {
+          const id = detalle.pedido_id.id_pedido;
+          if (!agrupados[id]) agrupados[id] = [];
+          agrupados[id].push(detalle);
+        });
+
+        this.pedidosAgrupados = Object.entries(agrupados).map(([id, productos]) => ({
+          pedidoId: productos[0].pedido_id,
+          productos,
+          expandido: true
+        }));
+      },
+      error: (error) => {
+        console.error('Error cargando pedidos:', error);
       }
-    }
+    });
   }
 
-  confirmarElaborado(numeroMesa: number) {
-    const mesa = this.mesas.find(m => m.numero === numeroMesa);
-    if (mesa) {
-      mesa.todosCompletados = mesa.pedidos.every(p => p.elaborado);
-      if (mesa.todosCompletados) {
-        this.agregarNuevoPedidoALaMesa();
+  toggleExpand(pedido: any): void {
+    pedido.expandido = !pedido.expandido;
+  }
+
+  marcarComoElaborado(pedidoProdId: number): void {
+    Swal.fire({
+      title: '¿Marcar como elaborado?',
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonText: 'Sí, marcar',
+      cancelButtonText: 'Cancelar'
+    }).then(result => {
+      if (result.isConfirmed) {
+        this.pedidosService.cambiarEstadoProducto(pedidoProdId, { estado: 'Preparado' }).subscribe({
+          next: () => {
+            Swal.fire('¡Marcado!', 'El producto fue marcado como preparado.', 'success');
+            this.ngOnInit(); // Recargar la lista
+          },
+          error: () => {
+            Swal.fire('Error', 'No se pudo cambiar el estado.', 'error');
+          }
+        });
       }
-    }
+    });
   }
 
-  agregarNuevoPedidoALaMesa() {
-    const nuevaMesa: Mesa = {
-      numero: this.mesas.length + 1,
-      pedidos: [{ id: Date.now(), nombre: 'Nuevo Pedido', cantidad: 1, elaborado: false, ingredientes: ['Nuevo ingrediente'], opciones: ['Nueva opción'], extras: ['Nuevo extra'] }],
-      todosCompletados: false
-    };
-    this.mesas.push(nuevaMesa);
+  marcarPedidoComoElaborado(pedido: any): void {
+  // Lógica para marcar todos los productos del pedido como elaborados
+  for (let producto of pedido.productos) {
+    producto.estado = 'Preparado';
   }
 
-  checkAllPedidos(mesa: Mesa) {
-    // Usamos el tipo Pedido para 'p'
-    mesa.todosCompletados = mesa.pedidos.every((p: Pedido) => p.elaborado);  // Aquí estamos especificando que p es de tipo Pedido
-  }
+  // Puedes integrar aquí una petición HTTP si necesitas hacerlo en backend
+
+  Swal.fire({
+    icon: 'success',
+    title: 'Pedido elaborado',
+    text: `El pedido #${pedido.pedidoId.id_pedido} ha sido marcado como elaborado.`,
+    timer: 2000,
+    showConfirmButton: false
+  });
+}
+
 }

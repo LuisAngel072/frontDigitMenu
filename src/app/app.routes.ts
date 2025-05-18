@@ -33,12 +33,7 @@ export const routes: Routes = [
         component: ClientesMenuComponent
     },
     {
-        path: '',
-        redirectTo: '/cocinero',  // Esto redirige al componente del cocinero por defecto
-        pathMatch: 'full'
-      },
-      {
-        path: 'cocinero',  // Ruta para cargar el componente Cocinero
+        path: "cocinero", // Agregar ruta para el componente cocinero
         component: CocineroComponent
-      }
+    }
 ];
