@@ -82,6 +82,15 @@
           </div>
         </div>
 
+        <div class="mb-3">
+          <h6>Ingredientes:</h6>
+          <ul class="list-group">
+            <li style="list-style: none;" *ngFor="let ing of ingredientes">
+              {{ ing.nombre_ingrediente }}
+            </li>
+          </ul>
+        </div>
+
         <h5 class="mt-4">Precio total: ${{ precioTotal }}</h5>
         <div class="text-center">
           <button class="btn btn-prim mt-2" (click)="agregarACuenta()">Agregar a la cuenta</button>
