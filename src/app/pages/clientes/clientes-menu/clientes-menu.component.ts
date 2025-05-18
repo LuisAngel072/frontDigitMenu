@@ -6,6 +6,7 @@ import { environment } from '../../../../environment';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ProductosService } from '../../../services/productos.service'; // ajusta ruta según estructura
+import { PedidosService } from '../../../services/pedidos.service';
 
 @Component({
   selector: 'app-clientes-menu',
@@ -29,7 +30,8 @@ export class ClientesMenuComponent implements OnInit {
   constructor(  
     private route: ActivatedRoute,
     private http: HttpClient,
-    private productosService: ProductosService
+    private productosService: ProductosService,
+    private pedidosService: PedidosService  // Asegúrate de inyectar el servicio
   ) {}
 
   ngOnInit(): void {
@@ -108,47 +110,15 @@ async showProduct(prod: any) {
         }
       });
 
-      // 1. Obtener todos los pedidos existentes
-      const pedidos: any[] = await this.http.get<any[]>(`${environment.ApiIP}pedidos`).toPromise() ?? [];
-
-      // 2. Buscar si hay uno activo para esta mesa
-      const pedidoExistente = pedidos.find(p =>
-        p.no_mesa?.no_mesa === parseInt(this.mesaId!) &&
-        p.estado === 'Iniciado'
-      );
-
-      let idPedido: number;
-
-      if (pedidoExistente) {
-        idPedido = pedidoExistente.id_pedido;
-      } else {
-        // 3. Crear nuevo pedido
-        await this.http.post<any>(
-          `${environment.ApiIP}pedidos/registrar`,
-          { no_mesa: parseInt(this.mesaId!) }
-        ).toPromise();
-
-        // 4. Obtener el nuevo pedido creado
-        const pedidosActualizados: any[] = await this.http.get<any[]>(`${environment.ApiIP}pedidos`).toPromise() ?? [];
-        const ultimoPedido = pedidosActualizados
-          .filter(p => p.no_mesa?.no_mesa === parseInt(this.mesaId!))
-          .sort((a, b) => b.id_pedido - a.id_pedido)[0];
-
-        idPedido = ultimoPedido.id_pedido;
-      }
-
-      // 5. Preparar el cuerpo para registrar el producto
-      const payloadProducto = {
-        pedido_id: idPedido,
-        producto_id: this.selectedProduct.id_prod,
-        opcion_id: this.selectedOpcion?.opcion_id?.id_opcion ?? null,
-        precio: this.precioTotal,
-        extras: this.selectedExtras.map(e => e.extra_id.id_extra),
-        ingr: this.ingredientes.map(i => i.id_ingr)
-      };
-
-      // 6. Registrar el producto al pedido
-      await this.http.post(`${environment.ApiIP}pedidos/registrar/productos`, payloadProducto).toPromise();
+      // Usar el nuevo método del servicio que maneja todo el flujo
+      await this.pedidosService.agregarProductoCompleto(
+        parseInt(this.mesaId!),
+        this.selectedProduct,
+        this.selectedOpcion,
+        this.selectedExtras,
+        this.ingredientes,
+        this.precioTotal
+      ).toPromise();
 
       // Cerrar la alerta de carga
       Swal.close();
@@ -163,12 +133,10 @@ async showProduct(prod: any) {
 
     } catch (error) {
       console.error('Error al agregar producto al pedido:', error);
-      Swal.close(); // Asegúrate de cerrar cualquier loading
+      Swal.close();
       Swal.fire('Error', 'No se pudo agregar el producto', 'error');
     }
   }
-
-
 
   cargarCategoriasYSubcategorias(): void {
     const cat$ = this.http.get<any[]>(`${environment.ApiIP}categorias`);
@@ -197,7 +165,4 @@ async showProduct(prod: any) {
       });
     });
   }
-  
-
- 
 }
