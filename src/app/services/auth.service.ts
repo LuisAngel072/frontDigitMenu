@@ -15,7 +15,7 @@ export class AuthService {
     ) { }
 
     /**
-     * 
+     *
      * @param data codigo y contrasena del usuario en un objeto { codigo, contrasena}
      * @returns Autenticacion exitosa o credenciales inválidas
      */
@@ -30,12 +30,7 @@ export class AuthService {
           return false;
         }
       } catch (error: any) {
-        if (error.status === 401) {
-          return false;
-        } else {
-          console.error('Error during authentication:', error);
-          throw error;
-        }
+        return false;
       }
     }
 
@@ -44,20 +39,20 @@ export class AuthService {
         decodificado = this.jwtHelper.decodeToken(token);
       localStorage.setItem('rol', decodificado.rol);
       return decodificado.rol;
-  
+
     }
-  
+
     getId() {
       var token: any = localStorage.getItem('tok');
       var decodificado = this.jwtHelper.decodeToken(token);
       return decodificado.codigo;
     }
-  
+
     getToken() {
       let token: any = localStorage.getItem('tok')?.toString()
       return token
     }
-    
+
     getInfo() {
       var token: any = localStorage.getItem('tok'),
         decodificado = this.jwtHelper.decodeToken(token);
@@ -67,7 +62,7 @@ export class AuthService {
       localStorage.setItem('rol', decodificado.rol);
       return
     }
-    
+
 
     cerrarSesion() {
       localStorage.clear();

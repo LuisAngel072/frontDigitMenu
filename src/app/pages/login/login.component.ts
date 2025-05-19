@@ -42,6 +42,7 @@ export class LoginComponent {
       .autenticar(data)
       .then((isSuccessful: boolean) => {
         if (!isSuccessful) {
+          Swal.close();
           Swal.fire({
             title: 'Uy algo salió mal...',
             text: 'Credenciales inválidas o usuario desactivado',
@@ -49,6 +50,7 @@ export class LoginComponent {
             customClass: { confirmButton: 'btn btn-terc' },
           });
         } else {
+          Swal.close();
           Swal.fire({
             title: 'Credenciales válidas',
             text: 'Iniciando sesión',
@@ -61,8 +63,13 @@ export class LoginComponent {
         }
       })
       .catch((error) => {
-        if (error.status == 401) {
-        }
+        Swal.close();
+        Swal.fire({
+          title: 'Uy algo salió mal...',
+          text: 'Credenciales inválidas o usuario desactivado',
+          icon: 'warning',
+          customClass: { confirmButton: 'btn btn-terc' },
+        });
       });
   }
 }

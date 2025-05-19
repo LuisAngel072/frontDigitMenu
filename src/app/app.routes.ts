@@ -6,34 +6,39 @@ import { CrudProductosComponent } from './pages/administrador/crud-productos/cru
 import { ClientesComponent } from './pages/clientes/clientes.component';
 import { ClientesMenuComponent } from './pages/clientes/clientes-menu/clientes-menu.component';
 import { CocineroComponent } from './pages/cocinero/cocinero.component'; // Importar CocineroComponent
+import { MeserosComponent } from './pages/meseros/meseros.component';
 
 export const routes: Routes = [
-    {
-        path: "",
-        component: LoginComponent
-    },
-    {
-        path: "Administrador",
-        component: AdministradorComponent
-    },
-    {
-        path: "empleados",
-        component: CrudEmpleadosComponent
-    },
-    {
-        path: "productos",
-        component: CrudProductosComponent
-    },
-    {
-        path: "clientes",
-        component: ClientesComponent
-    },
-    {
-        path: "clientes-menu",
-        component: ClientesMenuComponent
-    },
-    {
-        path: "cocinero", // Agregar ruta para el componente cocinero
-        component: CocineroComponent
-    }
+  {
+    path: '',
+    component: LoginComponent,
+  },
+  {
+    path: 'Administrador',
+    component: AdministradorComponent,
+  },
+  {
+    path: 'empleados',
+    component: CrudEmpleadosComponent,
+  },
+  {
+    path: 'productos',
+    component: CrudProductosComponent,
+  },
+  {
+    path: 'clientes',
+    component: ClientesComponent,
+  },
+  {
+    path: 'clientes-menu',
+    component: ClientesMenuComponent,
+  },
+  {
+    path: 'Cocinero', // Agregar ruta para el componente cocinero
+    component: CocineroComponent,
+  },
+  {
+    path: 'Mesero',
+    component: MeserosComponent,
+  },
 ];

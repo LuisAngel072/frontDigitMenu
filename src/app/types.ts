@@ -144,10 +144,7 @@ export type Mesas = {
   qr_code_url: string;
 };
 
-<<<<<<< HEAD
 // Datos de un producto sobre un pedido
-=======
->>>>>>> productos
 export type Producto_extras_ingrSel = {
   pedido_prod_id: number; // ← AÑADIDO para que puedas usarlo en (click)
   pedido_id: Pedidos;

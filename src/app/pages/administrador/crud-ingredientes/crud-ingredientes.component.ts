@@ -29,13 +29,6 @@ export class CrudIngredientesComponent {
   @Input() opciones: Opciones[] = [];
 
   ingredientesFiltrados: Ingredientes[] = [];
-<<<<<<< HEAD
-
-  @ViewChild(MatPaginator) paginator!: MatPaginator;
-
-  currentPage: number = 0;
-  pageSize: number = 5;
-=======
   opcionesFiltradas: Opciones[] = [];
   extrasFiltrados: Extras[] = [];
 
@@ -43,7 +36,6 @@ export class CrudIngredientesComponent {
 
   currentPageIngr: number = 0;
   pageSizeIngr: number = 5;
->>>>>>> productos
 
   currentPageExt: number = 0;
   pageSizeExt: number = 5;
@@ -104,13 +96,8 @@ export class CrudIngredientesComponent {
    * Permite paginar los ingredientes
    */
   updateIngredientesFiltrados() {
-<<<<<<< HEAD
-    const startIndex = this.currentPage * this.pageSize;
-    const endIndex = startIndex + this.pageSize;
-=======
     const startIndex = this.currentPageIngr * this.pageSizeIngr;
     const endIndex = startIndex + this.pageSizeIngr;
->>>>>>> productos
     this.ingredientesFiltrados = this.ingredientes.slice(
       startIndex,
       endIndex
@@ -120,35 +107,23 @@ export class CrudIngredientesComponent {
    * Permite paginar las opciones
    */
   updateOpcionesFiltradas() {
-<<<<<<< HEAD
-    const startIndex = this.currentPage * this.pageSize;
-    const endIndex = startIndex + this.pageSize;
-    this.opciones = this.adminComponente.opciones.slice(startIndex, endIndex);
-=======
     const startIndex = this.currentPageOpc * this.pageSizeOpc;
     const endIndex = startIndex + this.pageSizeOpc;
     this.opcionesFiltradas = this.opciones.slice(
       startIndex,
       endIndex
     );
->>>>>>> productos
   }
   /**
    * Permite paginar los extras
    */
   updateExtrasFiltrados() {
-<<<<<<< HEAD
-    const startIndex = this.currentPage * this.pageSize;
-    const endIndex = startIndex + this.pageSize;
-    this.extras = this.adminComponente.extras.slice(startIndex, endIndex);
-=======
     const startIndex = this.currentPageExt * this.pageSizeExt;
     const endIndex = startIndex + this.pageSizeExt;
     this.extrasFiltrados = this.extras.slice(
       startIndex,
       endIndex
     );
->>>>>>> productos
   }
 
   /**

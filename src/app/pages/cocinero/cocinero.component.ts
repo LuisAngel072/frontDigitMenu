@@ -3,13 +3,14 @@ import { PedidosService } from '../../services/pedidos.service';
 import { Producto_extras_ingrSel } from '../../types';
 import Swal from 'sweetalert2';
 import { CommonModule } from '@angular/common';
+import { HeaderComponent } from '../comun-componentes/header/header.component';
 
 @Component({
   selector: 'app-cocinero',
   standalone: true,
   templateUrl: './cocinero.component.html',
   styleUrls: ['./cocinero.component.css'],
-  imports: [CommonModule]
+  imports: [CommonModule, HeaderComponent]
 })
 export class CocineroComponent implements OnInit {
   pedidosAgrupados: {

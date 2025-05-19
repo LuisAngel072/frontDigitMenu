@@ -67,3 +67,7 @@ h1 {
 .btn-realizado:hover {
   background-color: var(--color-botonPH);
 }
+
+.main-content {
+  padding-top: 90px;
+}
