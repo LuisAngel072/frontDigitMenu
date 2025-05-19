@@ -6,8 +6,8 @@
   
   <div class="qr-container">
     <div *ngFor="let mesa of mesas" class="qr-item">
-      <p>Mesa {{ mesa }}</p>
-      <qrcode [qrdata]="generarURL(mesa)" [width]="200" [errorCorrectionLevel]="'M'"></qrcode>
+      <p>Mesa {{ mesa.id }}</p>
+      <qrcode [qrdata]="mesa.qrData" [width]="200" [errorCorrectionLevel]="'M'"></qrcode>
     </div>
   </div>
 </main>

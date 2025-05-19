@@ -76,20 +76,19 @@ export class CocineroComponent implements OnInit {
   }
 
   marcarPedidoComoElaborado(pedido: any): void {
-  // Lógica para marcar todos los productos del pedido como elaborados
-  for (let producto of pedido.productos) {
-    producto.estado = 'Preparado';
+    // Lógica para marcar todos los productos del pedido como elaborados
+    for (let producto of pedido.productos) {
+      producto.estado = 'Preparado';
+    }
+
+    // Puedes integrar aquí una petición HTTP si necesitas hacerlo en backend
+
+    Swal.fire({
+      icon: 'success',
+      title: 'Pedido elaborado',
+      text: `El pedido #${pedido.pedidoId.id_pedido} ha sido marcado como elaborado.`,
+      timer: 2000,
+      showConfirmButton: false
+    });
   }
-
-  // Puedes integrar aquí una petición HTTP si necesitas hacerlo en backend
-
-  Swal.fire({
-    icon: 'success',
-    title: 'Pedido elaborado',
-    text: `El pedido #${pedido.pedidoId.id_pedido} ha sido marcado como elaborado.`,
-    timer: 2000,
-    showConfirmButton: false
-  });
-}
-
 }
