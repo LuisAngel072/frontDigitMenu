@@ -1,4 +1,4 @@
-import { Extras, Ingredientes, Opciones } from "./types";
+import { EstadoPedido, Extras, Ingredientes, Opciones } from "./types";
 
 export type UsuariosDTO = {
   codigo: string;
@@ -81,4 +81,14 @@ export type Pedidos_has_ProductosDto = {
   opcion_id: number;
   extras: number[]; //Llaves primarias de los extras
   ingr: number[]; //Llaves primarias de los ingredientes
+}
+
+export type CrPedidoDto = {
+  no_mesa: number; //Para crear un pedido, crealo simplemente con el no. de mesa
+  //donde se encuentran los clientes
+}
+
+export type UpPedidoDto = {
+  total: number; //Actualiza el total del pedido, conforme se agregan productos al mismo
+  estado: EstadoPedido; //Actualiza el estado del pedido, si este fue pagado/terminado
 }

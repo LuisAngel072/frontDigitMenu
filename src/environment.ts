@@ -85,10 +85,13 @@ export const environment = {
    * Pedidos
    */
   ApiObtenerPedidos: "pedidos", // GET
+  ApiObtenerPedidoIniciadoByNoMesa: 'pedidos/no_mesa/', //GET  /:no_mesa
   ApiObtenerProductosDePedido: "pedidos/productos/", // GET /:id_pedido
-   ApiObtenerExtrasIngrProducto: "pedidos/productos/extrasIngrs", // GET /pedidos/productos/extrasIngrs/:p_h_pr_id
+  ApiObtenerExtrasIngrProducto: "pedidos/productos/extrasIngrs", // GET /pedidos/productos/extrasIngrs/:p_h_pr_id
   ApiCrearPedido: "pedidos/registrar", // POST
   ApiAgregarProductoAlPedido: "pedidos/registrar/productos", // POST
   ApiActualizarPedido: "pedidos/actualizar/", // PATCH /:id_pedido
   ApiCambiarEstadoProducto: "pedidos/actualizar/", // PATCH /:pedido_prod_id
+
+
 }

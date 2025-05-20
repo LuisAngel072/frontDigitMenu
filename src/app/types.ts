@@ -156,6 +156,33 @@ export type Producto_extras_ingrSel = {
   ingredientes: Ingredientes[]; // ← Igual aquí
 };
 
+//Tabla pedidos_has_productos
+export type Pedidos_has_productos = {
+  pedido_prod_id: number; //Llave primaria
+  pedido_id: Pedidos; //Llave foránea a pedidos
+  producto_id: Productos; //Llave foranea a productos
+  estado: EstadoPedidoHasProductos; //Enum estado
+  precio: number; //Precio calculado al escoger los ingr, extras y opcion del producto en el pedido
+  opcion_id: Opciones; //Llave foranea de opciones, la opcion seleccionada que el cliente escogió
+}
+
+// Tabla pedidos_has_extrassel
+export type Pedidos_has_extrassel = {
+  pedido_extra_id: number; //Llave primaria
+  precio: number; //Precio del extra registrado en el momento
+  pedido_prod_id: Pedidos_has_productos; //Llave que referencia al producto del pedido que
+  // se están seleccionando los extras
+  extra_id: Extras; //Extra seleccionado
+}
+// Tabla pedidos_has_ingrsel
+export type Pedidos_has_ingrsel = {
+  pedido_ingr_id: number; //Llave primaria
+  precio: number; //Precio del ingrediente registrado en el momento
+  pedido_prod_id: Pedidos_has_productos; //Llave que referencia al producto del pedido que
+  // se están seleccionando los ingredientes
+  ingrediente_id: Extras; //Ingrediente seleccionado
+}
+
 export enum EstadoPedidoHasProductos {
   sin_preparar = 'Sin preparar',
   preparado = 'Preparado',

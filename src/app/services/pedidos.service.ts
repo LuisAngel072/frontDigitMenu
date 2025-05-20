@@ -1,12 +1,12 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, forkJoin } from 'rxjs';
+import { Observable, forkJoin, lastValueFrom } from 'rxjs';
 import { map, switchMap } from 'rxjs/operators';
 import { environment } from '../../environment';
-import { Producto_extras_ingrSel } from '../types';
+import { Pedidos, Producto_extras_ingrSel } from '../types';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class PedidosService {
   private baseUrl = environment.ApiIP + 'pedidos';
@@ -16,29 +16,39 @@ export class PedidosService {
   // Función existente
   getPedidosConProductosDetalles(): Observable<Producto_extras_ingrSel[]> {
     return this.http.get<any[]>(`${this.baseUrl}`).pipe(
-      switchMap(pedidos => {
-        const detalles$ = pedidos.map(pedido =>
-          this.http.get<any[]>(`${this.baseUrl}/productos/${pedido.id_pedido}`).pipe(
-            switchMap((productos: any[]) => {
-              const detallesProductos$ = productos.map(prod =>
-                this.http.get<Producto_extras_ingrSel>(
-                  `${this.baseUrl}/productos/extrasIngrs/${prod.pedido_prod_id}`
-                )
-              );
-              return forkJoin(detallesProductos$);
-            })
-          )
+      switchMap((pedidos) => {
+        const detalles$ = pedidos.map((pedido) =>
+          this.http
+            .get<any[]>(`${this.baseUrl}/productos/${pedido.id_pedido}`)
+            .pipe(
+              switchMap((productos: any[]) => {
+                const detallesProductos$ = productos.map((prod) =>
+                  this.http.get<Producto_extras_ingrSel>(
+                    `${this.baseUrl}/productos/extrasIngrs/${prod.pedido_prod_id}`
+                  )
+                );
+                return forkJoin(detallesProductos$);
+              })
+            )
         );
         return forkJoin(detalles$).pipe(
-          map((detallesAnidados: Producto_extras_ingrSel[][]) => detallesAnidados.flat())
+          map((detallesAnidados: Producto_extras_ingrSel[][]) =>
+            detallesAnidados.flat()
+          )
         );
       })
     );
   }
 
   // Función existente
-  cambiarEstadoProducto(pedidoProdId: number, estado: { estado: string }): Observable<any> {
-    return this.http.patch<any>(`${this.baseUrl}/actualizar/producto/${pedidoProdId}`, estado);
+  cambiarEstadoProducto(
+    pedidoProdId: number,
+    estado: { estado: string }
+  ): Observable<any> {
+    return this.http.patch<any>(
+      `${this.baseUrl}/actualizar/producto/${pedidoProdId}`,
+      estado
+    );
   }
 
   // ============ NUEVAS FUNCIONES ============
@@ -57,13 +67,39 @@ export class PedidosService {
    */
   buscarPedidoActivoPorMesa(numeroMesa: number): Observable<any | null> {
     return this.obtenerTodosPedidos().pipe(
-      map(pedidos => {
-        const pedidoExistente = pedidos.find(p =>
-          p.no_mesa?.no_mesa === numeroMesa && p.estado === 'Iniciado'
+      map((pedidos) => {
+        const pedidoExistente = pedidos.find(
+          (p) => p.no_mesa?.no_mesa === numeroMesa && p.estado === 'Iniciado'
         );
         return pedidoExistente || null;
       })
     );
+  }
+
+  /**
+   * Obtiene el pedido iniciado del momento según el número de mesa
+   * que se esté buscando. Esta función será utilizada para determinar
+   * si existe ya un pedido iniciado para añadir productos, de lo contrario,
+   * crear un pedido con el número de mesa.
+   * @param no_mesa Número de mesa donde se accede al menú
+   * @returns Pedido encontrado o nulo
+   */
+  async getPedidoIniciadoByNoMesa(no_mesa: number): Promise<Pedidos | null> {
+    try {
+      const response$ = await this.http.get<any>(
+        environment.ApiIP +
+          environment.ApiObtenerPedidoIniciadoByNoMesa +
+          no_mesa
+      );
+      const response: Pedidos | null = await lastValueFrom(response$);
+      return response;
+    } catch (error) {
+      console.error(
+        `Ocurrió un error al intentar obtener el pedido iniciado según el no.mesa ${no_mesa}`,
+        error
+      );
+      throw error;
+    }
   }
 
   /**
@@ -74,10 +110,10 @@ export class PedidosService {
    */
   obtenerOCrearPedidoPorMesa(numeroMesa: number): Observable<number> {
     return this.buscarPedidoActivoPorMesa(numeroMesa).pipe(
-      switchMap(pedidoExistente => {
+      switchMap((pedidoExistente) => {
         if (pedidoExistente) {
           // Retorna el ID del pedido existente
-          return new Observable<number>(observer => {
+          return new Observable<number>((observer) => {
             observer.next(pedidoExistente.id_pedido);
             observer.complete();
           });
@@ -85,7 +121,7 @@ export class PedidosService {
           // Crea nuevo pedido y retorna su ID
           return this.crearNuevoPedido(numeroMesa).pipe(
             switchMap(() => this.obtenerUltimoPedidoPorMesa(numeroMesa)),
-            map(ultimoPedido => ultimoPedido.id_pedido)
+            map((ultimoPedido) => ultimoPedido.id_pedido)
           );
         }
       })
@@ -97,8 +133,8 @@ export class PedidosService {
    * @param numeroMesa - Número de la mesa
    */
   crearNuevoPedido(numeroMesa: number): Observable<any> {
-    return this.http.post<any>(`${this.baseUrl}/registrar`, { 
-      no_mesa: numeroMesa 
+    return this.http.post<any>(`${this.baseUrl}/registrar`, {
+      no_mesa: numeroMesa,
     });
   }
 
@@ -108,9 +144,9 @@ export class PedidosService {
    */
   obtenerUltimoPedidoPorMesa(numeroMesa: number): Observable<any> {
     return this.obtenerTodosPedidos().pipe(
-      map(pedidos => {
-        const pedidosDeLaMesa = pedidos.filter(p => 
-          p.no_mesa?.no_mesa === numeroMesa
+      map((pedidos) => {
+        const pedidosDeLaMesa = pedidos.filter(
+          (p) => p.no_mesa?.no_mesa === numeroMesa
         );
         return pedidosDeLaMesa.sort((a, b) => b.id_pedido - a.id_pedido)[0];
       })
@@ -129,7 +165,10 @@ export class PedidosService {
     extras: number[];
     ingr: number[];
   }): Observable<any> {
-    return this.http.post(`${this.baseUrl}/registrar/productos`, payloadProducto);
+    return this.http.post(
+      `${this.baseUrl}/registrar/productos`,
+      payloadProducto
+    );
   }
 
   /**
@@ -151,14 +190,14 @@ export class PedidosService {
     precioTotal: number
   ): Observable<any> {
     return this.obtenerOCrearPedidoPorMesa(numeroMesa).pipe(
-      switchMap(idPedido => {
+      switchMap((idPedido) => {
         const payload = {
           pedido_id: idPedido,
           producto_id: productoData.id_prod,
           opcion_id: opcionSeleccionada?.opcion_id?.id_opcion ?? null,
           precio: precioTotal,
-          extras: extrasSeleccionados.map(e => e.extra_id.id_extra),
-          ingr: ingredientes.map(i => i.id_ingr)
+          extras: extrasSeleccionados.map((e) => e.extra_id.id_extra),
+          ingr: ingredientes.map((i) => i.id_ingr),
         };
         return this.registrarProductoAlPedido(payload);
       })
@@ -179,6 +218,8 @@ export class PedidosService {
    * @param estado - Nuevo estado
    */
   actualizarEstadoPedido(idPedido: number, estado: string): Observable<any> {
-    return this.http.patch<any>(`${this.baseUrl}/actualizar/${idPedido}`, { estado });
+    return this.http.patch<any>(`${this.baseUrl}/actualizar/${idPedido}`, {
+      estado,
+    });
   }
 }
