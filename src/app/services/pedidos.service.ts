@@ -49,7 +49,15 @@ export class PedidosService {
   }
 
   // Función existente
-
+  /**
+   * Hace la llamada a la api cambiarEstado, la cual, modifica el estado de un registro
+   * de la tabla pedidos_has_productos.
+   * Se cambió de forma async (asíncrona) por practicidad del caso
+   * @param pedido_prod_id Llave primaria del registro en la tabla pedidos_has_productos
+   * para cambiar el estado del producto a 'Preparado' 'Entregado' o 'Pagado'
+   * @param estado El estado a cambiar, debe corresponder al enum establecido
+   * @returns UpdateResult, estado de pedido cambiado
+   */
   async cambiarEstadoDeProducto(
     pedido_prod_id: number,
     estado: EstadoPedidoHasProductos
