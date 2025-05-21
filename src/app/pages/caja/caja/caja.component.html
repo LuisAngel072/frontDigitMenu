@@ -1,0 +1,36 @@
+<main class="main-container">
+  <h1 class="mb-4">Caja</h1>
+  <!-- Filtros -->
+  <div class="filtros">
+    <div class="filtro-item">
+      <label for="buscar-venta"></label>
+      <input id="buscar-venta" type="text" placeholder="🔎 Buscar venta" />
+    </div>
+  </div>
+
+  <!-- Tabla de ventas -->
+  <table class="table table-striped">
+    <thead>
+      <tr>
+        <th>Pedido</th>
+        <th>No. de mesa</th>
+        <th>Total</th>
+        <th>Fecha</th>
+        <th>Acciones</th>
+      </tr>
+    </thead>
+    <tbody *ngFor="let pedido of pedidosAgrupados">
+      <tr>
+        <td>{{pedido.pedidoId.id_pedido}}</td>
+        <td>{{pedido.pedidoId.no_mesa.no_mesa}}</td>
+        <td>{{pedido.pedidoId.total}}</td>
+        <td>{{pedido.pedidoId.fecha_pedido}}</td>
+        <td class="icon_eye_col">
+          <span class="material-symbols-outlined icon icon-eye" (click)="cobrarPedido(pedido.pedidoId.id_pedido)">
+            point_of_sale
+          </span>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</main>
