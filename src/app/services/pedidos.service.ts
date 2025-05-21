@@ -1,9 +1,14 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, forkJoin, lastValueFrom } from 'rxjs';
-import { map, switchMap } from 'rxjs/operators';
+import { Observable, forkJoin, lastValueFrom, throwError } from 'rxjs';
+import { catchError, map, switchMap } from 'rxjs/operators';
 import { environment } from '../../environment';
-import { Pedidos, Producto_extras_ingrSel } from '../types';
+import {
+  EstadoPedidoHasProductos,
+  Pedidos,
+  Producto_extras_ingrSel,
+} from '../types';
+import { AuthService } from './auth.service';
 
 @Injectable({
   providedIn: 'root',
@@ -11,7 +16,10 @@ import { Pedidos, Producto_extras_ingrSel } from '../types';
 export class PedidosService {
   private baseUrl = environment.ApiIP + 'pedidos';
 
-  constructor(private http: HttpClient) {}
+  constructor(
+    private http: HttpClient,
+    private readonly authService: AuthService
+  ) {}
 
   // Función existente
   getPedidosConProductosDetalles(): Observable<Producto_extras_ingrSel[]> {
@@ -41,14 +49,28 @@ export class PedidosService {
   }
 
   // Función existente
-  cambiarEstadoProducto(
-    pedidoProdId: number,
-    estado: { estado: string }
-  ): Observable<any> {
-    return this.http.patch<any>(
-      `${this.baseUrl}/actualizar/producto/${pedidoProdId}`,
-      estado
-    );
+
+  async cambiarEstadoDeProducto(
+    pedido_prod_id: number,
+    estado: EstadoPedidoHasProductos
+  ) {
+    try {
+      const response$ = await this.http.patch<any>(
+        environment.ApiIP +
+          environment.ApiCambiarEstadoProducto +
+          pedido_prod_id,
+        { estado },
+        { headers: { Authorization: `Bearer ${this.authService.getToken()}` } }
+      );
+      const response = await lastValueFrom(response$);
+      return response;
+    } catch (error) {
+      console.error(
+        `Ocurrió un error al intentar cambiar el estado del producto sobre el pedido con id ${pedido_prod_id} a ${estado}`,
+        error
+      );
+      throw error;
+    }
   }
 
   // ============ NUEVAS FUNCIONES ============

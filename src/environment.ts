@@ -91,7 +91,7 @@ export const environment = {
   ApiCrearPedido: "pedidos/registrar", // POST
   ApiAgregarProductoAlPedido: "pedidos/registrar/productos", // POST
   ApiActualizarPedido: "pedidos/actualizar/", // PATCH /:id_pedido
-  ApiCambiarEstadoProducto: "pedidos/actualizar/", // PATCH /:pedido_prod_id
+  ApiCambiarEstadoProducto: "pedidos/pedido_prod/actualizar/", // PATCH /:pedido_prod_id
 
 
 }

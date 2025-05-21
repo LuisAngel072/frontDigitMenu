@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { PedidosService } from '../../services/pedidos.service';
-import { Producto_extras_ingrSel } from '../../types';
+import { EstadoPedidoHasProductos, Producto_extras_ingrSel } from '../../types';
 import Swal from 'sweetalert2';
 import { CommonModule } from '@angular/common';
 import { HeaderComponent } from '../comun-componentes/header/header.component';
@@ -53,27 +53,49 @@ export class CocineroComponent implements OnInit {
     pedido.expandido = !pedido.expandido;
   }
 
-  marcarComoElaborado(pedidoProdId: number): void {
-    Swal.fire({
-      title: '¿Marcar como elaborado?',
-      icon: 'question',
-      showCancelButton: true,
-      confirmButtonText: 'Sí, marcar',
-      cancelButtonText: 'Cancelar'
-    }).then(result => {
-      if (result.isConfirmed) {
-        this.pedidosService.cambiarEstadoProducto(pedidoProdId, { estado: 'Preparado' }).subscribe({
-          next: () => {
-            Swal.fire('¡Marcado!', 'El producto fue marcado como preparado.', 'success');
-            this.ngOnInit(); // Recargar la lista
-          },
-          error: () => {
-            Swal.fire('Error', 'No se pudo cambiar el estado.', 'error');
-          }
-        });
-      }
-    });
+  async marcarComoElaborado(pedidoProdId: number): Promise<void> {
+  const { isConfirmed } = await Swal.fire({
+    title: '¿Marcar como elaborado?',
+    icon: 'question',
+    showCancelButton: true,
+    confirmButtonText: 'Sí, marcar',
+    cancelButtonText: 'Cancelar',
+  });
+
+  if (!isConfirmed) {
+    return;
   }
+
+  try {
+    Swal.fire({
+      title: 'Cargando...',
+      html: 'Por favor, espere mientras se procesa la información.',
+      allowOutsideClick: false,
+      allowEscapeKey: false,
+      allowEnterKey: false,
+      didOpen: () => Swal.showLoading(),
+    });
+
+    await this.pedidosService.cambiarEstadoDeProducto(
+      pedidoProdId,
+      EstadoPedidoHasProductos.preparado
+    );
+
+    Swal.close();
+    await Swal.fire(
+      '¡Marcado!',
+      'El producto fue marcado como preparado.',
+      'success'
+    );
+
+    // Recarga la lista
+    await this.ngOnInit();
+  } catch (error) {
+    Swal.close();
+    Swal.fire('Error', 'No se pudo cambiar el estado.', 'error');
+  }
+}
+
 
   marcarPedidoComoElaborado(pedido: any): void {
     // Lógica para marcar todos los productos del pedido como elaborados

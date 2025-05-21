@@ -1,7 +1,10 @@
 // lista-pedidos.component.ts
 import { Component, OnInit } from '@angular/core';
 import { PedidosService } from '../../../services/pedidos.service';
-import { Producto_extras_ingrSel } from '../../../types';
+import {
+  EstadoPedidoHasProductos,
+  Producto_extras_ingrSel,
+} from '../../../types';
 import Swal from 'sweetalert2';
 import { CommonModule } from '@angular/common';
 
@@ -70,16 +73,18 @@ export class ListaPedidosComponent implements OnInit {
     if (!iconLink) {
       const link = document.createElement('link');
       link.rel = 'stylesheet';
-      link.href = 'https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css';
+      link.href =
+        'https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css';
       document.head.appendChild(link);
     }
-    
+
     // Add Bootstrap CSS if not present
     const bootstrapLink = document.querySelector('link[href*="bootstrap"]');
     if (!bootstrapLink) {
       const link = document.createElement('link');
       link.rel = 'stylesheet';
-      link.href = 'https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css';
+      link.href =
+        'https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css';
       document.head.appendChild(link);
     }
   }
@@ -88,15 +93,15 @@ export class ListaPedidosComponent implements OnInit {
     this.pedidosService.getPedidosConProductosDetalles().subscribe({
       next: (data: Producto_extras_ingrSel[]) => {
         // Normalizar datos
-        const normalizado = data.map(p => ({
+        const normalizado = data.map((p) => ({
           ...p,
           extras: p.extras ?? [],
-          ingredientes: p.ingredientes ?? []
+          ingredientes: p.ingredientes ?? [],
         }));
 
         // Agrupar por pedido
         const agrupados: { [id: number]: Producto_extras_ingrSel[] } = {};
-        normalizado.forEach(detalle => {
+        normalizado.forEach((detalle) => {
           const id = detalle.pedido_id.id_pedido;
           if (!agrupados[id]) agrupados[id] = [];
           agrupados[id].push(detalle);
@@ -111,20 +116,26 @@ export class ListaPedidosComponent implements OnInit {
             estado: primerProducto.pedido_id.estado,
             fecha_pedido: new Date(primerProducto.pedido_id.fecha_pedido),
             expanded: false, // Por defecto contraído en lista-pedidos
-            items: productos.map(p => ({
+            items: productos.map((p) => ({
               pedido_prod_id: p.pedido_prod_id,
               name: p.producto_id.nombre_prod,
               opcion: p.opcion_id?.nombre_opcion || 'Sin opción',
               precio: p.precio,
-              status: p.estado as 'Sin preparar' | 'Preparado' | 'Entregado' | 'Pagado',
+              status: p.estado as
+                | 'Sin preparar'
+                | 'Preparado'
+                | 'Entregado'
+                | 'Pagado',
               extras: p.extras || [],
-              ingredientes: p.ingredientes || []
-            }))
+              ingredientes: p.ingredientes || [],
+            })),
           } as Order;
         });
 
         // Ordenar por fecha más reciente
-        this.orders.sort((a, b) => b.fecha_pedido.getTime() - a.fecha_pedido.getTime());
+        this.orders.sort(
+          (a, b) => b.fecha_pedido.getTime() - a.fecha_pedido.getTime()
+        );
       },
       error: (error) => {
         console.error('Error cargando pedidos:', error);
@@ -133,9 +144,9 @@ export class ListaPedidosComponent implements OnInit {
           text: 'No se pudieron cargar los pedidos',
           icon: 'error',
           timer: 3000,
-          showConfirmButton: false
+          showConfirmButton: false,
         });
-      }
+      },
     });
   }
 
@@ -147,20 +158,20 @@ export class ListaPedidosComponent implements OnInit {
         tableNumber: 6,
         message: 'Nuevo pedido recibido',
         time: new Date(Date.now() - 5 * 60000),
-        read: false
+        read: false,
       },
       {
         id: 2,
         tableNumber: 2,
         message: 'Pedido listo para entregar',
         time: new Date(Date.now() - 15 * 60000),
-        read: false
-      }
+        read: false,
+      },
     ];
-    
+
     this.updateUnreadCount();
   }
-  
+
   loadNavigation(): void {
     this.navItems = [
       { name: 'Inicio', icon: 'bi-house', route: '/home' },
@@ -168,12 +179,12 @@ export class ListaPedidosComponent implements OnInit {
       { name: 'Menú', icon: 'bi-book', route: '/menu' },
       { name: 'Mesas', icon: 'bi-grid', route: '/tables' },
       { name: 'Configuración', icon: 'bi-gear', route: '/settings' },
-      { name: 'Cerrar Sesión', icon: 'bi-box-arrow-right', route: '/logout' }
+      { name: 'Cerrar Sesión', icon: 'bi-box-arrow-right', route: '' },
     ];
   }
 
   updateUnreadCount(): void {
-    this.unreadNotifications = this.notifications.filter(n => !n.read).length;
+    this.unreadNotifications = this.notifications.filter((n) => !n.read).length;
   }
 
   toggleSidebar(): void {
@@ -194,15 +205,15 @@ export class ListaPedidosComponent implements OnInit {
       this.navOpen = false;
     }
     this.notificationsOpen = !this.notificationsOpen;
-    
+
     if (this.notificationsOpen) {
-      this.notifications.forEach(notification => {
+      this.notifications.forEach((notification) => {
         notification.read = true;
       });
       this.updateUnreadCount();
     }
   }
-  
+
   toggleNavigation(): void {
     if (this.sidebarOpen) {
       this.sidebarOpen = false;
@@ -217,36 +228,41 @@ export class ListaPedidosComponent implements OnInit {
     order.expanded = !order.expanded;
   }
 
-  toggleItemStatus(order: Order, item: OrderItem): void {
-    const newStatus = this.getNextStatus(item.status);
-    
-    if (newStatus) {
-      // Actualizar en backend
-      this.pedidosService.cambiarEstadoProducto(item.pedido_prod_id, { estado: newStatus }).subscribe({
-        next: () => {
-          item.previousStatus = item.status;
-          item.status = newStatus as any;
-          
-          Swal.fire({
-            title: 'Estado actualizado',
-            text: `${item.name} marcado como: ${this.getStatusText(newStatus)}`,
-            icon: 'success',
-            timer: 1500,
-            showConfirmButton: false
-          });
-          
-          this.checkAllDelivered(order);
-        },
-        error: (error) => {
-          console.error('Error al cambiar estado:', error);
-          Swal.fire({
-            title: 'Error',
-            text: 'No se pudo cambiar el estado del producto',
-            icon: 'error',
-            timer: 2000,
-            showConfirmButton: false
-          });
-        }
+  async toggleItemStatus(order: Order, item: OrderItem): Promise<void> {
+    Swal.fire({
+      title: 'Cargando...',
+      html: 'Por favor, espere mientras se procesa la información.',
+      allowOutsideClick: false,
+      allowEscapeKey: false,
+      allowEnterKey: false,
+      didOpen: () => Swal.showLoading(),
+    });
+
+    try {
+      await this.pedidosService.cambiarEstadoDeProducto(
+        item.pedido_prod_id,
+        EstadoPedidoHasProductos.entregado
+      );
+
+      Swal.close();
+      Swal.fire({
+        title: '¡Pedido entregado!',
+        text: 'El pedido se ha marcado como entregado.',
+        icon: 'success',
+        timer: 2000,
+        showConfirmButton: false,
+      });
+
+      // Si quieres refrescar la vista tras el cambio:
+      await this.ngOnInit();
+    } catch (error) {
+      Swal.close();
+      Swal.fire({
+        title: '¡Error!',
+        text: 'Ocurrió un error al intentar cambiar el estado del producto. Por favor, revisa tu conexión.',
+        icon: 'error',
+        timer: 2000,
+        showConfirmButton: false,
       });
     }
   }
@@ -254,95 +270,114 @@ export class ListaPedidosComponent implements OnInit {
   getNextStatus(currentStatus: string): string | null {
     const statusFlow = {
       'Sin preparar': 'Preparado',
-      'Preparado': 'Entregado',
-      'Entregado': null, // No hay siguiente estado
-      'Pagado': null // Estado final
+      Preparado: 'Entregado',
+      Entregado: 'Entregado', // No hay siguiente estado
+      Pagado: 'Pagado', // Estado final
     };
-    
+
     return statusFlow[currentStatus as keyof typeof statusFlow] || null;
   }
 
-  markAllAsDelivered(order: Order): void {
-    const itemsToUpdate = order.items.filter(item => 
-      item.status !== 'Entregado' && item.status !== 'Pagado'
+  async markAllAsDelivered(order: Order): Promise<any> {
+    const itemsToUpdate = order.items.filter(
+      (item) =>
+        item.status !== EstadoPedidoHasProductos.entregado &&
+        item.status !== EstadoPedidoHasProductos.pagado
     );
-    
+
     if (itemsToUpdate.length === 0) {
-      Swal.fire({
+      return Swal.fire({
         title: 'Información',
         text: 'Todos los items ya están entregados o pagados',
         icon: 'info',
         timer: 1500,
-        showConfirmButton: false
+        showConfirmButton: false,
       });
-      return;
     }
 
-    // Confirmar acción
-    Swal.fire({
+    const { isConfirmed } = await Swal.fire({
       title: '¿Marcar todo como entregado?',
       text: `Se marcarán ${itemsToUpdate.length} items como entregados`,
       icon: 'question',
       showCancelButton: true,
       confirmButtonText: 'Sí, marcar todo',
-      cancelButtonText: 'Cancelar'
-    }).then(result => {
-      if (result.isConfirmed) {
-        // Actualizar cada item en el backend
-        const updatePromises = itemsToUpdate.map(item => 
-          this.pedidosService.cambiarEstadoProducto(item.pedido_prod_id, { estado: 'Entregado' }).toPromise()
-        );
-
-        Promise.all(updatePromises).then(() => {
-          // Actualizar estado local
-          itemsToUpdate.forEach(item => {
-            item.previousStatus = item.status;
-            item.status = 'Entregado';
-          });
-
-          Swal.fire({
-            title: '¡Pedido completado!',
-            text: `Todos los items del pedido #${order.id} han sido marcados como entregados`,
-            icon: 'success',
-            timer: 2000,
-            showConfirmButton: false
-          });
-        }).catch(error => {
-          console.error('Error al actualizar estados:', error);
-          Swal.fire({
-            title: 'Error',
-            text: 'Hubo un problema al actualizar algunos items',
-            icon: 'error',
-            timer: 2000,
-            showConfirmButton: false
-          });
-        });
-      }
+      cancelButtonText: 'Cancelar',
     });
+    if (!isConfirmed) {
+      return;
+    }
+
+    try {
+      Swal.fire({
+        title: 'Cargando...',
+        html: 'Por favor, espere mientras se procesan los cambios.',
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        allowEnterKey: false,
+        didOpen: () => Swal.showLoading(),
+      });
+
+      // Lanza todas las promesas en paralelo
+      await Promise.all(
+        itemsToUpdate.map((item) =>
+          this.pedidosService.cambiarEstadoDeProducto(
+            item.pedido_prod_id,
+            EstadoPedidoHasProductos.entregado
+          )
+        )
+      );
+
+      // Actualiza estado local
+      itemsToUpdate.forEach((item) => {
+        item.previousStatus = item.status;
+        item.status = EstadoPedidoHasProductos.entregado;
+      });
+
+      Swal.close();
+      Swal.fire({
+        title: '¡Pedido completado!',
+        text: `Todos los items del pedido #${order.id} han sido marcados como entregados`,
+        icon: 'success',
+        timer: 2000,
+        showConfirmButton: false,
+      });
+    } catch (error) {
+      Swal.close();
+      console.error('Error al actualizar estados:', error);
+      Swal.fire({
+        title: 'Error',
+        text: 'Hubo un problema al actualizar algunos items',
+        icon: 'error',
+        timer: 2000,
+        showConfirmButton: false,
+      });
+    }
   }
 
   checkAllDelivered(order: Order): void {
-    const allDelivered = order.items.every(i => 
-      i.status === 'Entregado' || i.status === 'Pagado'
+    const allDelivered = order.items.every(
+      (i) => i.status === 'Entregado' || i.status === 'Pagado'
     );
-    
+
     if (allDelivered) {
       // Actualizar estado del pedido completo si es necesario
-      this.pedidosService.actualizarEstadoPedido(order.id, 'Completado').subscribe({
-        next: () => {
-          order.estado = 'Completado';
-          Swal.fire({
-            title: '¡Pedido completado!',
-            text: `El pedido #${order.id} ha sido entregado por completo`,
-            icon: 'success',
-            timer: 2000,
-            showConfirmButton: false
-          });
-        },
-        error: (error) => {
-          console.error('Error al actualizar estado del pedido:', error);
-        }
-      });
+      this.pedidosService
+        .actualizarEstadoPedido(order.id, 'Entregado')
+        .subscribe({
+          next: () => {
+            order.estado = 'Completado';
+            Swal.fire({
+              title: '¡Pedido completado!',
+              text: `El pedido #${order.id} ha sido entregado por completo`,
+              icon: 'success',
+              timer: 2000,
+              showConfirmButton: false,
+            });
+          },
+          error: (error) => {
+            console.error('Error al actualizar estado del pedido:', error);
+          },
+        });
     }
   }
 
@@ -353,8 +388,10 @@ export class ListaPedidosComponent implements OnInit {
 
   formatTime(date: Date): string {
     const now = new Date();
-    const diffMinutes = Math.round((now.getTime() - date.getTime()) / (1000 * 60));
-    
+    const diffMinutes = Math.round(
+      (now.getTime() - date.getTime()) / (1000 * 60)
+    );
+
     if (diffMinutes < 1) {
       return 'Ahora mismo';
     } else if (diffMinutes < 60) {
@@ -370,49 +407,64 @@ export class ListaPedidosComponent implements OnInit {
 
   getStatusClass(status: string): string {
     switch (status) {
-      case 'Sin preparar': return 'text-danger';
-      case 'Preparado': return 'text-warning';
-      case 'Entregado': return 'text-success';
-      case 'Pagado': return 'text-primary';
-      default: return '';
+      case 'Sin preparar':
+        return 'text-danger';
+      case 'Preparado':
+        return 'text-warning';
+      case 'Entregado':
+        return 'text-success';
+      case 'Pagado':
+        return 'text-primary';
+      default:
+        return '';
     }
   }
 
   getStatusText(status: string): string {
     switch (status) {
-      case 'Sin preparar': return 'Sin preparar';
-      case 'Preparado': return 'Preparado';
-      case 'Entregado': return 'Entregado';
-      case 'Pagado': return 'Pagado';
-      default: return status;
+      case 'Sin preparar':
+        return 'Sin preparar';
+      case 'Preparado':
+        return 'Preparado';
+      case 'Entregado':
+        return 'Entregado';
+      case 'Pagado':
+        return 'Pagado';
+      default:
+        return status;
     }
   }
 
   getOrderStatusClass(status: string): string {
     switch (status) {
-      case 'Iniciado': return 'badge bg-primary';
-      case 'En preparación': return 'badge bg-warning';
-      case 'Completado': return 'badge bg-success';
-      case 'Pagado': return 'badge bg-secondary';
-      default: return 'badge bg-light';
+      case 'Iniciado':
+        return 'badge bg-primary';
+      case 'En preparación':
+        return 'badge bg-warning';
+      case 'Completado':
+        return 'badge bg-success';
+      case 'Pagado':
+        return 'badge bg-secondary';
+      default:
+        return 'badge bg-light';
     }
   }
 
   getOrderByTable(tableNumber: number): Order | undefined {
-    return this.orders.find(order => order.tableNumber === tableNumber);
+    return this.orders.find((order) => order.tableNumber === tableNumber);
   }
 
   goToOrder(tableNumber: number): void {
     const order = this.getOrderByTable(tableNumber);
-    
+
     if (order) {
       this.notificationsOpen = false;
       this.sidebarOpen = true;
-      
-      this.orders.forEach(o => {
-        o.expanded = (o.id === order.id);
+
+      this.orders.forEach((o) => {
+        o.expanded = o.id === order.id;
       });
-      
+
       setTimeout(() => {
         const orderElement = document.getElementById(`order-${order.id}`);
         if (orderElement) {
@@ -425,11 +477,11 @@ export class ListaPedidosComponent implements OnInit {
         text: `No se encontró ningún pedido para la mesa ${tableNumber}`,
         icon: 'warning',
         timer: 2000,
-        showConfirmButton: false
+        showConfirmButton: false,
       });
     }
   }
-  
+
   navigate(route: string): void {
     // Aquí implementarías la navegación real con Angular Router
     Swal.fire({
@@ -437,9 +489,9 @@ export class ListaPedidosComponent implements OnInit {
       text: `Navegando a: ${route}`,
       icon: 'info',
       timer: 1500,
-      showConfirmButton: false
+      showConfirmButton: false,
     });
-    
+
     this.navOpen = false;
   }
 
@@ -455,7 +507,7 @@ export class ListaPedidosComponent implements OnInit {
       month: '2-digit',
       year: 'numeric',
       hour: '2-digit',
-      minute: '2-digit'
+      minute: '2-digit',
     }).format(date);
   }
 

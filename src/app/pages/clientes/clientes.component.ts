@@ -24,21 +24,28 @@ export class ClientesComponent implements OnInit {
     this.route.queryParams.subscribe((params) => {
       this.mesaId = params['mesa'];
     });
-    if (this.mesaId !== null) {
+
+    if (this.mesaId !== null && this.mesaId !== undefined) {
+       const no_mesa: number = parseInt(this.mesaId);
       this.pedido = await this.pedidosService.getPedidoIniciadoByNoMesa(
-        parseInt(this.mesaId)
+        no_mesa
       );
     }
   }
 
   async goToClientesMenu() {
-    this.router.navigate(['/clientes-menu'], {
-      queryParams: { mesa: this.mesaId },
-    });
-    if (this.pedido === null) {
-      if (this.mesaId !== null) {
-        await this.pedidosService.crearNuevoPedido(parseInt(this.mesaId));
+    if (this.pedido === null) { // No existe el pedido iniciado
+      if (this.mesaId !== null && this.mesaId !== undefined ) {
+        const no_mesa: number = parseInt(this.mesaId);
+        await this.pedidosService.crearNuevoPedido(no_mesa); //Lo crea
+        this.router.navigate(['/clientes-menu'], {
+          queryParams: { mesa: this.mesaId },
+        });
       }
+    } else {
+      this.router.navigate(['/clientes-menu'], {
+          queryParams: { mesa: this.mesaId },
+        });
     }
   }
 }
