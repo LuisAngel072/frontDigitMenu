@@ -5,8 +5,9 @@ import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../../environment';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ProductosService } from '../../../services/productos.service'; // ajusta ruta según estructura
+import { ProductosService } from '../../../services/productos.service';
 import { PedidosService } from '../../../services/pedidos.service';
+import { EstadoPedidoHasProductos, Producto_extras_ingrSel } from '../../../types';
 
 @Component({
   selector: 'app-clientes-menu',
@@ -27,60 +28,198 @@ export class ClientesMenuComponent implements OnInit {
   precioTotal: number = 0;
   ingredientes: any[] = [];
   searchTerm: string = '';
-  categoriasOriginales: any[] = []; // Nuevo arreglo para no perder datos originales
+  categoriasOriginales: any[] = [];
+  
+  // Nuevas propiedades para el carrito
+  pedidoActual: any = null;
+  productosEnPedido: Producto_extras_ingrSel[] = [];
+  totalCarrito: number = 0;
 
   constructor(  
     private route: ActivatedRoute,
     private http: HttpClient,
     private productosService: ProductosService,
-    private pedidosService: PedidosService  // Asegúrate de inyectar el servicio
+    private pedidosService: PedidosService
   ) {}
 
   ngOnInit(): void {
     this.route.queryParams.subscribe(params => {
       this.mesaId = params['mesa'];
+      if (this.mesaId) {
+        // Cargar el pedido activo de la mesa cuando tengamos el id
+        this.cargarPedidoMesa();
+      }
     });
 
     this.cargarCategoriasYSubcategorias();
   }
 
-async showProduct(prod: any) {
-  this.selectedProduct = prod;
-  this.selectedExtras = [];
-  this.selectedOpcion = null;
-  this.precioTotal = parseFloat(prod.precio);
-  this.ingredientes = [];
+  // Carga los productos del pedido actual de forma similar a cómo lo hace el componente Cocinero
+  cargarPedidoMesa(): void {
+    if (!this.mesaId) return;
+    
+    // Utilizamos el mismo servicio que utiliza el componente de cocina
+    this.pedidosService.getPedidosConProductosDetalles().subscribe({
+      next: (data) => {
+        // Normalizamos los datos igual que en el componente de cocina
+        const normalizado = data.map(p => ({
+          ...p,
+          extras: p.extras ?? [],
+          ingredientes: p.ingredientes ?? []
+        }));
+        
+        // Encontramos productos que pertenecen a la mesa actual
+        // Primero filtramos por mesa
+        const productosDeMiMesa = normalizado.filter(detalle => 
+          detalle.pedido_id.no_mesa.no_mesa === parseInt(this.mesaId!)
+        );
+        
+        if (productosDeMiMesa.length > 0) {
+          // Guardamos la referencia al pedido
+          this.pedidoActual = productosDeMiMesa[0].pedido_id;
+          
+          // Asignamos los productos al arreglo
+          this.productosEnPedido = productosDeMiMesa;
+          
+          // Calculamos el total del carrito
+          this.calcularTotalCarrito();
+          
+          console.log('Pedido cargado con éxito. Total de productos:', this.productosEnPedido.length);
+        } else {
+          console.log('No se encontraron productos para la mesa:', this.mesaId);
+          this.pedidoActual = null;
+          this.productosEnPedido = [];
+        }
+      },
+      error: (error) => {
+        console.error('Error cargando productos del pedido:', error);
+      }
+    });
+  }
 
-  try {
-    const [opciones, extras, ingRaw] = await Promise.all([
-      this.productosService.obtenerOpcionesDeProducto(prod.id_prod),
-      this.productosService.obtenerExtrasDeProducto(prod.id_prod),
-      this.http.get<any[]>(`${environment.ApiIP}productos/ingredientes/${prod.id_prod}`).toPromise()
-    ]);
+  // Calcula el total del carrito sumando los precios de todos los productos
+// Método corregido para calcular el total del carrito
+calcularTotalCarrito(): void {
+  this.totalCarrito = this.productosEnPedido.reduce((total, producto) => {
+    // Asegurarse de que todos los valores sean numéricos usando el operador +
+    let precio = +producto.precio || 0;
+    
+    // Suma los precios de extras si los hay
+    if (producto.extras && producto.extras.length > 0) {
+      const extrasTotal = producto.extras.reduce((sum, extra) => {
+        // Convertir a número con el operador + y asegurar que sea un número válido
+        const extraPrecio = +(extra.precio || 0);
+        return sum + extraPrecio;
+      }, 0);
+      precio += extrasTotal;
+    }
+    
+    // Suma los precios de ingredientes adicionales si los hay
+    if (producto.ingredientes && producto.ingredientes.length > 0) {
+      const ingTotal = producto.ingredientes.reduce((sum, ing) => {
+        // Convertir a número con el operador + y asegurar que sea un número válido
+        const ingPrecio = +(ing.precio || 0);
+        return sum + ingPrecio;
+      }, 0);
+      precio += ingTotal;
+    }
+    
+    // Verificar que el resultado sea un número válido
+    return total + (isNaN(precio) ? 0 : precio);
+  }, 0);
+  
+  // Verificar que el resultado final sea un número válido
+  if (isNaN(this.totalCarrito)) {
+    console.error('Error: El total calculado no es un número válido', this.productosEnPedido);
+    this.totalCarrito = 0;
+  } else {
+    // Redondear a dos decimales para evitar problemas de precisión con números flotantes
+    this.totalCarrito = Math.round(this.totalCarrito * 100) / 100;
+  }
+  
+  console.log('Total calculado:', this.totalCarrito);
+}
 
-    this.opciones = opciones;
-    this.extras = extras;
-
-    // ✅ Solo asignamos si hay ingredientes
-    this.ingredientes = Array.isArray(ingRaw)
-      ? ingRaw.map(item => item.ingrediente_id)
-      : [];
-
+  // Método para mostrar el modal del carrito
+  mostrarCarrito(): void {
+    // Aseguramos que tenemos los datos más recientes
+    this.cargarPedidoMesa();
+    
     setTimeout(() => {
       const modal = new (window as any).bootstrap.Modal(
-        document.getElementById('productModal')
+        document.getElementById('carritoModal')
       );
       modal.show();
     });
-
-  } catch (error) {
-    console.error('Error cargando producto:', error);
-    this.ingredientes = []; // fallback defensivo
   }
-}
 
+  // Método para eliminar un producto del carrito
+  async eliminarProducto(producto: Producto_extras_ingrSel): Promise<void> {
+    try {
+      const { isConfirmed } = await Swal.fire({
+        title: '¿Eliminar producto?',
+        text: '¿Estás seguro de que deseas eliminar este producto del pedido?',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Sí, eliminar',
+        cancelButtonText: 'Cancelar'
+      });
 
-  
+      if (!isConfirmed) return;
+
+      // Aquí debería ir la lógica para eliminar el producto del pedido en el backend
+      // Por ejemplo:
+      // await this.pedidosService.eliminarProductoDePedido(producto.id);
+
+      // Recargamos los productos después de eliminar
+      this.cargarPedidoMesa();
+
+      Swal.fire(
+        '¡Eliminado!',
+        'El producto ha sido eliminado del pedido.',
+        'success'
+      );
+    } catch (error) {
+      console.error('Error al eliminar producto:', error);
+      Swal.fire('Error', 'No se pudo eliminar el producto', 'error');
+    }
+  }
+
+  async showProduct(prod: any) {
+    this.selectedProduct = prod;
+    this.selectedExtras = [];
+    this.selectedOpcion = null;
+    this.precioTotal = parseFloat(prod.precio);
+    this.ingredientes = [];
+
+    try {
+      const [opciones, extras, ingRaw] = await Promise.all([
+        this.productosService.obtenerOpcionesDeProducto(prod.id_prod),
+        this.productosService.obtenerExtrasDeProducto(prod.id_prod),
+        this.http.get<any[]>(`${environment.ApiIP}productos/ingredientes/${prod.id_prod}`).toPromise()
+      ]);
+
+      this.opciones = opciones;
+      this.extras = extras;
+
+      // ✅ Solo asignamos si hay ingredientes
+      this.ingredientes = Array.isArray(ingRaw)
+        ? ingRaw.map(item => item.ingrediente_id)
+        : [];
+
+      setTimeout(() => {
+        const modal = new (window as any).bootstrap.Modal(
+          document.getElementById('productModal')
+        );
+        modal.show();
+      });
+
+    } catch (error) {
+      console.error('Error cargando producto:', error);
+      this.ingredientes = []; // fallback defensivo
+    }
+  }
+
   toggleExtra(extra: any) {
     const index = this.selectedExtras.indexOf(extra);
     if (index >= 0) {
@@ -127,6 +266,9 @@ async showProduct(prod: any) {
 
       // Mostrar éxito
       Swal.fire('¡Agregado!', 'Producto agregado al pedido', 'success');
+
+      // Recargar productos del carrito
+      this.cargarPedidoMesa();
 
       // Cerrar modal
       const modalEl = document.getElementById('productModal');

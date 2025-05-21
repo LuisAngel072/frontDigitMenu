@@ -8,9 +8,13 @@
       (input)="filtrarProductos()"
     />
 
-    <button class="material-symbols-outlined">
-      shopping_cart
-    </button>
+ <button class="btn btn-primary position-relative" (click)="mostrarCarrito()">
+    <span class="material-symbols-outlined">shopping_cart</span>
+    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" 
+          *ngIf="productosEnPedido.length > 0">
+      {{ productosEnPedido.length }}
+    </span>
+  </button>
   </header>
 
   <div class="accordion" id="menuAccordion">
@@ -116,6 +120,97 @@
             </div>
           </div>
         </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="carritoModal" tabindex="-1" aria-labelledby="carritoModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header bg-dark text-white">
+        <h5 class="modal-title" id="carritoModalLabel">
+          <i class="bi bi-cart-fill me-2"></i>Tu Pedido - Mesa #{{ mesaId }}
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div *ngIf="productosEnPedido.length === 0" class="text-center py-5">
+          <i class="bi bi-cart-x" style="font-size: 3rem; color: #ccc;"></i>
+          <p class="mt-3">Tu carrito está vacío</p>
+          <p class="text-muted">Añade productos desde el menú para comenzar tu pedido</p>
+        </div>
+
+        <div *ngIf="productosEnPedido.length > 0">
+          <div class="table-responsive">
+            <table class="table table-hover">
+              <thead class="table-light">
+                <tr>
+                  <th>Producto</th>
+                  <th>Opción</th>
+                  <th>Extras</th>
+                  <th>Estado</th>
+                  <th class="text-end">Precio</th>
+                  <th class="text-center">Acciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let producto of productosEnPedido">
+                  <td>{{ producto.producto_id.nombre_prod }}</td>
+                  <td>{{ producto.opcion_id.nombre_opcion }}</td>
+                  <td>
+                    <small *ngIf="producto.extras.length > 0">
+                      <ul class="list-unstyled mb-0">
+                        <li *ngFor="let extra of producto.extras">
+                          ✅ {{ extra.nombre_extra }}
+                        </li>
+                      </ul>
+                    </small>
+                    <small *ngIf="producto.ingredientes.length > 0">
+                      <ul class="list-unstyled mb-0">
+                        <li *ngFor="let ing of producto.ingredientes">
+                          🧂 {{ ing.nombre_ingrediente }}
+                        </li>
+                      </ul>
+                    </small>
+                    <span *ngIf="producto.extras.length === 0 && producto.ingredientes.length === 0">-</span>
+                  </td>
+                  <td>
+                    <span class="badge"
+                      [ngClass]="{
+                        'bg-warning': producto.estado === 'Sin preparar',
+                        'bg-success': producto.estado === 'Preparado',
+                        'bg-info': producto.estado === 'Entregado',
+                        'bg-secondary': producto.estado === 'Pagado'
+                      }">
+                      {{ producto.estado }}
+                    </span>
+                  </td>
+                  <td class="text-end">${{ producto.precio }}</td>
+                  <td class="text-center">
+                    <button class="btn btn-sm btn-outline-danger" 
+                            (click)="eliminarProducto(producto)"
+                            [disabled]="producto.estado !== 'Sin preparar'">
+                      <i class="bi bi-trash"></i>
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <td colspan="4" class="text-end fw-bold">Total:</td>
+                  <td class="text-end fw-bold">${{ totalCarrito }}</td>
+                  <td></td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+          Cerrar
+        </button>
       </div>
     </div>
   </div>
