@@ -7,6 +7,7 @@ import { ClientesComponent } from './pages/clientes/clientes.component';
 import { ClientesMenuComponent } from './pages/clientes/clientes-menu/clientes-menu.component';
 import { CocineroComponent } from './pages/cocinero/cocinero.component'; // Importar CocineroComponent
 import { CrudEmpleadosComponent } from './pages/administrador/crud-empleados/crud-empleados.component';
+import { CajeroComponent } from './pages/caja/cajero.component';
 
 export const routes: Routes = [
   {
@@ -41,4 +42,8 @@ export const routes: Routes = [
     path: 'Mesero',
     component: MeserosComponent,
   },
+  {
+    path: 'Cajero',
+    component: CajeroComponent,
+  }
 ];

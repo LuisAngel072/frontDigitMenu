@@ -90,65 +90,66 @@ export class ListaPedidosComponent implements OnInit {
   }
 
   loadOrders(): void {
-    this.pedidosService.getPedidosConProductosDetalles().subscribe({
-      next: (data: Producto_extras_ingrSel[]) => {
-        // Normalizar datos
-        const normalizado = data.map((p) => ({
-          ...p,
-          extras: p.extras ?? [],
-          ingredientes: p.ingredientes ?? [],
-        }));
+  this.pedidosService.getPedidosConProductosDetalles().subscribe({
+    next: (data: Producto_extras_ingrSel[]) => {
+      // 1) Normalizar datos
+      const normalizado = data.map(p => ({
+        ...p,
+        extras: p.extras ?? [],
+        ingredientes: p.ingredientes ?? [],
+      }));
 
-        // Agrupar por pedido
-        const agrupados: { [id: number]: Producto_extras_ingrSel[] } = {};
-        normalizado.forEach((detalle) => {
-          const id = detalle.pedido_id.id_pedido;
-          if (!agrupados[id]) agrupados[id] = [];
-          agrupados[id].push(detalle);
-        });
+      // 2) Agrupar por pedido
+      const agrupados: { [id: number]: Producto_extras_ingrSel[] } = {};
+      normalizado.forEach(detalle => {
+        const id = detalle.pedido_id.id_pedido;
+        if (!agrupados[id]) agrupados[id] = [];
+        agrupados[id].push(detalle);
+      });
 
-        // Convertir a la estructura Order
-        this.orders = Object.entries(agrupados).map(([id, productos]) => {
-          const primerProducto = productos[0];
-          return {
-            id: primerProducto.pedido_id.id_pedido,
-            tableNumber: primerProducto.pedido_id.no_mesa.no_mesa,
-            estado: primerProducto.pedido_id.estado,
-            fecha_pedido: new Date(primerProducto.pedido_id.fecha_pedido),
-            expanded: false, // Por defecto contraído en lista-pedidos
-            items: productos.map((p) => ({
-              pedido_prod_id: p.pedido_prod_id,
-              name: p.producto_id.nombre_prod,
-              opcion: p.opcion_id?.nombre_opcion || 'Sin opción',
-              precio: p.precio,
-              status: p.estado as
-                | 'Sin preparar'
-                | 'Preparado'
-                | 'Entregado'
-                | 'Pagado',
-              extras: p.extras || [],
-              ingredientes: p.ingredientes || [],
-            })),
-          } as Order;
-        });
+      // 3) Convertir a la estructura Order
+      let orders: Order[] = Object.entries(agrupados).map(([_, productos]) => {
+        const first = productos[0];
+        return {
+          id: first.pedido_id.id_pedido,
+          tableNumber: first.pedido_id.no_mesa.no_mesa,
+          estado: first.pedido_id.estado,
+          fecha_pedido: new Date(first.pedido_id.fecha_pedido),
+          expanded: false,
+          items: productos.map(p => ({
+            pedido_prod_id: p.pedido_prod_id,
+            name: p.producto_id.nombre_prod,
+            opcion: p.opcion_id?.nombre_opcion || 'Sin opción',
+            precio: p.precio,
+            status: p.estado as 'Sin preparar'|'Preparado'|'Entregado'|'Pagado',
+            extras: p.extras,
+            ingredientes: p.ingredientes,
+          })),
+        };
+      });
 
-        // Ordenar por fecha más reciente
-        this.orders.sort(
-          (a, b) => b.fecha_pedido.getTime() - a.fecha_pedido.getTime()
-        );
-      },
-      error: (error) => {
-        console.error('Error cargando pedidos:', error);
-        Swal.fire({
-          title: 'Error',
-          text: 'No se pudieron cargar los pedidos',
-          icon: 'error',
-          timer: 3000,
-          showConfirmButton: false,
-        });
-      },
-    });
-  }
+      // 4) Filtrar OUT los pedidos cuyo *todos* items están ya en 'Entregado'
+      orders = orders.filter(o => !o.items.every(i => i.status === 'Entregado' || !o.items.every(i => i.status === 'Pagado')));
+
+      // 5) Ordenar por fecha más reciente
+      orders.sort((a, b) => b.fecha_pedido.getTime() - a.fecha_pedido.getTime());
+
+      // 6) Asignar al componente
+      this.orders = orders;
+    },
+    error: err => {
+      console.error('Error cargando pedidos:', err);
+      Swal.fire({
+        title: 'Error',
+        text: 'No se pudieron cargar los pedidos',
+        icon: 'error',
+        timer: 3000,
+        showConfirmButton: false,
+      });
+    }
+  });
+}
+
 
   loadNotifications(): void {
     // Por ahora mantenemos las notificaciones mock, pero podrías crear un servicio para esto

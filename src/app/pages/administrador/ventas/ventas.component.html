@@ -27,18 +27,19 @@
             <th>Pedido</th>
             <th>No. de mesa</th>
             <th>Total</th>
+            <th>Fecha</th>
             <th>Acciones</th>
         </tr>
         </thead>
         <tbody>
-        <!-- Datos de ejemplo estáticos -->
-        <tr>
-            <td>6</td>
-            <td>1</td>
-            <td>$320</td>
+        <tr *ngFor="let pedido of this.pedidosAgrupados">
+            <td>{{pedido.pedidoId.id_pedido}}</td>
+            <td>{{pedido.pedidoId.no_mesa.no_mesa}}</td>
+            <td>{{pedido.pedidoId.total}}</td>
+            <td>{{pedido.pedidoId.fecha_pedido}}</td>
             <td class="icon_eye_col">
             <span
-            class="material-symbols-outlined icon icon-eye">
+            class="material-symbols-outlined icon icon-eye" (click)="verPedido(pedido.pedidoId.id_pedido)">
             visibility
             </span>
             </td>

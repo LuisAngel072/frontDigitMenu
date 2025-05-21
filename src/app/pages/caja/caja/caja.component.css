@@ -1,0 +1,30 @@
+.main-container {
+    display: flex;
+    flex-direction: column;
+    padding-top: 20vh;
+    margin: 0 15vw 0 15vw;
+}
+
+.mb-4 {
+    text-align: center;
+}
+.form-select {
+    width: 180px;
+    border: 1px solid #dee2e6;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    font-family: 'cocogoose-letter', sans-serif;
+}
+
+option:focus {
+    background-color: var(--color-secundario);
+}
+.opt:hover{
+    background-color: var(--color-secundario);
+}
+.icons-space{
+display: flex;
+justify-content: space-evenly;
+}
+
