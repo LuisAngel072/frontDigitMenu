@@ -21,6 +21,8 @@ export class CategoriasComponent {
   @Input() categorias: Categorias[] = [];
   @Input() subcategorias: Sub_categorias[] = []; // Subcategorías
 
+  categoriasFiltradas: Categorias[] = [];
+  subCategoriasFiltradas: Sub_categorias[] = [];
   selectedFile: File | null = null;
   formData: any = {};
 
@@ -34,11 +36,36 @@ export class CategoriasComponent {
 
   async ngOnInit() {
     this.categorias = this.adminComponente.categorias;
-    this.subcategorias = await this.subcatServices.obtenerSubcategorias(); // Ahora es asincrónico
-    this.adminComponente.subcategorias = this.subcategorias;
+    this.subcategorias = this.adminComponente.subcategorias;
+    this.subCategoriasFiltradas = this.subcategorias;
+    this.categoriasFiltradas = this.categorias;
   }
 
-  // Categorías
+  /**
+   * BUSCADORES
+   */
+  filtrarCategorias(event: any) {
+    const valor = event.target.value.toLowerCase();
+    this.categoriasFiltradas = this.categorias.filter((categoria) => {
+      const nombre_cat = categoria.nombre_cat.toLowerCase() || '';
+      return nombre_cat.includes(valor);
+    });
+  }
+  filtrarSubCategorias(event: any) {
+    const valor = event.target.value.toLowerCase();
+    this.subCategoriasFiltradas = this.subcategorias.filter((subCategoria) => {
+      const nombre_subCategoria = subCategoria.nombre_subcat.toLowerCase() || '';
+      const nombre_cat = subCategoria.categoria_id.nombre_cat.toString().toLowerCase() || '';
+
+      return nombre_subCategoria.includes(valor) || nombre_cat.includes(valor);
+    });
+  }
+
+  /**
+   *
+   * CRUD Categorias
+   *
+   */
   async verCategoria(id_cat: number) {
     try {
       Swal.fire({

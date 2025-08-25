@@ -50,6 +50,7 @@
           type="file"
           class="form-control"
           required
+          (change)="onFileSelected($event)"
           [class.is-invalid]="
             form.get('img_prod')?.invalid && form.get('img_prod')?.touched
           "

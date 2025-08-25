@@ -12,6 +12,7 @@
               type="search"
               class="form-control"
               placeholder="Buscar categoría"
+              (keyup)="filtrarCategorias($event)"
             />
           </div>
 
@@ -33,7 +34,7 @@
               </tr>
             </thead>
             <tbody>
-              <tr *ngFor="let cat of categorias">
+              <tr *ngFor="let cat of categoriasFiltradas">
                 <td>{{ cat.nombre_cat }}</td>
                 <td>
                   <span class="material-symbols-outlined icon icon-eye" (click)="verCategoria(cat.id_cat)">
@@ -65,6 +66,7 @@
               type="search"
               class="form-control"
               placeholder="Buscar subcategoría"
+              (keyup)="filtrarSubCategorias($event)"
             />
           </div>
 
@@ -87,7 +89,7 @@
               </tr>
             </thead>
             <tbody>
-              <tr *ngFor="let sub of subcategorias">
+              <tr *ngFor="let sub of subCategoriasFiltradas">
                 <td>{{ sub.nombre_subcat }}</td>
                 <td>{{ sub.categoria_id.nombre_cat }}</td>
                 <td>

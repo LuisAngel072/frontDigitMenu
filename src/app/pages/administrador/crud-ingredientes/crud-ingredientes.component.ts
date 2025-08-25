@@ -130,7 +130,7 @@ export class CrudIngredientesComponent {
    * BUSCADORES
    */
   filtrarIngredientes(event: any) {
-    const valor = event.target.lowerCase();
+    const valor = event.target.value.toLowerCase();
     this.ingredientesFiltrados = this.ingredientes.filter(
       (ingrediente) => {
         const nombre_ingr = ingrediente.nombre_ingrediente.toLowerCase() || '';
@@ -141,7 +141,7 @@ export class CrudIngredientesComponent {
     );
   }
   filtrarOpciones(event: any) {
-    const valor = event.target.lowerCase();
+    const valor = event.target.value.toLowerCase();
     this.opcionesFiltradas = this.opciones.filter((opcion) => {
       const nombre_opcion = opcion.nombre_opcion.toLowerCase() || '';
       const porcentaje = opcion.porcentaje.toString().toLowerCase() || '';
@@ -150,7 +150,7 @@ export class CrudIngredientesComponent {
     });
   }
   filtrarExtras(event: any) {
-    const valor = event.target.lowerCase();
+    const valor = event.target.value.toLowerCase();
     this.extrasFiltrados = this.extras.filter((extra) => {
       const nombre_extra = extra.nombre_extra.toLowerCase() || '';
       const precio = extra.precio.toString().toLowerCase() || '';

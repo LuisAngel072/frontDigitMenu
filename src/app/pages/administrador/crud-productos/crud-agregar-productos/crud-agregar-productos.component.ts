@@ -85,6 +85,10 @@ export class CrudAgregarProductosComponent {
     this.addCheckboxControls('ingredientes', this.ingredientes.length);
     this.addCheckboxControls('extras', this.extras.length);
     this.addCheckboxControls('opciones', this.opciones.length);
+
+    this.syncFormArrayWithFiltrados('ingredientes', this.ingredientesFiltrados);
+    this.syncFormArrayWithFiltrados('extras', this.extrasFiltrados);
+    this.syncFormArrayWithFiltrados('opciones', this.opcionesFiltradas);
   }
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -99,11 +103,13 @@ export class CrudAgregarProductosComponent {
     }
   }
 
+
   onPageChangeIngr(event: PageEvent) {
     this.currentPageIngr = event.pageIndex;
     this.pageSizeIngr = event.pageSize;
     this.updateIngredientesFiltrados();
     this.resetCheckboxes('ingredientes', this.ingredientesFiltrados.length);
+    this.syncFormArrayWithFiltrados('ingredientes', this.ingredientesFiltrados);
   }
 
   onPageChangeOpc(event: PageEvent) {
@@ -111,6 +117,7 @@ export class CrudAgregarProductosComponent {
     this.pageSizeOpc = event.pageSize;
     this.updateOpcionesFiltradas();
     this.resetCheckboxes('opciones', this.opcionesFiltradas.length);
+    this.syncFormArrayWithFiltrados('opciones', this.opcionesFiltradas);
   }
 
   onPageChangeExt(event: PageEvent) {
@@ -118,6 +125,7 @@ export class CrudAgregarProductosComponent {
     this.pageSizeExt = event.pageSize;
     this.updateExtrasFiltrados();
     this.resetCheckboxes('extras', this.extrasFiltrados.length);
+    this.syncFormArrayWithFiltrados('extras', this.extrasFiltrados);
   }
   /**
    * Permite paginar los ingredientes
@@ -200,7 +208,17 @@ export class CrudAgregarProductosComponent {
   get opcionesFA() {
     return this.form.get('opciones') as FormArray;
   }
-
+ private syncFormArrayWithFiltrados(formArrayName: 'ingredientes' | 'extras' | 'opciones', filtrados: any[]) {
+  const arr = this.form.get(formArrayName) as FormArray;
+  // Guarda los valores actuales
+  const oldValues = arr.value.slice(0, filtrados.length);
+  // Elimina todos los controles
+  while (arr.length > 0) arr.removeAt(0);
+  // Agrega controles nuevos, conservando los valores previos si existen
+  for (let i = 0; i < filtrados.length; i++) {
+    arr.push(new FormControl(oldValues[i] ?? false));
+  }
+}
   /** ——— Envío del formulario ——— */
   async onSubmit() {
     try {
@@ -236,7 +254,7 @@ export class CrudAgregarProductosComponent {
       const ingredientesSeleccionados: Ingredientes[] =
         this.ingredientes.filter((i) => idsIngredientes.includes(i.id_ingr));
 
-      const res_img = await  this.productosService.subirImg(this.selectedFile!);
+      const res_img = await this.productosService.subirImg(this.selectedFile!);
 
       console.log(res_img);
       const img_prod = '/productos/' + String(res_img.ruta_img);
