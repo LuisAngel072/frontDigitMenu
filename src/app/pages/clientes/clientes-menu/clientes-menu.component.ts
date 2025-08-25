@@ -10,11 +10,10 @@ import { PedidosService } from '../../../services/pedidos.service';
 import { EstadoPedidoHasProductos, Producto_extras_ingrSel } from '../../../types';
 
 @Component({
-  selector: 'app-clientes-menu',
-  standalone: true,
-  imports: [CommonModule, FormsModule],
-  templateUrl: './clientes-menu.component.html',
-  styleUrl: './clientes-menu.component.css'
+    selector: 'app-clientes-menu',
+    imports: [CommonModule, FormsModule],
+    templateUrl: './clientes-menu.component.html',
+    styleUrl: './clientes-menu.component.css'
 })
 export class ClientesMenuComponent implements OnInit {
   mesaId: string | null = null;

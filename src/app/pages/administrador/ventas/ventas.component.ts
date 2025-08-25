@@ -4,11 +4,10 @@ import { Pedidos, Producto_extras_ingrSel } from '../../../types';
 import { CommonModule } from '@angular/common';
 import Swal from 'sweetalert2';
 @Component({
-  selector: 'app-ventas',
-  standalone: true,
-  imports: [CommonModule],
-  templateUrl: './ventas.component.html',
-  styleUrl: './ventas.component.css',
+    selector: 'app-ventas',
+    imports: [CommonModule],
+    templateUrl: './ventas.component.html',
+    styleUrl: './ventas.component.css'
 })
 export class VentasComponent {
   constructor(private readonly pedidosService: PedidosService) {}

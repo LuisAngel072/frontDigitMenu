@@ -5,15 +5,14 @@ import { HttpClient } from '@angular/common/http';
 import Swal from 'sweetalert2';
 
 @Component({
-  selector: 'app-mesas',
-  standalone: true,
-  imports: [QRCodeModule, CommonModule, 
-// TODO: `HttpClientModule` should not be imported into a component directly.
-// Please refactor the code to add `provideHttpClient()` call to the provider list in the
-// application bootstrap logic and remove the `HttpClientModule` import from this component.
-HttpClientModule],
-  templateUrl: './mesas.component.html',
-  styleUrl: '../mesas/mesas.component.css',
+    selector: 'app-mesas',
+    imports: [QRCodeModule, CommonModule,
+        // TODO: `HttpClientModule` should not be imported into a component directly.
+        // Please refactor the code to add `provideHttpClient()` call to the provider list in the
+        // application bootstrap logic and remove the `HttpClientModule` import from this component.
+        HttpClientModule],
+    templateUrl: './mesas.component.html',
+    styleUrl: '../mesas/mesas.component.css'
 })
 export class MesasComponent {
   constructor(private http: HttpClient) {}

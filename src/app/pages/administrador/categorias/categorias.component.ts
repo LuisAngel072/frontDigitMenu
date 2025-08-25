@@ -11,11 +11,10 @@ import { switchMap } from 'rxjs';
 import { environment } from '../../../../environment';
 
 @Component({
-  selector: 'app-crud-categorias',
-  standalone: true,
-  imports: [CommonModule],
-  templateUrl: './categorias.component.html',
-  styleUrls: ['./categorias.component.css'],
+    selector: 'app-crud-categorias',
+    imports: [CommonModule],
+    templateUrl: './categorias.component.html',
+    styleUrls: ['./categorias.component.css']
 })
 export class CategoriasComponent {
   @Input() categorias: Categorias[] = [];

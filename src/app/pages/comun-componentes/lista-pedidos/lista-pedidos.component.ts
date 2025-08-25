@@ -43,11 +43,10 @@ interface NavItem {
 }
 
 @Component({
-  selector: 'app-lista-pedidos',
-  templateUrl: './lista-pedidos.component.html',
-  styleUrls: ['./lista-pedidos.component.scss'],
-  standalone: true,
-  imports: [CommonModule],
+    selector: 'app-lista-pedidos',
+    templateUrl: './lista-pedidos.component.html',
+    styleUrls: ['./lista-pedidos.component.scss'],
+    imports: [CommonModule]
 })
 export class ListaPedidosComponent implements OnInit {
   orders: Order[] = [];

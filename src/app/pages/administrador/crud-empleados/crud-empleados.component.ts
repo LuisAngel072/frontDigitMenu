@@ -20,12 +20,11 @@ import { SharedService } from '../../../services/shared.service';
 import { environment } from '../../../../environment';
 
 @Component({
-  selector: 'app-crud-empleados',
-  standalone: true,
-  imports: [CommonModule, FormsModule, MatPaginatorModule],
-  templateUrl: './crud-empleados.component.html',
-  styleUrl: './crud-empleados.component.css',
-  providers: [{ provide: MatPaginatorIntl, useClass: CustomPaginatorIntl }],
+    selector: 'app-crud-empleados',
+    imports: [CommonModule, FormsModule, MatPaginatorModule],
+    templateUrl: './crud-empleados.component.html',
+    styleUrl: './crud-empleados.component.css',
+    providers: [{ provide: MatPaginatorIntl, useClass: CustomPaginatorIntl }]
 })
 export class CrudEmpleadosComponent {
   @Input() usuarios: Usuarios_has_roles[] = [];

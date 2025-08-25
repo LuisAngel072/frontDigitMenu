@@ -10,11 +10,10 @@ import { CommonModule } from '@angular/common';
 import Swal from 'sweetalert2';
 
 @Component({
-  selector: 'app-caja',
-  standalone: true,
-  imports: [CommonModule],
-  templateUrl: './caja.component.html',
-  styleUrl: './caja.component.css',
+    selector: 'app-caja',
+    imports: [CommonModule],
+    templateUrl: './caja.component.html',
+    styleUrl: './caja.component.css'
 })
 export class CajaComponent {
   constructor(private readonly pedidosService: PedidosService) {}

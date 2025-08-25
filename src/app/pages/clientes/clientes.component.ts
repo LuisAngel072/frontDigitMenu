@@ -4,11 +4,10 @@ import { PedidosService } from '../../services/pedidos.service';
 import { Pedidos } from '../../types';
 
 @Component({
-  selector: 'app-clientes',
-  standalone: true,
-  imports: [],
-  templateUrl: './clientes.component.html',
-  styleUrl: './clientes.component.css',
+    selector: 'app-clientes',
+    imports: [],
+    templateUrl: './clientes.component.html',
+    styleUrl: './clientes.component.css'
 })
 export class ClientesComponent implements OnInit {
   mesaId: string | null = null;

@@ -23,12 +23,11 @@ import { ProductosService } from '../../../../services/productos.service';
 import { ProductosDto } from '../../../../dtos';
 
 @Component({
-  selector: 'app-crud-agregar-productos',
-  standalone: true,
-  imports: [CommonModule, MatPaginator, ReactiveFormsModule],
-  providers: [{ provide: MatPaginatorIntl, useClass: CustomPaginatorIntl }],
-  templateUrl: './crud-agregar-productos.component.html',
-  styleUrl: './crud-agregar-productos.component.css',
+    selector: 'app-crud-agregar-productos',
+    imports: [CommonModule, MatPaginator, ReactiveFormsModule],
+    providers: [{ provide: MatPaginatorIntl, useClass: CustomPaginatorIntl }],
+    templateUrl: './crud-agregar-productos.component.html',
+    styleUrl: './crud-agregar-productos.component.css'
 })
 export class CrudAgregarProductosComponent {
   form: FormGroup = this.fb.group({

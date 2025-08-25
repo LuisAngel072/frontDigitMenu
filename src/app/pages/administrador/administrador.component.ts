@@ -20,21 +20,20 @@ import { ProductosService } from '../../services/productos.service';
 
 
 @Component({
-  selector: 'app-administrador',
-  standalone: true,
-  imports: [
-    HeaderComponent,
-    CommonModule,
-    CrudEmpleadosComponent,
-    CrudProductosComponent,
-    CategoriasComponent,
-    CrudIngredientesComponent,
-    MesasComponent,
-    VentasComponent,
-    CrudAgregarProductosComponent,
-  ],
-  templateUrl: './administrador.component.html',
-  styleUrls: ['./administrador.component.css'],
+    selector: 'app-administrador',
+    imports: [
+        HeaderComponent,
+        CommonModule,
+        CrudEmpleadosComponent,
+        CrudProductosComponent,
+        CategoriasComponent,
+        CrudIngredientesComponent,
+        MesasComponent,
+        VentasComponent,
+        CrudAgregarProductosComponent,
+    ],
+    templateUrl: './administrador.component.html',
+    styleUrls: ['./administrador.component.css']
 })
 export class AdministradorComponent {
   selectedSection: string = 'seccion1';

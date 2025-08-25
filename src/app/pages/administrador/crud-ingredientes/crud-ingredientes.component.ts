@@ -16,12 +16,11 @@ import {
 } from '@angular/material/paginator';
 import { CustomPaginatorIntl } from '../../../../matPaginator';
 @Component({
-  selector: 'app-crud-ingredientes',
-  standalone: true,
-  imports: [CommonModule, MatPaginatorModule],
-  templateUrl: './crud-ingredientes.component.html',
-  styleUrl: './crud-ingredientes.component.css',
-  providers: [{ provide: MatPaginatorIntl, useClass: CustomPaginatorIntl }],
+    selector: 'app-crud-ingredientes',
+    imports: [CommonModule, MatPaginatorModule],
+    templateUrl: './crud-ingredientes.component.html',
+    styleUrl: './crud-ingredientes.component.css',
+    providers: [{ provide: MatPaginatorIntl, useClass: CustomPaginatorIntl }]
 })
 export class CrudIngredientesComponent {
   @Input() ingredientes: Ingredientes[] = [];

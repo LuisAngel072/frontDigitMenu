@@ -20,11 +20,10 @@ import { AdministradorComponent } from '../administrador.component';
 import { environment } from '../../../../environment';
 import { ProductosService } from '../../../services/productos.service';
 @Component({
-  selector: 'app-crud-productos',
-  standalone: true,
-  imports: [CommonModule, MatPaginator],
-  templateUrl: './crud-productos.component.html',
-  styleUrl: './crud-productos.component.css',
+    selector: 'app-crud-productos',
+    imports: [CommonModule, MatPaginator],
+    templateUrl: './crud-productos.component.html',
+    styleUrl: './crud-productos.component.css'
 })
 export class CrudProductosComponent {
   @Output() cambiarComponente = new EventEmitter<string>();
