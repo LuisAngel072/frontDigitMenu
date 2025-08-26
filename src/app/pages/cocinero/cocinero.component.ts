@@ -11,6 +11,7 @@ import { HeaderComponent } from '../comun-componentes/header/header.component';
 
 @Component({
     selector: 'app-cocinero',
+    standalone: true,
     templateUrl: './cocinero.component.html',
     styleUrls: ['./cocinero.component.css'],
     imports: [CommonModule, HeaderComponent]

@@ -46,6 +46,7 @@ interface NavItem {
     selector: 'app-lista-pedidos',
     templateUrl: './lista-pedidos.component.html',
     styleUrls: ['./lista-pedidos.component.scss'],
+    standalone: true,
     imports: [CommonModule]
 })
 export class ListaPedidosComponent implements OnInit {

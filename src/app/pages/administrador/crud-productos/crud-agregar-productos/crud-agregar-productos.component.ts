@@ -24,6 +24,7 @@ import { ProductosDto } from '../../../../dtos';
 
 @Component({
     selector: 'app-crud-agregar-productos',
+    standalone: true,
     imports: [CommonModule, MatPaginator, ReactiveFormsModule],
     providers: [{ provide: MatPaginatorIntl, useClass: CustomPaginatorIntl }],
     templateUrl: './crud-agregar-productos.component.html',

@@ -10,12 +10,13 @@ import { QRCodeModule } from 'angularx-qrcode';
 @Component({
     selector: 'app-meseros',
     templateUrl: './meseros.component.html',
+    standalone: true,
     styleUrls: ['./meseros.component.scss'],
     imports: [CommonModule, ListaPedidosComponent, QRCodeModule]
 })
 export class MeserosComponent implements OnInit {
   @ViewChild(ListaPedidosComponent) listaPedidos!: ListaPedidosComponent;
-  
+
   mesas: Mesa[] = [];
   isLoading = true;
   errorMessage = '';
@@ -78,7 +79,7 @@ export class MeserosComponent implements OnInit {
         this.router.navigate(['/clientes-menu'], {
           queryParams: { mesa: mesa.no_mesa }
         });
-        
+
         // Opcional: Mostrar mensaje de confirmación antes de navegar
         Swal.fire({
           title: '¡Redirigiendo!',

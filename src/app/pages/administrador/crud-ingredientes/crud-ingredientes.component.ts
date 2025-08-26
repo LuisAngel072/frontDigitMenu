@@ -17,6 +17,7 @@ import {
 import { CustomPaginatorIntl } from '../../../../matPaginator';
 @Component({
     selector: 'app-crud-ingredientes',
+    standalone: true,
     imports: [CommonModule, MatPaginatorModule],
     templateUrl: './crud-ingredientes.component.html',
     styleUrl: './crud-ingredientes.component.css',

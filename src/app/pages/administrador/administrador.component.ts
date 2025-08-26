@@ -7,7 +7,16 @@ import { CategoriasComponent } from '../../pages/administrador/categorias/catego
 import { CrudIngredientesComponent } from './crud-ingredientes/crud-ingredientes.component';
 import { MesasComponent } from './mesas/mesas.component';
 import { VentasComponent } from './ventas/ventas.component';
-import { Ingredientes, Roles, Usuarios_has_roles, Categorias, Extras, Opciones, Sub_categorias, Productos } from '../../types';
+import {
+  Ingredientes,
+  Roles,
+  Usuarios_has_roles,
+  Categorias,
+  Extras,
+  Opciones,
+  Sub_categorias,
+  Productos,
+} from '../../types';
 import { UsuariosService } from '../../services/usuarios.service';
 import { RolesService } from '../../services/roles.service';
 import { CrudAgregarProductosComponent } from './crud-productos/crud-agregar-productos/crud-agregar-productos.component';
@@ -18,22 +27,22 @@ import { ExtrasService } from '../../services/extras.service';
 import { OpcionesService } from '../../services/opciones.service';
 import { ProductosService } from '../../services/productos.service';
 
-
 @Component({
-    selector: 'app-administrador',
-    imports: [
-        HeaderComponent,
-        CommonModule,
-        CrudEmpleadosComponent,
-        CrudProductosComponent,
-        CategoriasComponent,
-        CrudIngredientesComponent,
-        MesasComponent,
-        VentasComponent,
-        CrudAgregarProductosComponent,
-    ],
-    templateUrl: './administrador.component.html',
-    styleUrls: ['./administrador.component.css']
+  selector: 'app-administrador',
+  standalone: true,
+  imports: [
+    HeaderComponent,
+    CommonModule,
+    CrudEmpleadosComponent,
+    CrudProductosComponent,
+    CategoriasComponent,
+    CrudIngredientesComponent,
+    MesasComponent,
+    VentasComponent,
+    CrudAgregarProductosComponent,
+  ],
+  templateUrl: './administrador.component.html',
+  styleUrls: ['./administrador.component.css'],
 })
 export class AdministradorComponent {
   selectedSection: string = 'seccion1';
@@ -44,7 +53,7 @@ export class AdministradorComponent {
   public extras: Extras[] = [];
   public opciones: Opciones[] = [];
   public categorias: Categorias[] = [];
-  public subcategorias: Sub_categorias[] = [];  // Arreglo para almacenar las subcategorías
+  public subcategorias: Sub_categorias[] = []; // Arreglo para almacenar las subcategorías
   public productos: Productos[] = [];
 
   constructor(
@@ -55,9 +64,9 @@ export class AdministradorComponent {
     private readonly opcionesService: OpcionesService,
     private readonly categoriasService: CategoriasService,
     private readonly subcategoriaService: SubcategoriasService,
-    private readonly productosService: ProductosService,
+    private readonly productosService: ProductosService
   ) {}
-  cambiarComponente(componente:string) {
+  cambiarComponente(componente: string) {
     this.selectedSection = componente;
   }
   async ngOnInit() {

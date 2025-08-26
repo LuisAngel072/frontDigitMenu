@@ -12,6 +12,7 @@ import { environment } from '../../../../environment';
 
 @Component({
     selector: 'app-crud-categorias',
+    standalone: true,
     imports: [CommonModule],
     templateUrl: './categorias.component.html',
     styleUrls: ['./categorias.component.css']

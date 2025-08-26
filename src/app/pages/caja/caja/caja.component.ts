@@ -11,6 +11,7 @@ import Swal from 'sweetalert2';
 
 @Component({
     selector: 'app-caja',
+    standalone: true,
     imports: [CommonModule],
     templateUrl: './caja.component.html',
     styleUrl: './caja.component.css'

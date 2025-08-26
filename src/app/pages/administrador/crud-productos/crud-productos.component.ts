@@ -21,6 +21,7 @@ import { environment } from '../../../../environment';
 import { ProductosService } from '../../../services/productos.service';
 @Component({
     selector: 'app-crud-productos',
+    standalone: true,
     imports: [CommonModule, MatPaginator],
     templateUrl: './crud-productos.component.html',
     styleUrl: './crud-productos.component.css'

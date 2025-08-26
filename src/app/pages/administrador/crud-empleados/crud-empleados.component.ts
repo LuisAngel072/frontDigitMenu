@@ -21,6 +21,7 @@ import { environment } from '../../../../environment';
 
 @Component({
     selector: 'app-crud-empleados',
+    standalone: true,
     imports: [CommonModule, FormsModule, MatPaginatorModule],
     templateUrl: './crud-empleados.component.html',
     styleUrl: './crud-empleados.component.css',

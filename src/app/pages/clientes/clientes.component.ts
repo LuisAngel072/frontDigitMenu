@@ -5,7 +5,7 @@ import { Pedidos } from '../../types';
 
 @Component({
     selector: 'app-clientes',
-    imports: [],
+    standalone: true,
     templateUrl: './clientes.component.html',
     styleUrl: './clientes.component.css'
 })

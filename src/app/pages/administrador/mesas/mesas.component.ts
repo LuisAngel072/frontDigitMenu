@@ -1,11 +1,12 @@
 import { Component } from '@angular/core';
 import { QRCodeModule } from 'angularx-qrcode';
 import { CommonModule } from '@angular/common';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpClientModule } from '@angular/common/http';
 import Swal from 'sweetalert2';
 
 @Component({
     selector: 'app-mesas',
+    standalone: true,
     imports: [QRCodeModule, CommonModule,
         // TODO: `HttpClientModule` should not be imported into a component directly.
         // Please refactor the code to add `provideHttpClient()` call to the provider list in the
@@ -41,7 +42,7 @@ export class MesasComponent {
 
   agregarQR() {
     const nuevoId = this.mesas.length > 0 ? Math.max(...this.mesas.map(m => m.id)) + 1 : 1;
-  
+
     Swal.fire({
       title: 'Ingrese el número de la mesa',
       input: 'number',
@@ -60,10 +61,10 @@ export class MesasComponent {
       if (result.isConfirmed) {
         const mesaId = Number(result.value);
         const qrData = `http://localhost:4200/clientes-menu?mesa=${mesaId}`;
-  
+
         // Lógica para insertar visualmente
         this.mesas.push({ id: mesaId, qrData });
-  
+
         // Lógica para enviar al backend
         this.http.post('http://localhost:3000/api/mesas', {
           no_mesa: mesaId,
@@ -81,14 +82,14 @@ export class MesasComponent {
     });
   }
 
-  
+
 
   eliminarQR() {
     if (this.mesas.length === 0) {
       Swal.fire('Sin mesas', 'No hay mesas para eliminar.', 'info');
       return;
     }
-  
+
     Swal.fire({
       title: 'Eliminar mesa',
       input: 'number',
@@ -105,15 +106,15 @@ export class MesasComponent {
     }).then((result) => {
       if (result.isConfirmed) {
         const noMesa = Number(result.value);
-  
+
         // Buscar si existe en el array local
         const index = this.mesas.findIndex(m => m.id === noMesa);
-  
+
         if (index === -1) {
           Swal.fire('Error', `No se encontró la mesa ${noMesa}.`, 'error');
           return;
         }
-  
+
         // Llamar al backend para eliminar
         this.http.delete(`http://localhost:3000/api/mesas/${noMesa}`).subscribe({
           next: () => {
@@ -128,6 +129,6 @@ export class MesasComponent {
       }
     });
   }
-  
-  
+
+
 }

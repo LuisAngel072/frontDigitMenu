@@ -6,6 +6,7 @@ import { VentasComponent } from '../administrador/ventas/ventas.component';
 
 @Component({
     selector: 'app-cajero',
+    standalone: true,
     imports: [HeaderComponent, CajaComponent, VentasComponent, CommonModule],
     templateUrl: './cajero.component.html',
     styleUrl: './cajero.component.css'

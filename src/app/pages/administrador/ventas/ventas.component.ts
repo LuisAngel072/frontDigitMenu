@@ -5,6 +5,7 @@ import { CommonModule } from '@angular/common';
 import Swal from 'sweetalert2';
 @Component({
     selector: 'app-ventas',
+    standalone: true,
     imports: [CommonModule],
     templateUrl: './ventas.component.html',
     styleUrl: './ventas.component.css'

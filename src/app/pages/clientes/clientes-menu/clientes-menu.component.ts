@@ -11,6 +11,7 @@ import { EstadoPedidoHasProductos, Producto_extras_ingrSel } from '../../../type
 
 @Component({
     selector: 'app-clientes-menu',
+    standalone: true,
     imports: [CommonModule, FormsModule],
     templateUrl: './clientes-menu.component.html',
     styleUrl: './clientes-menu.component.css'
@@ -28,13 +29,13 @@ export class ClientesMenuComponent implements OnInit {
   ingredientes: any[] = [];
   searchTerm: string = '';
   categoriasOriginales: any[] = [];
-  
+
   // Nuevas propiedades para el carrito
   pedidoActual: any = null;
   productosEnPedido: Producto_extras_ingrSel[] = [];
   totalCarrito: number = 0;
 
-  constructor(  
+  constructor(
     private route: ActivatedRoute,
     private http: HttpClient,
     private productosService: ProductosService,
@@ -56,7 +57,7 @@ export class ClientesMenuComponent implements OnInit {
   // Carga los productos del pedido actual de forma similar a cómo lo hace el componente Cocinero
   cargarPedidoMesa(): void {
     if (!this.mesaId) return;
-    
+
     // Utilizamos el mismo servicio que utiliza el componente de cocina
     this.pedidosService.getPedidosConProductosDetalles().subscribe({
       next: (data) => {
@@ -66,23 +67,23 @@ export class ClientesMenuComponent implements OnInit {
           extras: p.extras ?? [],
           ingredientes: p.ingredientes ?? []
         }));
-        
+
         // Encontramos productos que pertenecen a la mesa actual
         // Primero filtramos por mesa
-        const productosDeMiMesa = normalizado.filter(detalle => 
+        const productosDeMiMesa = normalizado.filter(detalle =>
           detalle.pedido_id.no_mesa.no_mesa === parseInt(this.mesaId!)
         );
-        
+
         if (productosDeMiMesa.length > 0) {
           // Guardamos la referencia al pedido
           this.pedidoActual = productosDeMiMesa[0].pedido_id;
-          
+
           // Asignamos los productos al arreglo
           this.productosEnPedido = productosDeMiMesa;
-          
+
           // Calculamos el total del carrito
           this.calcularTotalCarrito();
-          
+
           console.log('Pedido cargado con éxito. Total de productos:', this.productosEnPedido.length);
         } else {
           console.log('No se encontraron productos para la mesa:', this.mesaId);
@@ -102,7 +103,7 @@ calcularTotalCarrito(): void {
   this.totalCarrito = this.productosEnPedido.reduce((total, producto) => {
     // Asegurarse de que todos los valores sean numéricos usando el operador +
     let precio = +producto.precio || 0;
-    
+
     // Suma los precios de extras si los hay
     if (producto.extras && producto.extras.length > 0) {
       const extrasTotal = producto.extras.reduce((sum, extra) => {
@@ -112,7 +113,7 @@ calcularTotalCarrito(): void {
       }, 0);
       precio += extrasTotal;
     }
-    
+
     // Suma los precios de ingredientes adicionales si los hay
     if (producto.ingredientes && producto.ingredientes.length > 0) {
       const ingTotal = producto.ingredientes.reduce((sum, ing) => {
@@ -122,11 +123,11 @@ calcularTotalCarrito(): void {
       }, 0);
       precio += ingTotal;
     }
-    
+
     // Verificar que el resultado sea un número válido
     return total + (isNaN(precio) ? 0 : precio);
   }, 0);
-  
+
   // Verificar que el resultado final sea un número válido
   if (isNaN(this.totalCarrito)) {
     console.error('Error: El total calculado no es un número válido', this.productosEnPedido);
@@ -135,7 +136,7 @@ calcularTotalCarrito(): void {
     // Redondear a dos decimales para evitar problemas de precisión con números flotantes
     this.totalCarrito = Math.round(this.totalCarrito * 100) / 100;
   }
-  
+
   console.log('Total calculado:', this.totalCarrito);
 }
 
@@ -143,7 +144,7 @@ calcularTotalCarrito(): void {
   mostrarCarrito(): void {
     // Aseguramos que tenemos los datos más recientes
     this.cargarPedidoMesa();
-    
+
     setTimeout(() => {
       const modal = new (window as any).bootstrap.Modal(
         document.getElementById('carritoModal')
@@ -228,7 +229,7 @@ calcularTotalCarrito(): void {
     }
     this.calcularPrecio();
   }
-  
+
   calcularPrecio() {
     let base = parseFloat(this.selectedProduct.precio);
     if (this.selectedOpcion) base += parseFloat(this.selectedOpcion.precio);
@@ -237,7 +238,7 @@ calcularTotalCarrito(): void {
     }
     this.precioTotal = base;
   }
-  
+
   async agregarACuenta() {
     try {
       // Mostrar indicador de carga
@@ -285,7 +286,7 @@ calcularTotalCarrito(): void {
     const cat$ = this.http.get<any[]>(`${environment.ApiIP}categorias`);
     const subcat$ = this.http.get<any[]>(`${environment.ApiIP}sub-categorias`);
     const prod$ = this.http.get<any[]>(`${environment.ApiIP}productos`);
-  
+
     cat$.subscribe(categorias => {
       subcat$.subscribe(subcategorias => {
         prod$.subscribe(productos => {
@@ -296,7 +297,7 @@ calcularTotalCarrito(): void {
             );
             return { ...sub, productos: productosFiltrados };
           });
-  
+
           // Asignamos subcategorías a cada categoría
           this.categorias = categorias.map(cat => {
           const subcatFiltradas = subcategoriasConProductos.filter(
