@@ -35,7 +35,7 @@
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let producto of productosFiltrados">
+        <tr *ngFor="let producto of productosFiltrados | paginate: { itemsPerPage: pageSize, currentPage: currentPage }">
           <!-- <td>{{ product.id }}</td> -->
           <td>{{ producto.nombre_prod }}</td>
           <td>{{ producto.sub_cat_id.categoria_id.nombre_cat }}</td>
@@ -64,20 +64,26 @@
     </table>
 
     <div class="pagination-container row">
-      <div class="col-12 d-flex justify-content-center">
-        <mat-paginator
-          *ngIf="this.productos.length > 7"
-          [length]="this.productos.length"
-          [pageSize]="this.pageSize"
-          [hidePageSize]="true"
-          [pageSizeOptions]="[5, 7, 10]"
-          (page)="onPageChange($event)"
-        >
-        </mat-paginator>
+      <div class="col-12 d-flex justify-content-center"></div>
+    </div>
+    <div class="d-flex justify-content-center">
+      <div
+        class="d-flex justify-content-center"
+        *ngIf="productosFiltrados.length > 7"
+      >
+        <pagination-controls
+          (pageChange)="onPageChange($event)"
+          class="pagination"
+          previousLabel="Anterior"
+          nextLabel="Siguiente"
+        ></pagination-controls>
+      </div>
+      <div
+        class="text-center"
+        *ngIf="productosFiltrados.length === 0"
+      >
+        <h2>¡Vaya! No hay registros de materiales</h2>
       </div>
     </div>
-    <h3 class="text-center" *ngIf="this.productos.length === 0">
-      ¡Vaya! No existen productos registrados.
-    </h3>
   </main>
 </div>

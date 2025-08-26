@@ -9,17 +9,22 @@ import { CategoriasDTO } from '../../../dtos';
 import { SubcategoriasDTO } from '../../../dtos'; // DTO para las subcategorías
 import { switchMap } from 'rxjs';
 import { environment } from '../../../../environment';
+import { NgxPaginationModule } from 'ngx-pagination';
 
 @Component({
-    selector: 'app-crud-categorias',
-    standalone: true,
-    imports: [CommonModule],
-    templateUrl: './categorias.component.html',
-    styleUrls: ['./categorias.component.css']
+  selector: 'app-crud-categorias',
+  standalone: true,
+  imports: [CommonModule, NgxPaginationModule],
+  templateUrl: './categorias.component.html',
+  styleUrls: ['./categorias.component.css'],
 })
 export class CategoriasComponent {
   @Input() categorias: Categorias[] = [];
   @Input() subcategorias: Sub_categorias[] = []; // Subcategorías
+
+  pageSize: number = 7;
+  currentPageCat: number = 0;
+  currentPageSubCat: number = 0;
 
   categoriasFiltradas: Categorias[] = [];
   subCategoriasFiltradas: Sub_categorias[] = [];
@@ -41,6 +46,12 @@ export class CategoriasComponent {
     this.categoriasFiltradas = this.categorias;
   }
 
+  async onPageChangeCat(page: number) {
+    this.currentPageCat = page;
+  }
+  async onPageChangeSubCat(page: number) {
+    this.currentPageSubCat = page;
+  }
   /**
    * BUSCADORES
    */
@@ -54,8 +65,10 @@ export class CategoriasComponent {
   filtrarSubCategorias(event: any) {
     const valor = event.target.value.toLowerCase();
     this.subCategoriasFiltradas = this.subcategorias.filter((subCategoria) => {
-      const nombre_subCategoria = subCategoria.nombre_subcat.toLowerCase() || '';
-      const nombre_cat = subCategoria.categoria_id.nombre_cat.toString().toLowerCase() || '';
+      const nombre_subCategoria =
+        subCategoria.nombre_subcat.toLowerCase() || '';
+      const nombre_cat =
+        subCategoria.categoria_id.nombre_cat.toString().toLowerCase() || '';
 
       return nombre_subCategoria.includes(valor) || nombre_cat.includes(valor);
     });

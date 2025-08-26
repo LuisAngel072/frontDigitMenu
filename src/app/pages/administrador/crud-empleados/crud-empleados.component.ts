@@ -7,31 +7,21 @@ import { UsuariosDTO } from '../../../dtos';
 import { UsuariosService } from '../../../services/usuarios.service';
 import { FormsModule } from '@angular/forms';
 import { switchMap } from 'rxjs';
-import {
-  MatPaginator,
-  MatPaginatorIntl,
-  MatPaginatorModule,
-  PageEvent,
-} from '@angular/material/paginator';
-import { CustomPaginatorIntl } from '../../../../matPaginator';
-import { HeaderComponent } from '../../comun-componentes/header/header.component';
 import { ChangeDetectorRef } from '@angular/core';
 import { SharedService } from '../../../services/shared.service';
 import { environment } from '../../../../environment';
+import { NgxPaginationModule } from 'ngx-pagination';
 
 @Component({
-    selector: 'app-crud-empleados',
-    standalone: true,
-    imports: [CommonModule, FormsModule, MatPaginatorModule],
-    templateUrl: './crud-empleados.component.html',
-    styleUrl: './crud-empleados.component.css',
-    providers: [{ provide: MatPaginatorIntl, useClass: CustomPaginatorIntl }]
+  selector: 'app-crud-empleados',
+  standalone: true,
+  imports: [CommonModule, FormsModule, NgxPaginationModule],
+  templateUrl: './crud-empleados.component.html',
+  styleUrl: './crud-empleados.component.css',
 })
 export class CrudEmpleadosComponent {
   @Input() usuarios: Usuarios_has_roles[] = [];
   @Input() roles: Roles[] = [];
-
-  @ViewChild(MatPaginator) paginator!: MatPaginator;
 
   pageSize: number = 7;
   currentPage: number = 0;
@@ -56,28 +46,12 @@ export class CrudEmpleadosComponent {
     this.activo = 0;
   }
 
-  async ngOnInit() {
-    this.usuarios = this.adminComponente.usuarios;
-    this.roles = this.adminComponente.roles;
-    this.updateUsuariosFiltrados();
+  ngOnInit() {
+    this.usuariosFiltrados = this.usuarios;
   }
 
-  ngOnChanges(changes: SimpleChanges): void {
-    if (changes['usuarios'] && this.usuarios) {
-      this.updateUsuariosFiltrados();
-    }
-  }
-
-  onPageChange(event: PageEvent) {
-    this.currentPage = event.pageIndex;
-    this.pageSize = event.pageSize;
-    this.updateUsuariosFiltrados();
-  }
-
-  updateUsuariosFiltrados() {
-    const startIndex = this.currentPage * this.pageSize;
-    const endIndex = startIndex + this.pageSize;
-    this.usuariosFiltrados = this.usuarios.slice(startIndex, endIndex);
+  async onPageChange(page: number) {
+    this.currentPage = page;
   }
 
   filtrarUsuarios(event: any) {
@@ -1175,7 +1149,7 @@ export class CrudEmpleadosComponent {
               allowOutsideClick: false, // Evita que se pueda cerrar
               allowEscapeKey: false, // Evita que se cierre con la tecla Escape
               allowEnterKey: false, // Evita que se cierre con Enter
-              showConfirmButton:false,
+              showConfirmButton: false,
               didOpen: () => {
                 Swal.showLoading(); // Muestra el spinner de carga
               },
@@ -1258,7 +1232,7 @@ export class CrudEmpleadosComponent {
               title: 'Empleado reactivado correctamente',
               icon: 'success',
               timer: 2000,
-              showConfirmButton:false,
+              showConfirmButton: false,
             });
             this.usuarios = await this.usuariosService.obtenerUsuariosYRoles();
 

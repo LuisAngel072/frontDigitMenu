@@ -38,7 +38,7 @@
               </tr>
             </thead>
             <tbody>
-              <tr *ngFor="let ingr of ingredientesFiltrados">
+              <tr *ngFor="let ingr of ingredientesFiltrados | paginate: { itemsPerPage: pageSize, currentPage: currentPageIngr }">
                 <td>{{ ingr.nombre_ingrediente }}</td>
                 <td>{{ ingr.precio }}</td>
                 <td>
@@ -64,17 +64,17 @@
               </tr>
             </tbody>
           </table>
-          <div class="pagination-container row">
-            <div class="col-12 d-flex justify-content-center">
-              <mat-paginator
-                *ngIf="this.ingredientes.length > 5"
-                [length]="this.ingredientes.length"
-                [pageSize]="this.pageSizeIngr"
-                [hidePageSize]="true"
-                [pageSizeOptions]="[5, 7, 10]"
-                (page)="onPageChangeIngr($event)"
-              >
-              </mat-paginator>
+          <div class="d-flex justify-content-center">
+            <div
+              class="d-flex justify-content-center"
+              *ngIf="ingredientesFiltrados.length > 7"
+            >
+              <pagination-controls
+                (pageChange)="onPageChangeIngr($event)"
+                class="pagination"
+                previousLabel="Anterior"
+                nextLabel="Siguiente"
+              ></pagination-controls>
             </div>
           </div>
           <h3 class="text-center" *ngIf="this.ingredientes.length === 0">
@@ -116,7 +116,7 @@
               </tr>
             </thead>
             <tbody>
-              <tr *ngFor="let opcion of opcionesFiltradas">
+              <tr *ngFor="let opcion of opcionesFiltradas | paginate: { itemsPerPage: pageSize, currentPage: currentPageOpc }">
                 <td>{{ opcion.nombre_opcion }}</td>
                 <td>{{ opcion.porcentaje }}</td>
                 <td>
@@ -143,16 +143,16 @@
             </tbody>
           </table>
           <div class="pagination-container row">
-            <div class="col-12 d-flex justify-content-center">
-              <mat-paginator
-                *ngIf="this.opciones.length > 5"
-                [length]="this.opciones.length"
-                [pageSize]="this.pageSizeOpc"
-                [hidePageSize]="true"
-                [pageSizeOptions]="[5, 7, 10]"
-                (page)="onPageChangeOpc($event)"
-              >
-              </mat-paginator>
+            <div
+              class="d-flex justify-content-center"
+              *ngIf="opcionesFiltradas.length > 7"
+            >
+              <pagination-controls
+                (pageChange)="onPageChangeOpc($event)"
+                class="pagination"
+                previousLabel="Anterior"
+                nextLabel="Siguiente"
+              ></pagination-controls>
             </div>
           </div>
           <h3 class="text-center" *ngIf="this.opciones.length === 0">
@@ -194,7 +194,7 @@
               </tr>
             </thead>
             <tbody>
-              <tr *ngFor="let extra of extrasFiltrados">
+              <tr *ngFor="let extra of extrasFiltrados | paginate: { itemsPerPage: pageSize, currentPage: currentPageExt }">
                 <td>{{ extra.nombre_extra }}</td>
                 <td>{{ extra.precio }}</td>
                 <td>
@@ -221,16 +221,16 @@
             </tbody>
           </table>
           <div class="pagination-container row">
-            <div class="col-12 d-flex justify-content-center">
-              <mat-paginator
-                *ngIf="this.extras.length > 5"
-                [length]="this.extras.length"
-                [pageSize]="this.pageSizeExt"
-                [hidePageSize]="true"
-                [pageSizeOptions]="[5, 7, 10]"
-                (page)="onPageChangeExt($event)"
-              >
-              </mat-paginator>
+            <div
+              class="d-flex justify-content-center"
+              *ngIf="extrasFiltrados.length > 7"
+            >
+              <pagination-controls
+                (pageChange)="onPageChangeExt($event)"
+                class="pagination"
+                previousLabel="Anterior"
+                nextLabel="Siguiente"
+              ></pagination-controls>
             </div>
           </div>
           <h3 class="text-center" *ngIf="this.extras.length === 0">

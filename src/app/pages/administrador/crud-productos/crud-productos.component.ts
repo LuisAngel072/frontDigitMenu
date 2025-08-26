@@ -1,30 +1,17 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { CommonModule, PercentPipe } from '@angular/common';
 import Swal from 'sweetalert2';
-import {
-  Extras,
-  Ingredientes,
-  P_H_E,
-  P_H_I,
-  P_H_O,
-  Productos,
-} from '../../../types';
-import {
-  MatPaginator,
-  MatPaginatorIntl,
-  MatPaginatorModule,
-  PageEvent,
-} from '@angular/material/paginator';
-import { CustomPaginatorIntl } from '../../../../matPaginator';
+import { P_H_E, P_H_I, P_H_O, Productos } from '../../../types';
 import { AdministradorComponent } from '../administrador.component';
 import { environment } from '../../../../environment';
 import { ProductosService } from '../../../services/productos.service';
+import { NgxPaginationModule } from 'ngx-pagination';
 @Component({
-    selector: 'app-crud-productos',
-    standalone: true,
-    imports: [CommonModule, MatPaginator],
-    templateUrl: './crud-productos.component.html',
-    styleUrl: './crud-productos.component.css'
+  selector: 'app-crud-productos',
+  standalone: true,
+  imports: [CommonModule, NgxPaginationModule],
+  templateUrl: './crud-productos.component.html',
+  styleUrl: './crud-productos.component.css',
 })
 export class CrudProductosComponent {
   @Output() cambiarComponente = new EventEmitter<string>();
@@ -50,19 +37,8 @@ export class CrudProductosComponent {
     this.cambiarComponente.emit('seccion7'); // Emite el nombre del componente que se debe mostrar
   }
 
-  onPageChange(event: PageEvent) {
-    this.currentPage = event.pageIndex;
-    this.pageSize = event.pageSize;
-    this.updateProductosFiltrados();
-  }
-
-  /**
-   * Permite paginar los productos
-   */
-  updateProductosFiltrados() {
-    const startIndex = this.currentPage * this.pageSize;
-    const endIndex = startIndex + this.pageSize;
-    this.productosFiltrados = this.productos.slice(startIndex, endIndex);
+  async onPageChange(page: number) {
+    this.currentPage = page;
   }
 
   async verProducto(id_producto: number) {

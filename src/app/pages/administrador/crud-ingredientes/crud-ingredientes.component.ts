@@ -7,21 +7,13 @@ import { CommonModule } from '@angular/common';
 import { ExtrasDTO, IngredientesDTO, OpcionesDTO } from '../../../dtos';
 import { ExtrasService } from '../../../services/extras.service';
 import { OpcionesService } from '../../../services/opciones.service';
-
-import {
-  MatPaginator,
-  MatPaginatorIntl,
-  MatPaginatorModule,
-  PageEvent,
-} from '@angular/material/paginator';
-import { CustomPaginatorIntl } from '../../../../matPaginator';
+import { NgxPaginationModule } from 'ngx-pagination';
 @Component({
-    selector: 'app-crud-ingredientes',
-    standalone: true,
-    imports: [CommonModule, MatPaginatorModule],
-    templateUrl: './crud-ingredientes.component.html',
-    styleUrl: './crud-ingredientes.component.css',
-    providers: [{ provide: MatPaginatorIntl, useClass: CustomPaginatorIntl }]
+  selector: 'app-crud-ingredientes',
+  standalone: true,
+  imports: [CommonModule, NgxPaginationModule],
+  templateUrl: './crud-ingredientes.component.html',
+  styleUrl: './crud-ingredientes.component.css',
 })
 export class CrudIngredientesComponent {
   @Input() ingredientes: Ingredientes[] = [];
@@ -32,113 +24,51 @@ export class CrudIngredientesComponent {
   opcionesFiltradas: Opciones[] = [];
   extrasFiltrados: Extras[] = [];
 
-  @ViewChild(MatPaginator) paginator!: MatPaginator;
-
+  pageSize: number = 5
   currentPageIngr: number = 0;
-  pageSizeIngr: number = 5;
-
   currentPageExt: number = 0;
-  pageSizeExt: number = 5;
-
   currentPageOpc: number = 0;
-  pageSizeOpc: number = 5;
+
   constructor(
     private readonly ingrServices: IngredientesService,
     private readonly opcionesService: OpcionesService,
     private readonly extrasService: ExtrasService,
     private adminComponente: AdministradorComponent
   ) {
-    this.ingredientesFiltrados = this.ingredientes;
-  }
-
-  async ngOnInit() {
     this.ingredientes = this.adminComponente.ingredientes;
     this.extras = this.adminComponente.extras;
     this.opciones = this.adminComponente.opciones;
-
-
-
-    await this.updateIngredientesFiltrados()
-    await this.updateExtrasFiltrados()
-    await this.updateOpcionesFiltradas()
+    this.ingredientesFiltrados = this.ingredientes;
+    this.extrasFiltrados = this.extras;
+    this.opcionesFiltradas = this.opciones;
   }
 
-  ngOnChanges(changes: SimpleChanges): void {
-    if (changes['ingredientesFiltrados'] && this.ingredientes) {
-      this.updateIngredientesFiltrados();
-    }
-    if (changes['opcionesFiltradas'] && this.opciones) {
-      this.updateIngredientesFiltrados();
-    }
-    if (changes['extrasFiltrados'] && this.extras) {
-      this.updateIngredientesFiltrados();
-    }
+   ngOnInit() {
+    this.ingredientes = this.adminComponente.ingredientes;
+    this.extras = this.adminComponente.extras;
+    this.opciones = this.adminComponente.opciones;
   }
 
-  onPageChangeIngr(event: PageEvent) {
-    this.currentPageIngr = event.pageIndex;
-    this.pageSizeIngr = event.pageSize;
-    this.updateIngredientesFiltrados();
+  async onPageChangeIngr(page: number) {
+    this.currentPageIngr = page;
   }
-
-  onPageChangeOpc(event: PageEvent) {
-    this.currentPageOpc = event.pageIndex;
-    this.pageSizeOpc = event.pageSize;
-    this.updateOpcionesFiltradas();
+  async onPageChangeOpc(page: number) {
+    this.currentPageOpc = page;
   }
-
-  onPageChangeExt(event: PageEvent) {
-    this.currentPageExt = event.pageIndex;
-    this.pageSizeExt = event.pageSize;
-    this.updateExtrasFiltrados();
+   async onPageChangeExt(page: number) {
+    this.currentPageExt = page;
   }
-  /**
-   * Permite paginar los ingredientes
-   */
-  updateIngredientesFiltrados() {
-    const startIndex = this.currentPageIngr * this.pageSizeIngr;
-    const endIndex = startIndex + this.pageSizeIngr;
-    this.ingredientesFiltrados = this.ingredientes.slice(
-      startIndex,
-      endIndex
-    );
-  }
-  /**
-   * Permite paginar las opciones
-   */
-  updateOpcionesFiltradas() {
-    const startIndex = this.currentPageOpc * this.pageSizeOpc;
-    const endIndex = startIndex + this.pageSizeOpc;
-    this.opcionesFiltradas = this.opciones.slice(
-      startIndex,
-      endIndex
-    );
-  }
-  /**
-   * Permite paginar los extras
-   */
-  updateExtrasFiltrados() {
-    const startIndex = this.currentPageExt * this.pageSizeExt;
-    const endIndex = startIndex + this.pageSizeExt;
-    this.extrasFiltrados = this.extras.slice(
-      startIndex,
-      endIndex
-    );
-  }
-
   /**
    * BUSCADORES
    */
   filtrarIngredientes(event: any) {
     const valor = event.target.value.toLowerCase();
-    this.ingredientesFiltrados = this.ingredientes.filter(
-      (ingrediente) => {
-        const nombre_ingr = ingrediente.nombre_ingrediente.toLowerCase() || '';
-        const precio = ingrediente.precio.toString().toLowerCase() || '';
+    this.ingredientesFiltrados = this.ingredientes.filter((ingrediente) => {
+      const nombre_ingr = ingrediente.nombre_ingrediente.toLowerCase() || '';
+      const precio = ingrediente.precio.toString().toLowerCase() || '';
 
-        return nombre_ingr.includes(valor) || precio.includes(valor);
-      }
-    );
+      return nombre_ingr.includes(valor) || precio.includes(valor);
+    });
   }
   filtrarOpciones(event: any) {
     const valor = event.target.value.toLowerCase();
