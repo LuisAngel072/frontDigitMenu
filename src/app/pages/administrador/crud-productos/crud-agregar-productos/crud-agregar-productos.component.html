@@ -93,7 +93,9 @@
           <div class="card p-3">
             <h5>Extras</h5>
             <div class="form-check" formArrayName="extras">
-              <ul *ngFor="let extra of extrasFiltrados; let i = index">
+              <ul
+                *ngFor="let extra of extrasFiltrados | paginate: { itemsPerPage: pageSize, currentPage: currentPageExt }; let i = index; "
+              >
                 <input
                   type="checkbox"
                   class="form-check-input"
@@ -111,16 +113,16 @@
             </div>
           </div>
           <div class="pagination-container row">
-            <div class="col-12 d-flex justify-content-center">
-              <mat-paginator
-                *ngIf="this.extras.length > 5"
-                [length]="this.extras.length"
-                [pageSize]="this.pageSizeExt"
-                [hidePageSize]="true"
-                [pageSizeOptions]="[5, 7, 10]"
-                (page)="onPageChangeExt($event)"
-              >
-              </mat-paginator>
+            <div
+              class="d-flex justify-content-center"
+              *ngIf="extrasFiltrados.length > pageSize"
+            >
+              <pagination-controls
+                (pageChange)="onPageChangeExt($event)"
+                class="pagination"
+                previousLabel="Anterior"
+                nextLabel="Siguiente"
+              ></pagination-controls>
             </div>
           </div>
           <h3 class="text-center" *ngIf="this.extras.length === 0">
@@ -131,7 +133,7 @@
           <div class="card p-3">
             <h5>Opciones</h5>
             <div class="form-check" formArrayName="opciones">
-              <ul *ngFor="let opcion of opcionesFiltradas; let i = index">
+              <ul *ngFor="let opcion of opcionesFiltradas | paginate: { itemsPerPage: pageSize, currentPage: currentPageOpc }; let i = index">
                 <input
                   class="form-check-input"
                   type="checkbox"
@@ -149,16 +151,16 @@
             </div>
           </div>
           <div class="pagination-container row">
-            <div class="col-12 d-flex justify-content-center">
-              <mat-paginator
-                *ngIf="this.opciones.length > 5"
-                [length]="this.opciones.length"
-                [pageSize]="this.pageSizeOpc"
-                [hidePageSize]="true"
-                [pageSizeOptions]="[5, 7, 10]"
-                (page)="onPageChangeOpc($event)"
-              >
-              </mat-paginator>
+            <div
+              class="d-flex justify-content-center"
+              *ngIf="opcionesFiltradas.length > pageSize"
+            >
+              <pagination-controls
+                (pageChange)="onPageChangeOpc($event)"
+                class="pagination"
+                previousLabel="Anterior"
+                nextLabel="Siguiente"
+              ></pagination-controls>
             </div>
           </div>
           <h3 class="text-center" *ngIf="this.opciones.length === 0">
@@ -169,7 +171,7 @@
           <div class="card p-3">
             <h5>Ingredientes</h5>
             <div class="form-check" formArrayName="ingredientes">
-              <ul *ngFor="let ingr of ingredientesFiltrados; let i = index">
+              <ul *ngFor="let ingr of ingredientesFiltrados | paginate: { itemsPerPage: pageSize, currentPage: currentPageIngr }; let i = index">
                 <input
                   class="form-check-input"
                   type="checkbox"
@@ -183,16 +185,16 @@
               </ul>
             </div>
             <div class="pagination-container row">
-              <div class="col-12 d-flex justify-content-center">
-                <mat-paginator
-                  *ngIf="this.ingredientes.length > 6"
-                  [length]="this.ingredientes.length"
-                  [pageSize]="this.pageSizeIngr"
-                  [hidePageSize]="true"
-                  [pageSizeOptions]="[5, 7, 10]"
-                  (page)="onPageChangeIngr($event)"
-                >
-                </mat-paginator>
+              <div
+                class="d-flex justify-content-center"
+                *ngIf="extrasFiltrados.length > pageSize"
+              >
+                <pagination-controls
+                  (pageChange)="onPageChangeExt($event)"
+                  class="pagination"
+                  previousLabel="Anterior"
+                  nextLabel="Siguiente"
+                ></pagination-controls>
               </div>
             </div>
             <h3 class="text-center" *ngIf="this.ingredientes.length === 0">
