@@ -24,7 +24,7 @@ export class CrudIngredientesComponent {
   opcionesFiltradas: Opciones[] = [];
   extrasFiltrados: Extras[] = [];
 
-  pageSize: number = 5
+  pageSize: number = 6;
   currentPageIngr: number = 0;
   currentPageExt: number = 0;
   currentPageOpc: number = 0;

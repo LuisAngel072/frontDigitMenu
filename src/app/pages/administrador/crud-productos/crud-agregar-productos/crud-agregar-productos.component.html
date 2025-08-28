@@ -92,32 +92,41 @@
         <div class="col-md-4">
           <div class="card p-3">
             <h5>Extras</h5>
-            <div class="form-check" formArrayName="extras">
+            <div class="form-check">
               <ul
-                *ngFor="let extra of extrasFiltrados | paginate: { itemsPerPage: pageSize, currentPage: currentPageExt }; let i = index; "
+                *ngFor="
+                  let extra of extrasFiltrados
+                    | paginate
+                      : {
+                          itemsPerPage: pageSize,
+                          currentPage: currentPageExt,
+                          id: 'extras-paginador'
+                        };
+                  let i = index
+                "
               >
                 <input
                   type="checkbox"
                   class="form-check-input"
                   [value]="extra"
                   id="extra_{{ extra.id_extra }}"
-                  [formControlName]="i"
+                  [checked]="isExtraSelected(extra.id_extra)"
+                  (change)="onExtraChange($event, extra.id_extra)"
                 />
                 <label
                   for="extra_{{ extra.id_extra }}"
                   class="form-check-label"
                 >
-                  {{ extra.nombre_extra }}</label
+                  {{ extra.nombre_extra }}
+                  <span class="text-muted">(+${{ extra.precio }})</span></label
                 >
               </ul>
             </div>
           </div>
           <div class="pagination-container row">
-            <div
-              class="d-flex justify-content-center"
-              *ngIf="extrasFiltrados.length > pageSize"
-            >
+            <div class="d-flex justify-content-center">
               <pagination-controls
+                id="extras-paginador"
                 (pageChange)="onPageChangeExt($event)"
                 class="pagination"
                 previousLabel="Anterior"
@@ -125,6 +134,9 @@
               ></pagination-controls>
             </div>
           </div>
+          <small class="text-muted">
+            Extras seleccionados: {{ selectedExtras.size }}
+          </small>
           <h3 class="text-center" *ngIf="this.extras.length === 0">
             ¡Vaya! No existen extras registrados.
           </h3>
@@ -132,30 +144,43 @@
         <div class="col-md-4">
           <div class="card p-3">
             <h5>Opciones</h5>
-            <div class="form-check" formArrayName="opciones">
-              <ul *ngFor="let opcion of opcionesFiltradas | paginate: { itemsPerPage: pageSize, currentPage: currentPageOpc }; let i = index">
+            <div class="form-check">
+              <ul
+                *ngFor="
+                  let opcion of opcionesFiltradas
+                    | paginate
+                      : {
+                          itemsPerPage: pageSize,
+                          currentPage: currentPageOpc,
+                          id: 'opciones-paginador'
+                        };
+                  let i = index
+                "
+              >
                 <input
                   class="form-check-input"
                   type="checkbox"
                   [value]="opcion"
                   id="opcion_{{ opcion.id_opcion }}"
-                  [formControlName]="i"
+                  [checked]="isOpcionSelected(opcion.id_opcion)"
+                  (change)="onOpcionChange($event, opcion.id_opcion)"
                 />
                 <label
                   class="form-check-label"
                   for="opcion_{{ opcion.id_opcion }}"
                 >
-                  {{ opcion.nombre_opcion }}</label
+                  {{ opcion.nombre_opcion }}
+                  <span class="text-muted"
+                    >({{ opcion.porcentaje }}%)</span
+                  ></label
                 >
               </ul>
             </div>
           </div>
           <div class="pagination-container row">
-            <div
-              class="d-flex justify-content-center"
-              *ngIf="opcionesFiltradas.length > pageSize"
-            >
+            <div class="d-flex justify-content-center">
               <pagination-controls
+                id="opciones-paginador"
                 (pageChange)="onPageChangeOpc($event)"
                 class="pagination"
                 previousLabel="Anterior"
@@ -163,40 +188,57 @@
               ></pagination-controls>
             </div>
           </div>
+          <small class="text-muted">
+            Opciones seleccionadas: {{ selectedOpciones.size }}
+          </small>
           <h3 class="text-center" *ngIf="this.opciones.length === 0">
             ¡Vaya! No existen opciones registradas.
           </h3>
         </div>
         <div class="col-md-4">
           <div class="card p-3">
-            <h5>Ingredientes</h5>
-            <div class="form-check" formArrayName="ingredientes">
-              <ul *ngFor="let ingr of ingredientesFiltrados | paginate: { itemsPerPage: pageSize, currentPage: currentPageIngr }; let i = index">
+            <h5>Ingredientes <span class="text-danger">*</span></h5>
+            <div class="form-check">
+              <ul
+                *ngFor="
+                  let ingr of ingredientesFiltrados
+                    | paginate
+                      : {
+                          itemsPerPage: pageSize,
+                          currentPage: currentPageIngr,
+                          id: 'ingredientes-paginador',
+                        };
+                  let i = index
+                "
+              >
                 <input
                   class="form-check-input"
                   type="checkbox"
                   [value]="ingr"
                   id="ingr_{{ ingr.id_ingr }}"
-                  [formControlName]="i"
+                  [checked]="isIngredienteSelected(ingr.id_ingr)"
+                  (change)="onIngredienteChange($event, ingr.id_ingr)"
                 />
-                <label class="form-check-label" for="ingr_{{ ingr.id_ingr }}">{{
-                  ingr.nombre_ingrediente
-                }}</label>
+                <label class="form-check-label" for="ingr_{{ ingr.id_ingr }}"
+                  >{{ ingr.nombre_ingrediente }}
+                  <span class="text-muted">(+${{ ingr.precio }})</span></label
+                >
               </ul>
             </div>
             <div class="pagination-container row">
-              <div
-                class="d-flex justify-content-center"
-                *ngIf="extrasFiltrados.length > pageSize"
-              >
+              <div class="d-flex justify-content-center">
                 <pagination-controls
-                  (pageChange)="onPageChangeExt($event)"
+                  id="ingredientes-paginador"
+                  (pageChange)="onPageChangeIngr($event)"
                   class="pagination"
                   previousLabel="Anterior"
                   nextLabel="Siguiente"
                 ></pagination-controls>
               </div>
             </div>
+            <small class="text-muted">
+              Ingredientes seleccionados: {{ selectedIngredientes.size }}
+            </small>
             <h3 class="text-center" *ngIf="this.ingredientes.length === 0">
               ¡Vaya! No existen ingredientes registrados.
             </h3>
@@ -213,12 +255,31 @@
           min="0"
           step="0.01"
           formControlName="precio"
+          [class.is-invalid]="
+            form.get('precio')?.invalid && form.get('precio')?.touched
+          "
         />
+        <div
+          class="invalid-feedback"
+          *ngIf="form.get('precio')?.hasError('required')"
+        >
+          El precio es obligatorio.
+        </div>
+        <div
+          class="invalid-feedback"
+          *ngIf="form.get('precio')?.hasError('min')"
+        >
+          El precio debe ser mayor a 0.
+        </div>
       </div>
 
       <!-- Botón para agregar producto -->
       <div class="text-end mt-3">
-        <button type="submit" class="btn btn-primary" [disabled]="form.invalid">
+        <button
+          type="submit"
+          class="btn btn-primary"
+          [disabled]="form.invalid || selectedIngredientes.size === 0"
+        >
           Agregar producto
         </button>
       </div>
