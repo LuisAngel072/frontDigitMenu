@@ -18,6 +18,12 @@ export const routes: Routes = [
     path: 'Administrador',
     component: AdministradorComponent,
   },
+  // Redirección para asegurar case-sensitivity
+  {
+    path: 'administrador',
+    redirectTo: '/Administrador',
+    pathMatch: 'full'
+  },
   {
     path: 'empleados',
     component: CrudEmpleadosComponent,
@@ -35,15 +41,33 @@ export const routes: Routes = [
     component: ClientesMenuComponent,
   },
   {
-    path: 'Cocinero', // Agregar ruta para el componente cocinero
+    path: 'Cocinero', // Ruta principal con mayúscula
     component: CocineroComponent,
+  },
+  // Redirección para asegurar case-sensitivity
+  {
+    path: 'cocinero',
+    redirectTo: '/Cocinero',
+    pathMatch: 'full'
   },
   {
     path: 'Mesero',
     component: MeserosComponent,
   },
+  // Redirección para asegurar case-sensitivity - ESTE ES EL QUE TE IMPORTA
+  {
+    path: 'mesero',
+    redirectTo: '/Mesero',
+    pathMatch: 'full'
+  },
   {
     path: 'Cajero',
     component: CajeroComponent,
+  },
+  // Redirección para asegurar case-sensitivity
+  {
+    path: 'cajero',
+    redirectTo: '/Cajero',
+    pathMatch: 'full'
   }
 ];

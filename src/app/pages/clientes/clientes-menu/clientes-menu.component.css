@@ -151,3 +151,27 @@
   border-radius: 12px;
   padding: 20px;
 }
+
+/* Solo agregar esto a tu CSS existente para el botón de concierge */
+.btn-concierge {
+    background-color: var(--color-botonP);
+    color: white;
+    border-color: var(--color-botonP);
+    font-family: 'cocogoose', sans-serif;
+    margin-left: 1%;
+    padding-bottom: 1%;
+}
+
+.btn-concierge:hover {
+    background-color: var(--color-botonPH);
+    color: white;
+    border-color: var(--color-botonPH);
+    transform: scale(1.05);
+}
+
+.btn-concierge:active {
+    background-color: var(--color-botonPA);
+    color: white;
+    border-color: var(--color-botonPA);
+    transform: scale(0.95);
+}
