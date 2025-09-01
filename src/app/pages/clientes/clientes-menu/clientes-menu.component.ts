@@ -8,6 +8,7 @@ import { FormsModule } from '@angular/forms';
 import { ProductosService } from '../../../services/productos.service';
 import { PedidosService } from '../../../services/pedidos.service';
 import { EstadoPedidoHasProductos, Producto_extras_ingrSel } from '../../../types';
+import { NotificacionesService } from '../../../services/notificaciones.service';
 
 @Component({
     selector: 'app-clientes-menu',
@@ -39,7 +40,8 @@ export class ClientesMenuComponent implements OnInit {
     private route: ActivatedRoute,
     private http: HttpClient,
     private productosService: ProductosService,
-    private pedidosService: PedidosService
+    private pedidosService: PedidosService,
+    private notificacionesService: NotificacionesService,
   ) {}
 
   ngOnInit(): void {
@@ -366,5 +368,18 @@ calcularTotalCarrito(): void {
         }
       });
     });
+  }
+
+  async llamarMesero() {
+    try {
+      const notif = await this.notificacionesService.crearNotificacion(
+        "El cliente solicita atención",
+        Number(this.mesaId)
+      );
+      console.log("Notificación enviada:", notif);
+      alert("Has llamado al mesero 🚨");
+    } catch (error) {
+      alert("Error al enviar notificación");
+    }
   }
 }

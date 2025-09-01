@@ -93,5 +93,10 @@ export const environment = {
   ApiActualizarPedido: "pedidos/actualizar/", // PATCH /:id_pedido
   ApiCambiarEstadoProducto: "pedidos/pedido_prod/actualizar/", // PATCH /:pedido_prod_id
 
-
+  /**
+   * Notificaciones
+  */
+  ApiCrearNotificacion: "notificaciones", // POST
+  ApiObtenerNotificacionesPorMesa: "notificaciones/mesa/", // GET /:mesaId
+  ApiAtenderNotificacion: "notificaciones/", // PATCH /:id/atender
 }
