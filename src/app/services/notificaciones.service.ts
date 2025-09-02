@@ -51,7 +51,9 @@ export class NotificacionesService {
   async atenderNotificacion(id: number): Promise<Notificacion> {
     try {
       return await firstValueFrom(
-        this.http.patch<Notificacion>(`${environment.ApiIP}${environment.ApiAtenderNotificacion}${id}/atender`, {})
+        this.http.patch<Notificacion>(`${environment.ApiIP}${environment.ApiAtenderNotificacion}${id}/atender`, {
+          estado: 'Atendido'
+        })
       );
     } catch (error) {
       console.error('Error al atender notificación:', error);

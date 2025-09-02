@@ -20,7 +20,18 @@
         <div class="col" *ngFor="let mesa of mesas">
           <div class="card h-100 mesa-card">
             <div class="card-body">
-              <h5 class="card-title">Mesa {{ mesa.no_mesa }}</h5>
+              <h5 class="card-title">
+                Mesa {{ mesa.no_mesa }}
+                <span *ngIf="tieneNotificaciones(mesa)" class="badge bg-danger">
+                  {{ obtenerNotificacionesPorMesa(mesa.no_mesa).length }}
+                </span>
+              </h5>
+              
+              <!-- Alerta de notificaciones -->
+              <div class="alert alert-warning" *ngIf="tieneNotificaciones(mesa)">
+                <strong>¡ATENCIÓN!</strong> {{ obtenerNotificacionesPorMesa(mesa.no_mesa).length }} notificación(es)
+              </div>
+              
               <div class="qr-code" *ngIf="mesa.qr_code_url">
                 <qrcode 
                   [qrdata]="mesa.qr_code_url" 
@@ -29,13 +40,16 @@
                   class="img-fluid mb-3">
                 </qrcode>
               </div>
-              <div class="card-text mb-3">
-                <!-- <span class="badge rounded-pill" [ngClass]="{'bg-success': tieneOrdenesActivas(mesa), 'bg-secondary': !tieneOrdenesActivas(mesa)}">
-                  {{ tieneOrdenesActivas(mesa) ? 'Con pedidos activos' : 'Sin pedidos activos' }}
-                </span> -->
-              </div>
             </div>
             <div class="card-footer">
+              <!-- Botón de notificaciones si hay pendientes -->
+              <button 
+                *ngIf="tieneNotificaciones(mesa)" 
+                class="btn btn-warning w-100 mb-2" 
+                (click)="mostrarNotificaciones(mesa)">
+                Ver Notificaciones ({{ obtenerNotificacionesPorMesa(mesa.no_mesa).length }})
+              </button>
+              
               <div class="btn-group w-100" role="group">
                 <button class="btn btn-outline-primary" (click)="verPedidos(mesa)">
                   <i class="bi bi-eye"></i> Ver Pedidos
