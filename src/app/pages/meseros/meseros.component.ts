@@ -6,6 +6,7 @@ import { ListaPedidosComponent } from '../comun-componentes/lista-pedidos/lista-
 import Swal from 'sweetalert2';
 import { MesasService, Mesa } from '../../services/mesas.service';
 import { NotificacionesService, Notificacion } from '../../services/notificaciones.service';
+import { PedidosService } from '../../services/pedidos.service';
 import { QRCodeModule } from 'angularx-qrcode';
 
 @Component({
@@ -27,6 +28,7 @@ export class MeserosComponent implements OnInit, OnDestroy {
   constructor(
     private mesasService: MesasService,
     private notificacionesService: NotificacionesService,
+    private pedidosService: PedidosService, // Agregamos el servicio de pedidos
     private router: Router
   ) {}
 
@@ -146,10 +148,149 @@ export class MeserosComponent implements OnInit, OnDestroy {
     });
   }
 
-  verPedidos(mesa: Mesa): void {
-    if (this.listaPedidos) {
-      this.listaPedidos.goToOrder(mesa.no_mesa);
+  // MÉTODO CORREGIDO: Ver pedidos de una mesa específica
+  async verPedidos(mesa: Mesa): Promise<void> {
+    try {
+      // Mostrar indicador de carga
+      Swal.fire({
+        title: 'Cargando pedidos...',
+        text: 'Obteniendo pedidos de la mesa',
+        allowOutsideClick: false,
+        didOpen: () => {
+          Swal.showLoading();
+        }
+      });
+
+      // Buscar pedidos de la mesa usando el mismo método que usa el carrito
+      this.pedidosService.getPedidosConProductosDetalles().subscribe({
+        next: (data) => {
+          console.log('Todos los pedidos obtenidos:', data);
+          
+          // Filtrar productos que pertenecen a la mesa seleccionada
+          const productosDeMesa = data.filter(detalle => 
+            detalle.pedido_id?.no_mesa?.no_mesa === mesa.no_mesa
+          );
+
+          console.log(`Productos encontrados para mesa ${mesa.no_mesa}:`, productosDeMesa);
+
+          Swal.close();
+
+          if (productosDeMesa.length === 0) {
+            Swal.fire({
+              icon: 'info',
+              title: 'Sin pedidos',
+              text: `No se encontraron pedidos para la mesa ${mesa.no_mesa}`,
+              showConfirmButton: true
+            });
+            return;
+          }
+
+          // Si el componente hijo existe, pasarle los datos filtrados
+          if (this.listaPedidos) {
+            // Pasar tanto el número de mesa como los productos filtrados
+            this.listaPedidos.cargarPedidosMesa(mesa.no_mesa, productosDeMesa);
+          } else {
+            // Si no existe el ViewChild, mostrar los datos en un modal
+            this.mostrarPedidosEnModal(mesa, productosDeMesa);
+          }
+        },
+        error: (error) => {
+          console.error('Error cargando pedidos:', error);
+          Swal.close();
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'No se pudieron cargar los pedidos de la mesa'
+          });
+        }
+      });
+
+    } catch (error) {
+      console.error('Error en verPedidos:', error);
+      Swal.close();
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'Ocurrió un error al cargar los pedidos'
+      });
     }
+  }
+
+  // Método auxiliar para mostrar pedidos en modal si no hay componente hijo
+  private mostrarPedidosEnModal(mesa: Mesa, productos: any[]): void {
+    const pedidosAgrupados = this.agruparProductosPorPedido(productos);
+    
+    let html = `<h4>Pedidos de Mesa ${mesa.no_mesa}</h4>`;
+    
+    Object.keys(pedidosAgrupados).forEach(pedidoId => {
+      const productosDelPedido = pedidosAgrupados[pedidoId];
+      const totalPedido = this.calcularTotalPedido(productosDelPedido);
+      
+      html += `
+        <div class="mb-3 border p-3">
+          <h5>Pedido #${pedidoId}</h5>
+          <div class="row">
+      `;
+      
+      productosDelPedido.forEach(producto => {
+        html += `
+          <div class="col-12 mb-2">
+            <div class="card">
+              <div class="card-body">
+                <h6>${producto.producto_id?.nombre_prod || 'Producto'}</h6>
+                <p><strong>Precio:</strong> $${producto.precio}</p>
+                <p><strong>Estado:</strong> ${producto.estado}</p>
+                ${producto.extras?.length > 0 ? `<p><strong>Extras:</strong> ${producto.extras?.map((e: any) => e.nombre_extra).join(', ')}</p>` : ''}
+              </div>
+            </div>
+          </div>
+        `;
+      });
+      
+      html += `
+          </div>
+          <div class="text-end">
+            <strong>Total del pedido: $${totalPedido.toFixed(2)}</strong>
+          </div>
+        </div>
+      `;
+    });
+
+    Swal.fire({
+      title: `Mesa ${mesa.no_mesa}`,
+      html: html,
+      width: '80%',
+      showConfirmButton: true,
+      confirmButtonText: 'Cerrar'
+    });
+  }
+
+  // Método auxiliar para agrupar productos por pedido
+  private agruparProductosPorPedido(productos: any[]): { [key: string]: any[] } {
+    return productos.reduce((grupos, producto) => {
+      const pedidoId = producto.pedido_id?.id_pedido || 'unknown';
+      if (!grupos[pedidoId]) {
+        grupos[pedidoId] = [];
+      }
+      grupos[pedidoId].push(producto);
+      return grupos;
+    }, {});
+  }
+
+  // Método auxiliar para calcular total de un pedido
+  private calcularTotalPedido(productos: any[]): number {
+    return productos.reduce((total, producto) => {
+      let precio = +(producto.precio || 0);
+      
+      if (producto.extras && producto.extras.length > 0) {
+        const extrasTotal = producto.extras.reduce((sum: number, extra: any) => {
+          return sum + (+(extra.precio || 0));
+        }, 0);
+        precio += extrasTotal;
+      }
+      
+      return total + precio;
+    }, 0);
   }
 
   crearPedido(mesa: Mesa): void {
