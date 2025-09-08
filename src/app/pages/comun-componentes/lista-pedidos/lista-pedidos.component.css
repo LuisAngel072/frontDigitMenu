@@ -2,7 +2,7 @@
 .order-system-container {
   display: flex;
   flex-direction: column;
-  height: 100vh;
+  min-height: 100vh;
 }
 
 /* Navbar styling */
@@ -84,7 +84,7 @@
   display: flex;
   flex: 1;
   position: relative;
-  overflow: hidden;
+  overflow-y: auto;
 }
 
 /* Sidebar styling - shared properties */
