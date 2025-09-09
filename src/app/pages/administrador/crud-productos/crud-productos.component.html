@@ -15,11 +15,10 @@
         />
       </div>
       <div class="col-auto">
-        <select class="form-select btn">
-          <option selected>Filtrar por categoria</option>
-          <option>Cortes finos</option>
-          <option>Especialidad</option>
-          <option>Comida de mar</option>
+        <select class="form-select btn" (change)="filtrarProductosPorCategoria($event)">
+          <option value="0" selected>Filtrar por categoria</option>
+          <option value="0">Todos</option>
+          <option *ngFor="let categoria of categoriasFiltradas" value="{{ categoria.id_cat }}">{{ categoria.nombre_cat }}</option>
         </select>
       </div>
     </div>
@@ -35,7 +34,12 @@
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let producto of productosFiltrados | paginate: { itemsPerPage: pageSize, currentPage: currentPage }">
+        <tr
+          *ngFor="
+            let producto of productosFiltrados
+              | paginate : { itemsPerPage: pageSize, currentPage: currentPage }
+          "
+        >
           <!-- <td>{{ product.id }}</td> -->
           <td>{{ producto.nombre_prod }}</td>
           <td>{{ producto.sub_cat_id.categoria_id.nombre_cat }}</td>
@@ -51,7 +55,7 @@
               </span>
             </button>
             <button class="btn">
-              <span class="material-symbols-outlined icon-edit">
+              <span class="material-symbols-outlined icon-edit" (click)="editarProducto(producto.id_prod)">
                 edit_square
               </span>
             </button>
@@ -78,10 +82,7 @@
           nextLabel="Siguiente"
         ></pagination-controls>
       </div>
-      <div
-        class="text-center"
-        *ngIf="productosFiltrados.length === 0"
-      >
+      <div class="text-center" *ngIf="productosFiltrados.length === 0">
         <h2>¡Vaya! No hay registros de materiales</h2>
       </div>
     </div>

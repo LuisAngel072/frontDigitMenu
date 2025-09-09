@@ -1,15 +1,17 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { CommonModule, PercentPipe } from '@angular/common';
 import Swal from 'sweetalert2';
-import { P_H_E, P_H_I, P_H_O, Productos } from '../../../types';
+import { Categorias, P_H_E, P_H_I, P_H_O, Productos } from '../../../types';
 import { AdministradorComponent } from '../administrador.component';
 import { environment } from '../../../../environment';
 import { ProductosService } from '../../../services/productos.service';
 import { NgxPaginationModule } from 'ngx-pagination';
+import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 @Component({
   selector: 'app-crud-productos',
   standalone: true,
-  imports: [CommonModule, NgxPaginationModule],
+  imports: [CommonModule, NgxPaginationModule, FormsModule],
   templateUrl: './crud-productos.component.html',
   styleUrl: './crud-productos.component.css',
 })
@@ -19,22 +21,42 @@ export class CrudProductosComponent {
   currentPage: number = 0;
 
   @Input() productos: Productos[] = [];
+  @Input() categorias: Categorias[] = [];
   productosFiltrados: Productos[] = [];
-
+  categoriasFiltradas: Categorias[] = [];
   constructor(
     private readonly adminComponente: AdministradorComponent,
-    private readonly productosService: ProductosService
+    private readonly productosService: ProductosService,
+    private router: Router,
   ) {
     this.productos = adminComponente.productos;
+    this.categorias = adminComponente.categorias;
     console.log(this.productos);
   }
 
   async ngOnInit() {
     this.productosFiltrados = this.productos;
+    this.categoriasFiltradas = this.categorias;
   }
 
   agregarProductosBoton() {
-    this.cambiarComponente.emit('seccion7'); // Emite el nombre del componente que se debe mostrar
+    this.router.navigate(['/Administrador/productos/agregar']);
+  }
+
+  editarProducto(id_prod: number) {
+    this.router.navigate(['/Administrador/productos/editar', id_prod]);
+  }
+
+  filtrarProductosPorCategoria(event: any) {
+    const categoriaSeleccionada = parseInt(event.target.value);
+    if (categoriaSeleccionada) {
+      this.productosFiltrados = this.productos.filter(
+        (producto) =>
+          producto.sub_cat_id.categoria_id.id_cat === categoriaSeleccionada
+      );
+    } else {
+      this.productosFiltrados = this.productos;
+    }
   }
 
   async onPageChange(page: number) {

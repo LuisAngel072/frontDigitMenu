@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import Swal from 'sweetalert2';
 import {
@@ -17,21 +17,25 @@ import {
 import { ProductosService } from '../../../../services/productos.service';
 import { ProductosDto } from '../../../../dtos';
 import { NgxPaginationModule } from 'ngx-pagination';
+import { ActivatedRoute } from '@angular/router';
 
 @Component({
   selector: 'app-crud-agregar-productos',
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, NgxPaginationModule],
   templateUrl: './crud-agregar-productos.component.html',
-  styleUrl: './crud-agregar-productos.component.css'
+  styleUrl: './crud-agregar-productos.component.css',
 })
-export class CrudAgregarProductosComponent {
+export class CrudAgregarProductosComponent implements OnInit {
+  id_prod?: number;
+  modoEdicion: boolean = false;
+
   form: FormGroup = this.fb.group({
     nombre_prod: ['', Validators.required],
     descripcion: ['', Validators.required],
     img_prod: [null, Validators.required],
     precio: [0, [Validators.required, Validators.min(0)]],
-    sub_cat_id: [null, Validators.required]
+    sub_cat_id: [null, Validators.required],
   });
   selectedFile?: File;
 
@@ -58,10 +62,20 @@ export class CrudAgregarProductosComponent {
   constructor(
     public readonly administradorComponent: AdministradorComponent,
     private readonly productosService: ProductosService,
-    private fb: FormBuilder
+    private fb: FormBuilder,
+    private route: ActivatedRoute
   ) {}
 
   async ngOnInit() {
+    this.route.paramMap.subscribe((params) => {
+      const idParam = params.get('id_prod');
+      if (idParam) {
+        this.id_prod = +idParam;
+        this.modoEdicion = true;
+        this.cargarProducto(this.id_prod);
+      }
+    });
+
     this.ingredientes = this.administradorComponent.ingredientes;
     this.extras = this.administradorComponent.extras;
     this.opciones = this.administradorComponent.opciones;
@@ -70,6 +84,9 @@ export class CrudAgregarProductosComponent {
     this.ingredientesFiltrados = this.ingredientes;
     this.extrasFiltrados = this.extras;
     this.opcionesFiltradas = this.opciones;
+
+    console.log(this.id_prod);
+    console.log(this.modoEdicion);
   }
 
   // Métodos de paginación
@@ -85,23 +102,11 @@ export class CrudAgregarProductosComponent {
     this.currentPageExt = page;
   }
 
-  // Métodos para obtener elementos paginados
-  getIngredientesPaginados(): Ingredientes[] {
-    const startIndex = (this.currentPageIngr - 1) * this.pageSize;
+  // Método genérico para obtener elementos paginados
+  getPaginados<T>(items: T[], currentPage: number): T[] {
+    const startIndex = (currentPage - 1) * this.pageSize;
     const endIndex = startIndex + this.pageSize;
-    return this.ingredientesFiltrados.slice(startIndex, endIndex);
-  }
-
-  getExtrasPaginados(): Extras[] {
-    const startIndex = (this.currentPageExt - 1) * this.pageSize;
-    const endIndex = startIndex + this.pageSize;
-    return this.extrasFiltrados.slice(startIndex, endIndex);
-  }
-
-  getOpcionesPaginadas(): Opciones[] {
-    const startIndex = (this.currentPageOpc - 1) * this.pageSize;
-    const endIndex = startIndex + this.pageSize;
-    return this.opcionesFiltradas.slice(startIndex, endIndex);
+    return items.slice(startIndex, endIndex);
   }
 
   // Métodos para verificar selecciones
@@ -145,6 +150,44 @@ export class CrudAgregarProductosComponent {
     } else {
       this.selectedOpciones.delete(id);
     }
+  }
+
+  cargarProducto(id: number) {
+    const producto = this.productosService.obtenerProducto(id);
+
+    producto.then((prod) => {
+      this.form.patchValue({
+        nombre_prod: prod.nombre_prod,
+        descripcion: prod.descripcion,
+        img_prod: prod.img_prod,
+        precio: prod.precio,
+        sub_cat_id: prod.sub_cat_id.id_subcat,
+      });
+
+      // Cargar ingredientes, extras y opciones seleccionadas
+      const ingredientesProd =
+        this.productosService.obtenerIngredientesDeProducto(id);
+      const extrasProd = this.productosService.obtenerExtrasDeProducto(id);
+      const opcionesProd = this.productosService.obtenerOpcionesDeProducto(id);
+
+      ingredientesProd.then((ings) => {
+        ings.forEach((ing: Ingredientes) => {
+          this.selectedIngredientes.add(ing.id_ingr);
+        });
+      });
+
+      extrasProd.then((exts) => {
+        exts.forEach((ext: Extras) => {
+          this.selectedExtras.add(ext.id_extra);
+        });
+      });
+
+      opcionesProd.then((opcs) => {
+        opcs.forEach((opc: Opciones) => {
+          this.selectedOpciones.add(opc.id_opcion);
+        });
+      });
+    });
   }
 
   // Actualizar validación personalizada
@@ -199,17 +242,18 @@ export class CrudAgregarProductosComponent {
       }
 
       // Obtener objetos seleccionados usando los IDs de los Sets
-      const extrasSeleccionadas: Extras[] = this.extras.filter(extra =>
+      const extrasSeleccionadas: Extras[] = this.extras.filter((extra) =>
         this.selectedExtras.has(extra.id_extra)
       );
 
-      const opcionesSeleccionadas: Opciones[] = this.opciones.filter(opcion =>
+      const opcionesSeleccionadas: Opciones[] = this.opciones.filter((opcion) =>
         this.selectedOpciones.has(opcion.id_opcion)
       );
 
-      const ingredientesSeleccionados: Ingredientes[] = this.ingredientes.filter(ingrediente =>
-        this.selectedIngredientes.has(ingrediente.id_ingr)
-      );
+      const ingredientesSeleccionados: Ingredientes[] =
+        this.ingredientes.filter((ingrediente) =>
+          this.selectedIngredientes.has(ingrediente.id_ingr)
+        );
 
       // Subir imagen
       const res_img = await this.productosService.subirImg(this.selectedFile!);
