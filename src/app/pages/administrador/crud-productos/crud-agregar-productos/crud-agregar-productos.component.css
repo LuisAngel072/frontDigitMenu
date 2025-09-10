@@ -40,7 +40,6 @@ textarea, input, .form-check-label, option, select {
   margin-right: 8px !important;
   border: 2px solid #6c757d !important;
   border-radius: 4px !important;
-  background-color: transparent !important;
   cursor: pointer !important;
   transition: all 0.2s ease !important;
 }

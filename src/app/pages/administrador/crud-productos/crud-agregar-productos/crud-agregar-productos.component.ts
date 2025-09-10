@@ -1,10 +1,11 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, Input, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import Swal from 'sweetalert2';
 import {
   Extras,
   Ingredientes,
   Opciones,
+  Productos,
   Sub_categorias,
 } from '../../../../types';
 import { AdministradorComponent } from '../../administrador.component';
@@ -12,6 +13,7 @@ import {
   FormBuilder,
   FormGroup,
   Validators,
+  FormsModule,
   ReactiveFormsModule,
 } from '@angular/forms';
 import { ProductosService } from '../../../../services/productos.service';
@@ -22,7 +24,7 @@ import { ActivatedRoute } from '@angular/router';
 @Component({
   selector: 'app-crud-agregar-productos',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, NgxPaginationModule],
+  imports: [CommonModule, ReactiveFormsModule, NgxPaginationModule, FormsModule],
   templateUrl: './crud-agregar-productos.component.html',
   styleUrl: './crud-agregar-productos.component.css',
 })
@@ -63,30 +65,24 @@ export class CrudAgregarProductosComponent implements OnInit {
     public readonly administradorComponent: AdministradorComponent,
     private readonly productosService: ProductosService,
     private fb: FormBuilder,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private cdr: ChangeDetectorRef
   ) {}
 
-  async ngOnInit() {
-    this.route.paramMap.subscribe((params) => {
-      const idParam = params.get('id_prod');
-      if (idParam) {
-        this.id_prod = +idParam;
-        this.modoEdicion = true;
-        this.cargarProducto(this.id_prod);
-      }
-    });
-
+  ngOnInit() {
     this.ingredientes = this.administradorComponent.ingredientes;
     this.extras = this.administradorComponent.extras;
     this.opciones = this.administradorComponent.opciones;
     this.sub_categorias = this.administradorComponent.subcategorias;
 
-    this.ingredientesFiltrados = this.ingredientes;
-    this.extrasFiltrados = this.extras;
-    this.opcionesFiltradas = this.opciones;
-
-    console.log(this.id_prod);
-    console.log(this.modoEdicion);
+    this.route.paramMap.subscribe(async (params) => {
+      const idParam = params.get('id_prod');
+      if (idParam) {
+        this.id_prod = +idParam;
+        this.modoEdicion = true;
+        await this.cargarProducto(this.id_prod);
+      }
+    });
   }
 
   // Métodos de paginación
@@ -123,9 +119,8 @@ export class CrudAgregarProductosComponent implements OnInit {
   }
 
   // Métodos para manejar cambios en checkboxes
-  onIngredienteChange(event: Event, id: number) {
-    const checkbox = event.target as HTMLInputElement;
-    if (checkbox.checked) {
+  onIngredienteChange(isChecked: boolean, id: number) {
+    if (isChecked) {
       this.selectedIngredientes.add(id);
     } else {
       this.selectedIngredientes.delete(id);
@@ -134,60 +129,65 @@ export class CrudAgregarProductosComponent implements OnInit {
     this.updateFormValidation();
   }
 
-  onExtraChange(event: Event, id: number) {
-    const checkbox = event.target as HTMLInputElement;
-    if (checkbox.checked) {
+  onExtraChange(isChecked: boolean, id: number) {
+    if (isChecked) {
       this.selectedExtras.add(id);
     } else {
       this.selectedExtras.delete(id);
     }
   }
 
-  onOpcionChange(event: Event, id: number) {
-    const checkbox = event.target as HTMLInputElement;
-    if (checkbox.checked) {
+  onOpcionChange(isChecked: boolean, id: number) {
+    if (isChecked) {
       this.selectedOpciones.add(id);
     } else {
       this.selectedOpciones.delete(id);
     }
   }
 
-  cargarProducto(id: number) {
-    const producto = this.productosService.obtenerProducto(id);
-
-    producto.then((prod) => {
-      this.form.patchValue({
-        nombre_prod: prod.nombre_prod,
-        descripcion: prod.descripcion,
-        img_prod: prod.img_prod,
-        precio: prod.precio,
-        sub_cat_id: prod.sub_cat_id.id_subcat,
-      });
-
-      // Cargar ingredientes, extras y opciones seleccionadas
-      const ingredientesProd =
-        this.productosService.obtenerIngredientesDeProducto(id);
-      const extrasProd = this.productosService.obtenerExtrasDeProducto(id);
-      const opcionesProd = this.productosService.obtenerOpcionesDeProducto(id);
-
-      ingredientesProd.then((ings) => {
-        ings.forEach((ing: Ingredientes) => {
-          this.selectedIngredientes.add(ing.id_ingr);
-        });
-      });
-
-      extrasProd.then((exts) => {
-        exts.forEach((ext: Extras) => {
-          this.selectedExtras.add(ext.id_extra);
-        });
-      });
-
-      opcionesProd.then((opcs) => {
-        opcs.forEach((opc: Opciones) => {
-          this.selectedOpciones.add(opc.id_opcion);
-        });
-      });
+  async cargarProducto(id: number) {
+    const producto = await this.productosService.obtenerProducto(id);
+    console.log(producto);
+    this.form.patchValue({
+      nombre_prod: producto.nombre_prod,
+      descripcion: producto.descripcion,
+      img_prod: producto.img_prod,
+      precio: producto.precio,
+      sub_cat_id: producto.sub_cat_id.id_subcat,
     });
+
+    // Limpiar selecciones previas para evitar estados inconsistentes
+    this.selectedIngredientes.clear();
+    this.selectedExtras.clear();
+    this.selectedOpciones.clear();
+
+    // Cargar ingredientes, extras y opciones seleccionadas
+    const [ingredientesProd, extrasProd, opcionesProd] = await Promise.all([
+      this.productosService.obtenerIngredientesDeProducto(id),
+      this.productosService.obtenerExtrasDeProducto(id),
+      this.productosService.obtenerOpcionesDeProducto(id),
+    ]);
+
+    ingredientesProd.forEach((ing: any) =>
+      this.selectedIngredientes.add(ing.ingrediente_id.id_ingr)
+    );
+    extrasProd.forEach((ext: any) =>
+      this.selectedExtras.add(ext.extra_id.id_extra)
+    );
+    opcionesProd.forEach((opc: any) =>
+      this.selectedOpciones.add(opc.opcion_id.id_opcion)
+    );
+    console.log([ingredientesProd, extrasProd, opcionesProd]);
+    // Asignar los datos a las propiedades que usa la vista AHORA que todo está cargado
+    this.ingredientesFiltrados = [...this.ingredientes];
+    this.extrasFiltrados = [...this.extras];
+    this.opcionesFiltradas = [...this.opciones];
+
+    console.log(this.selectedIngredientes);
+    console.log(this.selectedExtras);
+    console.log(this.selectedOpciones);
+    // Forzar la detección de cambios para que la vista se actualice
+    this.cdr.detectChanges();
   }
 
   // Actualizar validación personalizada
