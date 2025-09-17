@@ -34,15 +34,8 @@ import { RouterModule } from '@angular/router';
   imports: [
     HeaderComponent,
     CommonModule,
-    CrudEmpleadosComponent,
-    CrudProductosComponent,
-    CategoriasComponent,
-    CrudIngredientesComponent,
-    MesasComponent,
-    VentasComponent,
-    CrudAgregarProductosComponent,
-    RouterModule,
-  ],
+    RouterModule
+],
   templateUrl: './administrador.component.html',
   styleUrls: ['./administrador.component.css'],
 })
