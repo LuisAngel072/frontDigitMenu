@@ -201,4 +201,40 @@ export class CrudProductosComponent {
       });
     }
   }
+
+  async eliminarProducto(id_prod: number) {
+    Swal.fire({
+      title: '¿Estás seguro?',
+      text: 'Esta acción no se puede deshacer.',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Aceptar',
+      cancelButtonText: 'Cancelar',
+      customClass: {
+        confirmButton: 'btn btn-peligro',
+        cancelButton: 'btn btn-terc',
+      },
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        try {
+          await this.productosService.eliminarProducto(id_prod);
+          this.adminComponente.productos = await this.productosService.obtenerProductos();
+          this.productos = this.adminComponente.productos;
+          Swal.fire({
+            icon: 'success',
+            title: 'Éxito',
+            text: 'Producto eliminado correctamente',
+            timer: 2500,
+          });
+        } catch (error) {
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'Ocurrió un error al intentar eliminar el producto',
+            timer: 2500,
+          });
+        }
+      }
+    });
+  }
 }

@@ -60,7 +60,7 @@
               </span>
             </button>
             <button class="btn">
-              <span class="material-symbols-outlined icon-trash"> delete </span>
+              <span class="material-symbols-outlined icon-trash" (click)="eliminarProducto(producto.id_prod)"> delete </span>
             </button>
           </td>
         </tr>
@@ -83,7 +83,7 @@
         ></pagination-controls>
       </div>
       <div class="text-center" *ngIf="productosFiltrados.length === 0">
-        <h2>¡Vaya! No hay registros de materiales</h2>
+        <h2>¡Vaya! No hay registros de productos</h2>
       </div>
     </div>
   </main>
