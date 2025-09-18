@@ -8,6 +8,11 @@ import { ClientesMenuComponent } from './pages/clientes/clientes-menu/clientes-m
 import { CocineroComponent } from './pages/cocinero/cocinero.component'; // Importar CocineroComponent
 import { CrudEmpleadosComponent } from './pages/administrador/crud-empleados/crud-empleados.component';
 import { CajeroComponent } from './pages/caja/cajero.component';
+import { CrudAgregarProductosComponent } from './pages/administrador/crud-productos/crud-agregar-productos/crud-agregar-productos.component';
+import { CategoriasComponent } from './pages/administrador/categorias/categorias.component';
+import { CrudIngredientesComponent } from './pages/administrador/crud-ingredientes/crud-ingredientes.component';
+import { MesasComponent } from './pages/administrador/mesas/mesas.component';
+import { VentasComponent } from './pages/administrador/ventas/ventas.component';
 
 export const routes: Routes = [
   {

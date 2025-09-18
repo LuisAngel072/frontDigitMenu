@@ -2,7 +2,11 @@
   <!-- Formulario para agregar productos -->
   <div class="card p-4">
     <h3 class="text-center">Agregar Producto</h3>
-    <form [formGroup]="form" *ngIf="form" (ngSubmit)="onSubmit()">
+    <form
+      [formGroup]="form"
+      *ngIf="form"
+      (ngSubmit)="onSubmit()"
+    >
       <!-- Información del producto -->
       <div class="mb-3">
         <label class="form-label">Nombre del Producto</label>
@@ -108,10 +112,9 @@
                 <input
                   type="checkbox"
                   class="form-check-input"
-                  [value]="extra"
                   id="extra_{{ extra.id_extra }}"
-                  [checked]="isExtraSelected(extra.id_extra)"
-                  (change)="onExtraChange($event, extra.id_extra)"
+                  [ngModel]="isExtraSelected(extra.id_extra)"
+                  (ngModelChange)="onExtraChange($event, extra.id_extra)" [ngModelOptions]="{standalone: true}"
                 />
                 <label
                   for="extra_{{ extra.id_extra }}"
@@ -160,10 +163,9 @@
                 <input
                   class="form-check-input"
                   type="checkbox"
-                  [value]="opcion"
                   id="opcion_{{ opcion.id_opcion }}"
-                  [checked]="isOpcionSelected(opcion.id_opcion)"
-                  (change)="onOpcionChange($event, opcion.id_opcion)"
+                  [ngModel]="isOpcionSelected(opcion.id_opcion)"
+                  (ngModelChange)="onOpcionChange($event, opcion.id_opcion)" [ngModelOptions]="{standalone: true}"
                 />
                 <label
                   class="form-check-label"
@@ -214,10 +216,9 @@
                 <input
                   class="form-check-input"
                   type="checkbox"
-                  [value]="ingr"
                   id="ingr_{{ ingr.id_ingr }}"
-                  [checked]="isIngredienteSelected(ingr.id_ingr)"
-                  (change)="onIngredienteChange($event, ingr.id_ingr)"
+                  [ngModel]="isIngredienteSelected(ingr.id_ingr)"
+                  (ngModelChange)="onIngredienteChange($event, ingr.id_ingr)" [ngModelOptions]="{standalone: true}"
                 />
                 <label class="form-check-label" for="ingr_{{ ingr.id_ingr }}"
                   >{{ ingr.nombre_ingrediente }}
@@ -273,14 +274,14 @@
         </div>
       </div>
 
-      <!-- Botón para agregar producto -->
+      <!-- Botón para agregar/editar producto -->
       <div class="text-end mt-3">
         <button
           type="submit"
           class="btn btn-primary"
           [disabled]="form.invalid || selectedIngredientes.size === 0"
         >
-          Agregar producto
+          {{ modoEdicion ? "Editar producto" : "Agregar producto" }}
         </button>
       </div>
     </form>

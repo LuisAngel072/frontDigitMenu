@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { ChangeDetectorRef, Component, Input, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import Swal from 'sweetalert2';
 import {
@@ -12,26 +12,37 @@ import {
   FormBuilder,
   FormGroup,
   Validators,
+  FormsModule,
   ReactiveFormsModule,
 } from '@angular/forms';
+import { Router } from '@angular/router';
 import { ProductosService } from '../../../../services/productos.service';
 import { ProductosDto } from '../../../../dtos';
 import { NgxPaginationModule } from 'ngx-pagination';
+import { ActivatedRoute } from '@angular/router';
 
 @Component({
   selector: 'app-crud-agregar-productos',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, NgxPaginationModule],
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    NgxPaginationModule,
+    FormsModule,
+  ],
   templateUrl: './crud-agregar-productos.component.html',
-  styleUrl: './crud-agregar-productos.component.css'
+  styleUrl: './crud-agregar-productos.component.css',
 })
-export class CrudAgregarProductosComponent {
+export class CrudAgregarProductosComponent implements OnInit {
+  id_prod?: number;
+  modoEdicion: boolean = false;
+
   form: FormGroup = this.fb.group({
     nombre_prod: ['', Validators.required],
     descripcion: ['', Validators.required],
-    img_prod: [null, Validators.required],
+    img_prod: [null, ''],
     precio: [0, [Validators.required, Validators.min(0)]],
-    sub_cat_id: [null, Validators.required]
+    sub_cat_id: [null, Validators.required],
   });
   selectedFile?: File;
 
@@ -58,18 +69,26 @@ export class CrudAgregarProductosComponent {
   constructor(
     public readonly administradorComponent: AdministradorComponent,
     private readonly productosService: ProductosService,
-    private fb: FormBuilder
+    private fb: FormBuilder,
+    private route: ActivatedRoute,
+    private router: Router,
+    private cdr: ChangeDetectorRef
   ) {}
 
-  async ngOnInit() {
+  ngOnInit() {
     this.ingredientes = this.administradorComponent.ingredientes;
     this.extras = this.administradorComponent.extras;
     this.opciones = this.administradorComponent.opciones;
     this.sub_categorias = this.administradorComponent.subcategorias;
 
-    this.ingredientesFiltrados = this.ingredientes;
-    this.extrasFiltrados = this.extras;
-    this.opcionesFiltradas = this.opciones;
+    this.route.paramMap.subscribe(async (params) => {
+      const idParam = params.get('id_prod');
+      if (idParam) {
+        this.id_prod = +idParam;
+        this.modoEdicion = true;
+        await this.cargarProducto(this.id_prod);
+      }
+    });
   }
 
   // Métodos de paginación
@@ -85,23 +104,11 @@ export class CrudAgregarProductosComponent {
     this.currentPageExt = page;
   }
 
-  // Métodos para obtener elementos paginados
-  getIngredientesPaginados(): Ingredientes[] {
-    const startIndex = (this.currentPageIngr - 1) * this.pageSize;
+  // Método genérico para obtener elementos paginados
+  getPaginados<T>(items: T[], currentPage: number): T[] {
+    const startIndex = (currentPage - 1) * this.pageSize;
     const endIndex = startIndex + this.pageSize;
-    return this.ingredientesFiltrados.slice(startIndex, endIndex);
-  }
-
-  getExtrasPaginados(): Extras[] {
-    const startIndex = (this.currentPageExt - 1) * this.pageSize;
-    const endIndex = startIndex + this.pageSize;
-    return this.extrasFiltrados.slice(startIndex, endIndex);
-  }
-
-  getOpcionesPaginadas(): Opciones[] {
-    const startIndex = (this.currentPageOpc - 1) * this.pageSize;
-    const endIndex = startIndex + this.pageSize;
-    return this.opcionesFiltradas.slice(startIndex, endIndex);
+    return items.slice(startIndex, endIndex);
   }
 
   // Métodos para verificar selecciones
@@ -118,9 +125,8 @@ export class CrudAgregarProductosComponent {
   }
 
   // Métodos para manejar cambios en checkboxes
-  onIngredienteChange(event: Event, id: number) {
-    const checkbox = event.target as HTMLInputElement;
-    if (checkbox.checked) {
+  onIngredienteChange(isChecked: boolean, id: number) {
+    if (isChecked) {
       this.selectedIngredientes.add(id);
     } else {
       this.selectedIngredientes.delete(id);
@@ -129,22 +135,65 @@ export class CrudAgregarProductosComponent {
     this.updateFormValidation();
   }
 
-  onExtraChange(event: Event, id: number) {
-    const checkbox = event.target as HTMLInputElement;
-    if (checkbox.checked) {
+  onExtraChange(isChecked: boolean, id: number) {
+    if (isChecked) {
       this.selectedExtras.add(id);
     } else {
       this.selectedExtras.delete(id);
     }
   }
 
-  onOpcionChange(event: Event, id: number) {
-    const checkbox = event.target as HTMLInputElement;
-    if (checkbox.checked) {
+  onOpcionChange(isChecked: boolean, id: number) {
+    if (isChecked) {
       this.selectedOpciones.add(id);
     } else {
       this.selectedOpciones.delete(id);
     }
+  }
+
+  async cargarProducto(id: number) {
+    const producto = await this.productosService.obtenerProducto(id);
+    console.log(producto);
+    this.form.patchValue({
+      nombre_prod: producto.nombre_prod,
+      descripcion: producto.descripcion,
+      img_prod: producto.img_prod,
+      precio: producto.precio,
+      sub_cat_id: producto.sub_cat_id.id_subcat,
+    });
+
+    // Limpiar selecciones previas para evitar estados inconsistentes
+    this.selectedIngredientes.clear();
+    this.selectedExtras.clear();
+    this.selectedOpciones.clear();
+
+    // Cargar ingredientes, extras y opciones seleccionadas
+    const [ingredientesProd, extrasProd, opcionesProd] = await Promise.all([
+      this.productosService.obtenerIngredientesDeProducto(id),
+      this.productosService.obtenerExtrasDeProducto(id),
+      this.productosService.obtenerOpcionesDeProducto(id),
+    ]);
+
+    ingredientesProd.forEach((ing: any) =>
+      this.selectedIngredientes.add(ing.ingrediente_id.id_ingr)
+    );
+    extrasProd.forEach((ext: any) =>
+      this.selectedExtras.add(ext.extra_id.id_extra)
+    );
+    opcionesProd.forEach((opc: any) =>
+      this.selectedOpciones.add(opc.opcion_id.id_opcion)
+    );
+    console.log([ingredientesProd, extrasProd, opcionesProd]);
+    // Asignar los datos a las propiedades que usa la vista AHORA que todo está cargado
+    this.ingredientesFiltrados = [...this.ingredientes];
+    this.extrasFiltrados = [...this.extras];
+    this.opcionesFiltradas = [...this.opciones];
+
+    console.log(this.selectedIngredientes);
+    console.log(this.selectedExtras);
+    console.log(this.selectedOpciones);
+    // Forzar la detección de cambios para que la vista se actualice
+    this.cdr.detectChanges();
   }
 
   // Actualizar validación personalizada
@@ -187,94 +236,31 @@ export class CrudAgregarProductosComponent {
   // Envío del formulario
   async onSubmit() {
     try {
-      // Validación de ingredientes obligatorios
-      if (this.selectedIngredientes.size === 0) {
+      if (this.form.invalid) {
         Swal.fire({
           title: 'Error',
-          text: 'Por favor, seleccione al menos un ingrediente.',
+          text: 'Por favor, complete todos los campos obligatorios.',
           icon: 'error',
           timer: 2000,
         });
         return;
       }
 
-      // Obtener objetos seleccionados usando los IDs de los Sets
-      const extrasSeleccionadas: Extras[] = this.extras.filter(extra =>
-        this.selectedExtras.has(extra.id_extra)
-      );
-
-      const opcionesSeleccionadas: Opciones[] = this.opciones.filter(opcion =>
-        this.selectedOpciones.has(opcion.id_opcion)
-      );
-
-      const ingredientesSeleccionados: Ingredientes[] = this.ingredientes.filter(ingrediente =>
-        this.selectedIngredientes.has(ingrediente.id_ingr)
-      );
-
-      // Subir imagen
-      const res_img = await this.productosService.subirImg(this.selectedFile!);
-      const img_prod = '/productos/' + String(res_img.ruta_img);
-
-      // Construir DTO
-      const dto: ProductosDto = {
-        nombre_prod: this.form.value.nombre_prod,
-        descripcion: this.form.value.descripcion,
-        img_prod: String(img_prod),
-        precio: this.form.value.precio,
-        sub_cat_id: parseInt(this.form.value.sub_cat_id),
-        extras: extrasSeleccionadas,
-        opciones: opcionesSeleccionadas,
-        ingredientes: ingredientesSeleccionados,
-      };
-
-      // Validaciones adicionales del formulario
-      if (this.form.invalid) {
-        if (!dto.nombre_prod) {
-          Swal.fire({
-            title: 'Error',
-            text: 'Por favor, ingrese el nombre del producto.',
-            icon: 'error',
-            timer: 2000,
-          });
-          return;
-        }
-
-        if (!dto.descripcion) {
-          Swal.fire({
-            title: 'Error',
-            text: 'Por favor, ingrese la descripción del producto.',
-            icon: 'error',
-            timer: 2000,
-          });
-          return;
-        }
-
-        if (!dto.sub_cat_id) {
-          Swal.fire({
-            title: 'Error',
-            text: 'Por favor, seleccione una subcategoría.',
-            icon: 'error',
-            timer: 2000,
-          });
-          return;
-        }
-
-        if (!dto.precio) {
-          Swal.fire({
-            title: 'Error',
-            text: 'Por favor, ingrese el precio.',
-            icon: 'error',
-            timer: 2000,
-          });
-          return;
-        }
+      if (this.selectedIngredientes.size === 0) {
+        Swal.fire(
+          'Error',
+          'Por favor, seleccione al menos un ingrediente.',
+          'error'
+        );
+        return;
       }
 
-      console.log(dto);
+      const title = this.modoEdicion
+        ? '¿Estás seguro de actualizar este producto?'
+        : '¿Estás seguro de registrar este producto?';
 
-      // Confirmación
       const confirmacion = await Swal.fire({
-        title: '¿Estás seguro de registrar este producto?',
+        title: title,
         showDenyButton: true,
         confirmButtonText: 'Continuar',
         denyButtonText: 'Cancelar',
@@ -297,23 +283,76 @@ export class CrudAgregarProductosComponent {
           },
         });
 
-        // Llamada al servicio
-        await this.productosService.registrarProducto(dto);
+        let img_prod: string | undefined;
+        if (this.selectedFile) {
+          const res_img = await this.productosService.subirImg(
+            this.selectedFile
+          );
+          img_prod = '/productos/' + String(res_img.ruta_img);
+        }
 
-        // Limpiar selecciones después del éxito
+        const dto: Partial<ProductosDto> = {
+          nombre_prod: this.form.value.nombre_prod,
+          descripcion: this.form.value.descripcion,
+          precio: parseFloat(this.form.value.precio),
+          sub_cat_id: parseInt(this.form.value.sub_cat_id, 10),
+          extras: this.extras.filter((extra) =>
+            this.selectedExtras.has(extra.id_extra)
+          ),
+          opciones: this.opciones.filter((opcion) =>
+            this.selectedOpciones.has(opcion.id_opcion)
+          ),
+          ingredientes: this.ingredientes.filter((ingrediente) =>
+            this.selectedIngredientes.has(ingrediente.id_ingr)
+          ),
+        };
+
+        if (img_prod) {
+          dto.img_prod = img_prod;
+        }
+
+        if (this.modoEdicion && this.id_prod) {
+          console.log(dto);
+          await this.productosService.actualizarProducto(
+            this.id_prod,
+            dto as ProductosDto
+          );
+          Swal.fire('Éxito', 'Producto actualizado', 'success');
+          this.resetSelections();
+          this.form.reset();
+          this.administradorComponent.productos = await this.productosService.obtenerProductos();
+          this.router.navigate(['/Administrador/productos']);
+        } else {
+          console.log(dto);
+          await this.productosService.registrarProducto(dto as ProductosDto);
+          Swal.fire('Éxito', 'Producto creado', 'success');
+        }
+
         this.resetSelections();
+        this.form.reset();
+        this.administradorComponent.productos = await this.productosService.obtenerProductos();
 
-        Swal.fire('Éxito', 'Producto creado', 'success');
       }
     } catch (error) {
-      console.error('Error al intentar registrar el producto', error);
-      Swal.fire({
-        title: 'Error',
-        text: 'Error al intentar registrar el producto.',
-        icon: 'error',
-        timer: 2000,
-      });
-      throw error;
+      if (this.modoEdicion) {
+        console.error('Error al intentar editar el producto', error);
+        Swal.fire({
+          title: 'Error',
+          text: 'Error al intentar editar el producto.',
+          icon: 'error',
+          timer: 2000,
+        });
+        throw error;
+      } else {
+        console.error('Error al intentar registrar el producto', error);
+        Swal.fire({
+          title: 'Error',
+          text: 'Error al intentar registrar el producto.',
+          icon: 'error',
+          timer: 2000,
+        });
+        throw error;
+      }
     }
   }
 

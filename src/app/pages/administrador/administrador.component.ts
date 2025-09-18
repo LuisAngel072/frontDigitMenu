@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { HeaderComponent } from '../comun-componentes/header/header.component';
 import { CommonModule } from '@angular/common';
 import { CrudEmpleadosComponent } from './crud-empleados/crud-empleados.component';
@@ -26,6 +26,7 @@ import { SubcategoriasService } from '../../services/subcategorias.service';
 import { ExtrasService } from '../../services/extras.service';
 import { OpcionesService } from '../../services/opciones.service';
 import { ProductosService } from '../../services/productos.service';
+import { RouterModule } from '@angular/router';
 
 @Component({
   selector: 'app-administrador',
@@ -33,20 +34,12 @@ import { ProductosService } from '../../services/productos.service';
   imports: [
     HeaderComponent,
     CommonModule,
-    CrudEmpleadosComponent,
-    CrudProductosComponent,
-    CategoriasComponent,
-    CrudIngredientesComponent,
-    MesasComponent,
-    VentasComponent,
-    CrudAgregarProductosComponent,
-  ],
+    RouterModule
+],
   templateUrl: './administrador.component.html',
   styleUrls: ['./administrador.component.css'],
 })
-export class AdministradorComponent {
-  selectedSection: string = 'seccion1';
-
+export class AdministradorComponent implements OnInit {
   public usuarios: Usuarios_has_roles[] = [];
   public roles: Roles[] = [];
   public ingredientes: Ingredientes[] = [];
@@ -66,9 +59,7 @@ export class AdministradorComponent {
     private readonly subcategoriaService: SubcategoriasService,
     private readonly productosService: ProductosService
   ) {}
-  cambiarComponente(componente: string) {
-    this.selectedSection = componente;
-  }
+
   async ngOnInit() {
     this.roles = await this.rolesService.obtenerRoles();
     this.usuarios = await this.usuariosService.obtenerUsuariosYRoles();
@@ -80,9 +71,5 @@ export class AdministradorComponent {
     // Inicializa las subcategorías
     this.subcategorias = await this.subcategoriaService.obtenerSubcategorias();
     this.productos = await this.productosService.obtenerProductos();
-  }
-
-  selectSection(section: string): void {
-    this.selectedSection = section;
   }
 }

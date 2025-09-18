@@ -4,6 +4,7 @@ import { AuthService } from './auth.service';
 import { environment } from '../../environment';
 import { lastValueFrom } from 'rxjs';
 import { ProductosDto } from '../dtos';
+import { Productos } from '../types';
 
 @Injectable({
   providedIn: 'root',
@@ -36,7 +37,7 @@ export class ProductosService {
     }
   }
 
-  async obtenerProducto(id_prod: number) {
+  async obtenerProducto(id_prod: number): Promise<Productos> {
     try {
       const response$ = this.http.get<any>(
         environment.ApiIP + environment.ApiObtenerProducto + id_prod,
