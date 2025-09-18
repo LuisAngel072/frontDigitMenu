@@ -8,6 +8,7 @@ import { FormsModule } from '@angular/forms';
 import { ProductosService } from '../../../services/productos.service';
 import { PedidosService } from '../../../services/pedidos.service';
 import { EstadoPedidoHasProductos, Producto_extras_ingrSel } from '../../../types';
+import { NotificacionesService } from '../../../services/notificaciones.service';
 
 @Component({
     selector: 'app-clientes-menu',
@@ -39,7 +40,8 @@ export class ClientesMenuComponent implements OnInit {
     private route: ActivatedRoute,
     private http: HttpClient,
     private productosService: ProductosService,
-    private pedidosService: PedidosService
+    private pedidosService: PedidosService,
+    private notificacionesService: NotificacionesService,
   ) {}
 
   ngOnInit(): void {
@@ -367,4 +369,58 @@ calcularTotalCarrito(): void {
       });
     });
   }
+
+  async llamarMesero() {
+  try {
+    // Mostrar loading mientras se procesa
+    Swal.fire({
+      title: 'Llamando al mesero...',
+      text: 'Enviando notificación',
+      icon: 'info',
+      allowOutsideClick: false,
+      didOpen: () => {
+        Swal.showLoading();
+      }
+    });
+
+    const notif = await this.notificacionesService.crearNotificacion(
+      "El cliente solicita atención",
+      Number(this.mesaId)
+    );
+
+    console.log("Notificación enviada:", notif);
+
+    // Success alert
+    Swal.fire({
+      title: '¡Mesero llamado!',
+      text: 'Tu solicitud ha sido enviada. El mesero llegará en breve.',
+      icon: 'success',
+      confirmButtonText: 'Entendido',
+      confirmButtonColor: '#28a745',
+      timer: 3000,
+      timerProgressBar: true,
+      showClass: {
+        popup: 'animate__animated animate__fadeInUp'
+      },
+      hideClass: {
+        popup: 'animate__animated animate__fadeOutDown'
+      }
+    });
+
+  } catch (error) {
+    console.error('Error al llamar mesero:', error);
+    
+    // Error alert
+    Swal.fire({
+      title: 'Error',
+      text: 'No se pudo enviar la notificación. Intenta nuevamente.',
+      icon: 'error',
+      confirmButtonText: 'Intentar de nuevo',
+      confirmButtonColor: '#dc3545',
+      showClass: {
+        popup: 'animate__animated animate__shakeX'
+      }
+    });
+  }
+}
 }

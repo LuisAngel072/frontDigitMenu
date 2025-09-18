@@ -22,20 +22,20 @@ export const routes: Routes = [
   {
     path: 'Administrador',
     component: AdministradorComponent,
-    children: [
-      { path: '', redirectTo: 'empleados', pathMatch: 'full' }, // Ruta por defecto
-      { path: 'empleados', component: CrudEmpleadosComponent },
-      { path: 'productos', component: CrudProductosComponent },
-      { path: 'productos/agregar', component: CrudAgregarProductosComponent },
-      {
-        path: 'productos/editar/:id_prod',
-        component: CrudAgregarProductosComponent,
-      },
-      { path: 'categorias', component: CategoriasComponent },
-      { path: 'ingredientes', component: CrudIngredientesComponent },
-      { path: 'mesas', component: MesasComponent },
-      { path: 'ventas', component: VentasComponent },
-    ],
+  },
+  // Redirección para asegurar case-sensitivity
+  {
+    path: 'administrador',
+    redirectTo: '/Administrador',
+    pathMatch: 'full'
+  },
+  {
+    path: 'empleados',
+    component: CrudEmpleadosComponent,
+  },
+  {
+    path: 'productos',
+    component: CrudProductosComponent,
   },
   {
     path: 'clientes',
@@ -46,15 +46,33 @@ export const routes: Routes = [
     component: ClientesMenuComponent,
   },
   {
-    path: 'Cocinero', // Agregar ruta para el componente cocinero
+    path: 'Cocinero', // Ruta principal con mayúscula
     component: CocineroComponent,
+  },
+  // Redirección para asegurar case-sensitivity
+  {
+    path: 'cocinero',
+    redirectTo: '/Cocinero',
+    pathMatch: 'full'
   },
   {
     path: 'Mesero',
     component: MeserosComponent,
   },
+  // Redirección para asegurar case-sensitivity - ESTE ES EL QUE TE IMPORTA
+  {
+    path: 'mesero',
+    redirectTo: '/Mesero',
+    pathMatch: 'full'
+  },
   {
     path: 'Cajero',
     component: CajeroComponent,
+  },
+  // Redirección para asegurar case-sensitivity
+  {
+    path: 'cajero',
+    redirectTo: '/Cajero',
+    pathMatch: 'full'
   }
 ];

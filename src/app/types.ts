@@ -135,7 +135,6 @@ export type Pedidos = {
   no_mesa: Mesas;
   fecha_pedido: Date;
   total: number;
-  estado: EstadoPedido;
 };
 // Tabla mesas
 export type Mesas = {
@@ -176,11 +175,10 @@ export type Pedidos_has_extrassel = {
 }
 // Tabla pedidos_has_ingrsel
 export type Pedidos_has_ingrsel = {
-  pedido_ingr_id: number; //Llave primaria
-  precio: number; //Precio del ingrediente registrado en el momento
-  pedido_prod_id: Pedidos_has_productos; //Llave que referencia al producto del pedido que
-  // se están seleccionando los ingredientes
-  ingrediente_id: Extras; //Ingrediente seleccionado
+  ped_ingr_id: number;
+  precio: number;
+  pedido_prod_id: Pedidos_has_productos;
+  ingrediente_id: Ingredientes; // ← Corregir esto también
 }
 
 export enum EstadoPedidoHasProductos {

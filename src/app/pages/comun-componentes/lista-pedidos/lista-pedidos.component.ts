@@ -58,6 +58,11 @@ export class ListaPedidosComponent implements OnInit {
   unreadNotifications = 0;
   navItems: NavItem[] = [];
 
+  // Nuevas propiedades para el filtrado por mesa
+  mesaSeleccionada: number | null = null;
+  productosDelPedido: Producto_extras_ingrSel[] = [];
+  mostrandoSoloMesa: boolean = false;
+
   constructor(private pedidosService: PedidosService) {}
 
   ngOnInit(): void {
@@ -90,66 +95,180 @@ export class ListaPedidosComponent implements OnInit {
   }
 
   loadOrders(): void {
-  this.pedidosService.getPedidosConProductosDetalles().subscribe({
-    next: (data: Producto_extras_ingrSel[]) => {
-      // 1) Normalizar datos
-      const normalizado = data.map(p => ({
-        ...p,
-        extras: p.extras ?? [],
-        ingredientes: p.ingredientes ?? [],
-      }));
+    this.pedidosService.getPedidosConProductosDetalles().subscribe({
+      next: (data: Producto_extras_ingrSel[]) => {
+        // 1) Normalizar datos
+        const normalizado = data.map(p => ({
+          ...p,
+          extras: p.extras ?? [],
+          ingredientes: p.ingredientes ?? [],
+        }));
 
-      // 2) Agrupar por pedido
-      const agrupados: { [id: number]: Producto_extras_ingrSel[] } = {};
-      normalizado.forEach(detalle => {
-        const id = detalle.pedido_id.id_pedido;
-        if (!agrupados[id]) agrupados[id] = [];
-        agrupados[id].push(detalle);
-      });
+        // 2) Filtrar por mesa si hay una seleccionada
+        let datosFiltrados = normalizado;
+        if (this.mostrandoSoloMesa && this.mesaSeleccionada) {
+          datosFiltrados = normalizado.filter(detalle => 
+            detalle.pedido_id?.no_mesa?.no_mesa === this.mesaSeleccionada
+          );
+        }
 
-      // 3) Convertir a la estructura Order
-      let orders: Order[] = Object.entries(agrupados).map(([_, productos]) => {
-        const first = productos[0];
-        return {
-          id: first.pedido_id.id_pedido,
-          tableNumber: first.pedido_id.no_mesa.no_mesa,
-          estado: first.pedido_id.estado,
-          fecha_pedido: new Date(first.pedido_id.fecha_pedido),
-          expanded: false,
-          items: productos.map(p => ({
-            pedido_prod_id: p.pedido_prod_id,
-            name: p.producto_id.nombre_prod,
-            opcion: p.opcion_id?.nombre_opcion || 'Sin opción',
-            precio: p.precio,
-            status: p.estado as 'Sin preparar'|'Preparado'|'Entregado'|'Pagado',
-            extras: p.extras,
-            ingredientes: p.ingredientes,
-          })),
-        };
-      });
+        // 3) Agrupar por pedido
+        const agrupados: { [id: number]: Producto_extras_ingrSel[] } = {};
+        datosFiltrados.forEach(detalle => {
+          const id = detalle.pedido_id.id_pedido;
+          if (!agrupados[id]) agrupados[id] = [];
+          agrupados[id].push(detalle);
+        });
 
-      // 4) Filtrar OUT los pedidos cuyo *todos* items están ya en 'Entregado'
-      orders = orders.filter(o => !o.items.every(i => i.status === 'Entregado' || !o.items.every(i => i.status === 'Pagado')));
+        // 4) Convertir a la estructura Order
+        let orders: Order[] = Object.entries(agrupados).map(([_, productos]) => {
+          const first = productos[0];
+          return {
+            id: first.pedido_id.id_pedido,
+            tableNumber: first.pedido_id.no_mesa.no_mesa,
+            // estado: first.pedido_id.estado || "Sin preparar", // Usar el estado real del pedido
+            estado: "Sin preparar",
+            fecha_pedido: new Date(first.pedido_id.fecha_pedido),
+            expanded: false,
+            items: productos.map(p => ({
+              pedido_prod_id: p.pedido_prod_id,
+              name: p.producto_id.nombre_prod,
+              opcion: p.opcion_id?.nombre_opcion || 'Sin opción',
+              precio: p.precio,
+              status: p.estado as 'Sin preparar'|'Preparado'|'Entregado'|'Pagado',
+              extras: p.extras,
+              ingredientes: p.ingredientes,
+            })),
+          };
+        });
 
-      // 5) Ordenar por fecha más reciente
-      orders.sort((a, b) => b.fecha_pedido.getTime() - a.fecha_pedido.getTime());
+        // 5) Filtrar OUT los pedidos cuyo *todos* items están ya en 'Entregado' o 'Pagado'
+        orders = orders.filter(o => 
+          !o.items.every(i => i.status === 'Entregado' || i.status === 'Pagado')
+        );
 
-      // 6) Asignar al componente
-      this.orders = orders;
-    },
-    error: err => {
-      console.error('Error cargando pedidos:', err);
-      Swal.fire({
-        title: 'Error',
-        text: 'No se pudieron cargar los pedidos',
-        icon: 'error',
-        timer: 3000,
-        showConfirmButton: false,
-      });
+        // 6) Ordenar por fecha más reciente
+        orders.sort((a, b) => b.fecha_pedido.getTime() - a.fecha_pedido.getTime());
+
+        // 7) Asignar al componente
+        this.orders = orders;
+
+        console.log('Pedidos cargados:', this.orders);
+        if (this.mostrandoSoloMesa) {
+          console.log(`Mostrando solo pedidos de mesa ${this.mesaSeleccionada}:`, this.orders);
+        }
+      },
+      error: err => {
+        console.error('Error cargando pedidos:', err);
+        Swal.fire({
+          title: 'Error',
+          text: 'No se pudieron cargar los pedidos',
+          icon: 'error',
+          timer: 3000,
+          showConfirmButton: false,
+        });
+      }
+    });
+  }
+
+  // MÉTODO REQUERIDO POR EL COMPONENTE MESEROS
+  cargarPedidosMesa(mesaNumber: number, productosYaFiltrados?: Producto_extras_ingrSel[]): void {
+    console.log(`Cargando pedidos para mesa ${mesaNumber}`);
+    this.mesaSeleccionada = mesaNumber;
+    this.mostrandoSoloMesa = true;
+    
+    if (productosYaFiltrados && productosYaFiltrados.length > 0) {
+      // Si ya tenemos los productos filtrados, los procesamos directamente
+      this.productosDelPedido = productosYaFiltrados;
+      this.procesarProductosDelPedido(productosYaFiltrados);
+      console.log(`Pedidos cargados para mesa ${mesaNumber}:`, this.orders);
+      
+      // Abrir el sidebar y expandir el pedido
+      this.sidebarOpen = true;
+      if (this.orders.length > 0) {
+        this.orders[0].expanded = true;
+        setTimeout(() => {
+          const orderElement = document.getElementById(`order-${this.orders[0].id}`);
+          if (orderElement) {
+            orderElement.scrollIntoView({ behavior: 'smooth' });
+          }
+        }, 300);
+      }
+      return;
     }
-  });
-}
 
+    // Si no tenemos productos filtrados, los cargamos y filtramos
+    this.loadOrders(); // Esto ahora respetará el filtro por mesa
+  }
+
+  // MÉTODO AUXILIAR PARA PROCESAR PRODUCTOS DEL PEDIDO
+  private procesarProductosDelPedido(productos: Producto_extras_ingrSel[]): void {
+    if (!productos || productos.length === 0) {
+      console.log('No hay productos para procesar');
+      this.orders = [];
+      return;
+    }
+
+    // Normalizar datos
+    const normalizado = productos.map(p => ({
+      ...p,
+      extras: p.extras ?? [],
+      ingredientes: p.ingredientes ?? [],
+    }));
+
+    // Agrupar por pedido
+    const agrupados: { [id: number]: Producto_extras_ingrSel[] } = {};
+    normalizado.forEach(detalle => {
+      const id = detalle.pedido_id.id_pedido;
+      if (!agrupados[id]) agrupados[id] = [];
+      agrupados[id].push(detalle);
+    });
+
+    // Convertir a la estructura Order
+    const orders: Order[] = Object.entries(agrupados).map(([_, productosGrupo]) => {
+      const first = productosGrupo[0];
+      return {
+        id: first.pedido_id.id_pedido,
+        tableNumber: first.pedido_id.no_mesa.no_mesa,
+        // estado: first.pedido_id.estado || "Sin preparar",
+        estado: "Sin preparar",
+        fecha_pedido: new Date(first.pedido_id.fecha_pedido),
+        expanded: false,
+        items: productosGrupo.map(p => ({
+          pedido_prod_id: p.pedido_prod_id,
+          name: p.producto_id.nombre_prod,
+          opcion: p.opcion_id?.nombre_opcion || 'Sin opción',
+          precio: p.precio,
+          status: p.estado as 'Sin preparar'|'Preparado'|'Entregado'|'Pagado',
+          extras: p.extras,
+          ingredientes: p.ingredientes,
+        })),
+      };
+    });
+
+    // Ordenar por fecha más reciente
+    orders.sort((a, b) => b.fecha_pedido.getTime() - a.fecha_pedido.getTime());
+
+    this.orders = orders;
+  }
+
+  // MÉTODO PARA MOSTRAR TODOS LOS PEDIDOS (QUITAR FILTRO)
+  mostrarTodosLosPedidos(): void {
+    this.mesaSeleccionada = null;
+    this.mostrandoSoloMesa = false;
+    this.productosDelPedido = [];
+    this.loadOrders();
+  }
+
+  // MÉTODO PARA VERIFICAR SI HAY PEDIDOS DE LA MESA SELECCIONADA
+  tienePedidosMesa(): boolean {
+    return this.orders.length > 0;
+  }
+
+  // MÉTODO PARA OBTENER PRODUCTOS DE LA MESA SELECCIONADA
+  obtenerProductosMesaSeleccionada(): Producto_extras_ingrSel[] {
+    return this.productosDelPedido;
+  }
 
   loadNotifications(): void {
     // Por ahora mantenemos las notificaciones mock, pero podrías crear un servicio para esto
@@ -254,8 +373,12 @@ export class ListaPedidosComponent implements OnInit {
         showConfirmButton: false,
       });
 
-      // Si quieres refrescar la vista tras el cambio:
-      await this.ngOnInit();
+      // Actualizar el estado local del item
+      item.previousStatus = item.status;
+      item.status = EstadoPedidoHasProductos.entregado;
+
+      // Verificar si todo el pedido está completado
+      this.checkAllDelivered(order);
     } catch (error) {
       Swal.close();
       Swal.fire({
@@ -342,6 +465,9 @@ export class ListaPedidosComponent implements OnInit {
         timer: 2000,
         showConfirmButton: false,
       });
+
+      // Verificar si todo el pedido está completado
+      this.checkAllDelivered(order);
     } catch (error) {
       Swal.close();
       console.error('Error al actualizar estados:', error);
@@ -456,43 +582,34 @@ export class ListaPedidosComponent implements OnInit {
   }
 
   goToOrder(tableNumber: number): void {
-    const order = this.getOrderByTable(tableNumber);
+    // Si no estamos mostrando solo una mesa, buscar el pedido por número de mesa
+    if (!this.mostrandoSoloMesa) {
+      const order = this.getOrderByTable(tableNumber);
+      if (order) {
+        this.notificationsOpen = false;
+        this.sidebarOpen = true;
 
-    if (order) {
-      this.notificationsOpen = false;
-      this.sidebarOpen = true;
+        this.orders.forEach((o) => {
+          o.expanded = o.id === order.id;
+        });
 
-      this.orders.forEach((o) => {
-        o.expanded = o.id === order.id;
-      });
-
-      setTimeout(() => {
-        const orderElement = document.getElementById(`order-${order.id}`);
-        if (orderElement) {
-          orderElement.scrollIntoView({ behavior: 'smooth' });
-        }
-      }, 300);
-    } else {
-      Swal.fire({
-        title: 'Mesa no encontrada',
-        text: `No se encontró ningún pedido para la mesa ${tableNumber}`,
-        icon: 'warning',
-        timer: 2000,
-        showConfirmButton: false,
-      });
+        setTimeout(() => {
+          const orderElement = document.getElementById(`order-${order.id}`);
+          if (orderElement) {
+            orderElement.scrollIntoView({ behavior: 'smooth' });
+          }
+        }, 300);
+        return;
+      }
     }
+
+    // Si ya estamos mostrando una mesa específica o no se encontró el pedido, cargar esa mesa
+    this.cargarPedidosMesa(tableNumber);
   }
 
   navigate(route: string): void {
     // Aquí implementarías la navegación real con Angular Router
-    Swal.fire({
-      title: 'Navegación',
-      text: `Navegando a: ${route}`,
-      icon: 'info',
-      timer: 1500,
-      showConfirmButton: false,
-    });
-
+    console.log(`Navegando a: ${route}`);
     this.navOpen = false;
   }
 
@@ -514,6 +631,72 @@ export class ListaPedidosComponent implements OnInit {
 
   // Calcular total del pedido
   getOrderTotal(order: Order): number {
-    return order.items.reduce((total, item) => total + item.precio, 0);
+    return order.items.reduce((total, item) => {
+      let precio = item.precio;
+      
+      // Sumar extras si los hay
+      if (item.extras && item.extras.length > 0) {
+        const extrasTotal = item.extras.reduce((sum, extra: any) => {
+          return sum + (+(extra.precio || 0));
+        }, 0);
+        precio += extrasTotal;
+      }
+      
+      // Sumar ingredientes adicionales si los hay
+      if (item.ingredientes && item.ingredientes.length > 0) {
+        const ingredientesTotal = item.ingredientes.reduce((sum, ing: any) => {
+          return sum + (+(ing.precio || 0));
+        }, 0);
+        precio += ingredientesTotal;
+      }
+      
+      return total + precio;
+    }, 0);
+  }
+
+  // Método auxiliar para calcular total de un producto específico
+  calcularTotalProducto(item: OrderItem): number {
+    let precio = item.precio;
+    
+    // Sumar extras si los hay
+    if (item.extras && item.extras.length > 0) {
+      const extrasTotal = item.extras.reduce((sum, extra: any) => {
+        return sum + (+(extra.precio || 0));
+      }, 0);
+      precio += extrasTotal;
+    }
+    
+    // Sumar ingredientes adicionales si los hay
+    if (item.ingredientes && item.ingredientes.length > 0) {
+      const ingredientesTotal = item.ingredientes.reduce((sum, ing: any) => {
+        return sum + (+(ing.precio || 0));
+      }, 0);
+      precio += ingredientesTotal;
+    }
+    
+    return precio;
+  }
+
+  // Método para obtener nombres de extras (soluciona el error de tipado)
+  obtenerNombresExtras(extras: any[]): string {
+    if (!extras || extras.length === 0) {
+      return '';
+    }
+    
+    return extras.map((extra: any) => {
+      // Manejo más robusto del nombre del extra
+      return extra.nombre_extra || extra.nombre || extra.name || 'Extra';
+    }).join(', ');
+  }
+
+  // Método para obtener nombres de ingredientes
+  obtenerNombresIngredientes(ingredientes: any[]): string {
+    if (!ingredientes || ingredientes.length === 0) {
+      return '';
+    }
+    
+    return ingredientes.map((ing: any) => {
+      return ing.nombre_ingrediente || ing.nombre || ing.name || 'Ingrediente';
+    }).join(', ');
   }
 }
