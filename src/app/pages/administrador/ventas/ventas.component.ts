@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { PedidosService } from '../../../services/pedidos.service';
-import { Pedidos, Producto_extras_ingrSel } from '../../../types';
+import { Pedidos, Producto_extras_ingrSel } from '../../../interfaces/types';
 import { CommonModule } from '@angular/common';
 import Swal from 'sweetalert2';
 @Component({

@@ -7,7 +7,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ProductosService } from '../../../services/productos.service';
 import { PedidosService } from '../../../services/pedidos.service';
-import { EstadoPedidoHasProductos, Producto_extras_ingrSel } from '../../../types';
+import { EstadoPedidoHasProductos, Producto_extras_ingrSel } from '../../../interfaces/types';
 import { NotificacionesService } from '../../../services/notificaciones.service';
 
 @Component({
@@ -409,7 +409,7 @@ calcularTotalCarrito(): void {
 
   } catch (error) {
     console.error('Error al llamar mesero:', error);
-    
+
     // Error alert
     Swal.fire({
       title: 'Error',

@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { PedidosService } from '../../services/pedidos.service';
-import { Pedidos } from '../../types';
+import { Pedidos } from '../../interfaces/types';
 
 @Component({
     selector: 'app-clientes',

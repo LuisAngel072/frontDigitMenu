@@ -4,7 +4,7 @@ import { PedidosService } from '../../../services/pedidos.service';
 import {
   EstadoPedidoHasProductos,
   Producto_extras_ingrSel,
-} from '../../../types';
+} from '../../../interfaces/types';
 import Swal from 'sweetalert2';
 import { CommonModule } from '@angular/common';
 
@@ -107,7 +107,7 @@ export class ListaPedidosComponent implements OnInit {
         // 2) Filtrar por mesa si hay una seleccionada
         let datosFiltrados = normalizado;
         if (this.mostrandoSoloMesa && this.mesaSeleccionada) {
-          datosFiltrados = normalizado.filter(detalle => 
+          datosFiltrados = normalizado.filter(detalle =>
             detalle.pedido_id?.no_mesa?.no_mesa === this.mesaSeleccionada
           );
         }
@@ -143,7 +143,7 @@ export class ListaPedidosComponent implements OnInit {
         });
 
         // 5) Filtrar OUT los pedidos cuyo *todos* items están ya en 'Entregado' o 'Pagado'
-        orders = orders.filter(o => 
+        orders = orders.filter(o =>
           !o.items.every(i => i.status === 'Entregado' || i.status === 'Pagado')
         );
 
@@ -176,13 +176,13 @@ export class ListaPedidosComponent implements OnInit {
     console.log(`Cargando pedidos para mesa ${mesaNumber}`);
     this.mesaSeleccionada = mesaNumber;
     this.mostrandoSoloMesa = true;
-    
+
     if (productosYaFiltrados && productosYaFiltrados.length > 0) {
       // Si ya tenemos los productos filtrados, los procesamos directamente
       this.productosDelPedido = productosYaFiltrados;
       this.procesarProductosDelPedido(productosYaFiltrados);
       console.log(`Pedidos cargados para mesa ${mesaNumber}:`, this.orders);
-      
+
       // Abrir el sidebar y expandir el pedido
       this.sidebarOpen = true;
       if (this.orders.length > 0) {
@@ -633,7 +633,7 @@ export class ListaPedidosComponent implements OnInit {
   getOrderTotal(order: Order): number {
     return order.items.reduce((total, item) => {
       let precio = item.precio;
-      
+
       // Sumar extras si los hay
       if (item.extras && item.extras.length > 0) {
         const extrasTotal = item.extras.reduce((sum, extra: any) => {
@@ -641,7 +641,7 @@ export class ListaPedidosComponent implements OnInit {
         }, 0);
         precio += extrasTotal;
       }
-      
+
       // Sumar ingredientes adicionales si los hay
       if (item.ingredientes && item.ingredientes.length > 0) {
         const ingredientesTotal = item.ingredientes.reduce((sum, ing: any) => {
@@ -649,7 +649,7 @@ export class ListaPedidosComponent implements OnInit {
         }, 0);
         precio += ingredientesTotal;
       }
-      
+
       return total + precio;
     }, 0);
   }
@@ -657,7 +657,7 @@ export class ListaPedidosComponent implements OnInit {
   // Método auxiliar para calcular total de un producto específico
   calcularTotalProducto(item: OrderItem): number {
     let precio = item.precio;
-    
+
     // Sumar extras si los hay
     if (item.extras && item.extras.length > 0) {
       const extrasTotal = item.extras.reduce((sum, extra: any) => {
@@ -665,7 +665,7 @@ export class ListaPedidosComponent implements OnInit {
       }, 0);
       precio += extrasTotal;
     }
-    
+
     // Sumar ingredientes adicionales si los hay
     if (item.ingredientes && item.ingredientes.length > 0) {
       const ingredientesTotal = item.ingredientes.reduce((sum, ing: any) => {
@@ -673,7 +673,7 @@ export class ListaPedidosComponent implements OnInit {
       }, 0);
       precio += ingredientesTotal;
     }
-    
+
     return precio;
   }
 
@@ -682,7 +682,7 @@ export class ListaPedidosComponent implements OnInit {
     if (!extras || extras.length === 0) {
       return '';
     }
-    
+
     return extras.map((extra: any) => {
       // Manejo más robusto del nombre del extra
       return extra.nombre_extra || extra.nombre || extra.name || 'Extra';
@@ -694,7 +694,7 @@ export class ListaPedidosComponent implements OnInit {
     if (!ingredientes || ingredientes.length === 0) {
       return '';
     }
-    
+
     return ingredientes.map((ing: any) => {
       return ing.nombre_ingrediente || ing.nombre || ing.name || 'Ingrediente';
     }).join(', ');

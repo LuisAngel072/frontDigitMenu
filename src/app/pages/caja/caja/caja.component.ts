@@ -5,7 +5,7 @@ import {
   EstadoPedidoHasProductos,
   Pedidos,
   Producto_extras_ingrSel,
-} from '../../../types';
+} from '../../../interfaces/types';
 import { CommonModule } from '@angular/common';
 import Swal from 'sweetalert2';
 

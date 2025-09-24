@@ -1,10 +1,10 @@
 import { Component, Input, SimpleChanges, ViewChild } from '@angular/core';
 import { IngredientesService } from '../../../services/ingredientes.service';
 import Swal from 'sweetalert2';
-import { Extras, Ingredientes, Opciones } from '../../../types';
+import { Extras, Ingredientes, Opciones } from '../../../interfaces/types';
 import { AdministradorComponent } from '../administrador.component';
 import { CommonModule } from '@angular/common';
-import { ExtrasDTO, IngredientesDTO, OpcionesDTO } from '../../../dtos';
+import { ExtrasDTO, IngredientesDTO, OpcionesDTO } from '../../../interfaces/dtos';
 import { ExtrasService } from '../../../services/extras.service';
 import { OpcionesService } from '../../../services/opciones.service';
 import { NgxPaginationModule } from 'ngx-pagination';
