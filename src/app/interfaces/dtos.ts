@@ -26,7 +26,7 @@ export type UsuariosDTO = {
     no_int?: string; //Opcional, posible undefined, no mas de 5 caracteres
     municipio: string;
   };
-  img_perfil: { img_ruta: string };
+  img_perfil?: { img_ruta: string };
   rol: {
     id_rol: number;
     rol: string;

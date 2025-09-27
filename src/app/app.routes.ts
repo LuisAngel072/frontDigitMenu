@@ -23,6 +23,7 @@ export const routes: Routes = [
     path: 'Administrador',
     component: AdministradorComponent,
     children: [
+      { path: '', redirectTo: 'empleados', pathMatch: 'full' },
       {
         path: 'productos',
         component: CrudProductosComponent,

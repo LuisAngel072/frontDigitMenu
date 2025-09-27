@@ -44,7 +44,6 @@ export class AdministradorComponent implements OnInit {
   public productos: Productos[] = [];
 
   constructor(
-    private readonly usuariosService: UsuariosService,
     private readonly rolesService: RolesService,
     private readonly ingredientesService: IngredientesService,
     private readonly extrasService: ExtrasService,
@@ -56,7 +55,6 @@ export class AdministradorComponent implements OnInit {
 
   async ngOnInit() {
     this.roles = await this.rolesService.obtenerRoles();
-    this.usuarios = await this.usuariosService.obtenerUsuariosYRoles();
     this.ingredientes = await this.ingredientesService.getIngredientes();
     this.extras = await this.extrasService.getExtras();
     this.opciones = await this.opcionesService.getOpciones();

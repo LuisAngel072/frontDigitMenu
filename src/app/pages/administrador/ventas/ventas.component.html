@@ -1,61 +1,76 @@
 <main class="ventas-container">
-    <h1 class="mb-4">Ventas</h1>
-    <!-- Filtros -->
-    <div class="filtros">
-        <div class="filtro-item">
-        <label for="fecha-inicio">Fecha inicio</label>
-        <input id="fecha-inicio" type="date" />
-        </div>
-
-        <div class="filtro-item">
-        <label for="fecha-fin">Fecha fin</label>
-        <input id="fecha-fin" type="date" />
-        </div>
-
-        <div class="filtro-item">
-        <label for="buscar-venta"></label>
-        <input id="buscar-venta" type="text" placeholder="🔎 Buscar venta"/>
-        </div>
-
-        <button class="btn-filtrar">Filtrar</button>
+  <h1 class="mb-4">Ventas</h1>
+  <!-- Filtros -->
+  <div class="filtros">
+    <div class="filtro-item">
+      <label for="fecha-inicio">Fecha inicio</label>
+      <input class="form-control" id="fecha-inicio" type="date" />
     </div>
 
-    <!-- Tabla de ventas -->
-    <table class="table table-striped">
-        <thead>
-        <tr>
-            <th>Pedido</th>
-            <th>No. de mesa</th>
-            <th>Total</th>
-            <th>Fecha</th>
-            <th>Acciones</th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr *ngFor="let pedido of this.pedidosAgrupados">
-            <td>{{pedido.pedidoId.id_pedido}}</td>
-            <td>{{pedido.pedidoId.no_mesa.no_mesa}}</td>
-            <td>{{pedido.pedidoId.total}}</td>
-            <td>{{pedido.pedidoId.fecha_pedido}}</td>
-            <td class="icon_eye_col">
-            <span
-            class="material-symbols-outlined icon icon-eye" (click)="verPedido(pedido.pedidoId.id_pedido)">
+    <div class="filtro-item">
+      <label for="fecha-fin">Fecha fin</label>
+      <input class="form-control" id="fecha-fin" type="date" />
+    </div>
+
+    <div class="filtro-item">
+      <label for="buscar-venta"></label>
+      <input
+        id="buscar-venta"
+        type="search"
+        class="form-control search"
+        placeholder="🔎 Buscar venta"
+      />
+    </div>
+
+    <button class="btn-filtrar">Filtrar</button>
+  </div>
+
+  <!-- Tabla de ventas -->
+  <table class="table table-striped">
+    <thead>
+      <tr>
+        <th>Pedido</th>
+        <th>No. de mesa</th>
+        <th>Total</th>
+        <th>Fecha</th>
+        <th>Acciones</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let pedido of this.pedidosAgrupados">
+        <td>{{ pedido.pedidoId.id_pedido }}</td>
+        <td>{{ pedido.pedidoId.no_mesa.no_mesa }}</td>
+        <td>{{ pedido.pedidoId.total }}</td>
+        <td>{{ pedido.pedidoId.fecha_pedido }}</td>
+        <td class="icon_eye_col">
+          <span
+            class="material-symbols-outlined icon icon-eye"
+            (click)="verPedido(pedido.pedidoId.id_pedido)"
+          >
             visibility
-            </span>
-            </td>
-        </tr>
-        </tbody>
-    </table>
+          </span>
+        </td>
+      </tr>
+    </tbody>
+  </table>
 
-    <!-- Paginación -->
-    <div class="paginacion">
-        <button class="btn-pag" disabled>Anterior</button>
-        <span class="pagina-actual">Página 1</span>
-        <button class="btn-pag">Siguiente</button>
+  <!-- Paginación -->
+  <div class="pagination-container row">
+    <div
+      class="d-flex justify-content-center"
+      *ngIf="pedidosAgrupados.length > pageSize"
+    >
+      <pagination-controls
+        (pageChange)="onPageChange($event)"
+        class="pagination"
+        previousLabel="Anterior"
+        nextLabel="Siguiente"
+      ></pagination-controls>
     </div>
+  </div>
 
-    <!-- Sección opcional para estadísticas (ejemplo estático) -->
-    <!--
+  <!-- Sección opcional para estadísticas (ejemplo estático) -->
+  <!--
     <div class="estadisticas">
         <h3>Top ventas en categorías</h3>
         <div class="grafica-dona">[Aquí iría una gráfica de dona]</div>

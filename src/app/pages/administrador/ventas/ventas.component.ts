@@ -3,10 +3,11 @@ import { PedidosService } from '../../../services/pedidos.service';
 import { Pedidos, Producto_extras_ingrSel } from '../../../interfaces/types';
 import { CommonModule } from '@angular/common';
 import Swal from 'sweetalert2';
+import { NgxPaginationModule } from 'ngx-pagination';
 @Component({
     selector: 'app-ventas',
     standalone: true,
-    imports: [CommonModule],
+    imports: [CommonModule, NgxPaginationModule],
     templateUrl: './ventas.component.html',
     styleUrl: './ventas.component.css'
 })
@@ -16,8 +17,17 @@ export class VentasComponent {
     pedidoId: Pedidos;
     productos: Producto_extras_ingrSel[];
   }[] = [];
-  ngOnInit() {
-    this.cargarPedidos();
+
+  pageSize: number = 7;
+  currentPage: number = 0;
+
+  async onPageChange(page: number) {
+    this.currentPage = page;
+  }
+
+  async ngOnInit() {
+    await this.cargarPedidos();
+    await console.log(this.pedidosAgrupados);
   }
   async cargarPedidos() {
     this.pedidosService.getPedidosConProductosDetalles().subscribe({
