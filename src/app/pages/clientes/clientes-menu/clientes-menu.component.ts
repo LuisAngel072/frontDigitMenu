@@ -99,46 +99,17 @@ export class ClientesMenuComponent implements OnInit {
     });
   }
 
-  // Calcula el total del carrito sumando los precios de todos los productos
-// Método corregido para calcular el total del carrito
+// Calcula el total del carrito sumando los precios de todos los productos
 calcularTotalCarrito(): void {
   this.totalCarrito = this.productosEnPedido.reduce((total, producto) => {
-    // Asegurarse de que todos los valores sean numéricos usando el operador +
-    let precio = +producto.precio || 0;
-
-    // Suma los precios de extras si los hay
-    if (producto.extras && producto.extras.length > 0) {
-      const extrasTotal = producto.extras.reduce((sum, extra) => {
-        // Convertir a número con el operador + y asegurar que sea un número válido
-        const extraPrecio = +(extra.precio || 0);
-        return sum + extraPrecio;
-      }, 0);
-      precio += extrasTotal;
-    }
-
-    // Suma los precios de ingredientes adicionales si los hay
-    if (producto.ingredientes && producto.ingredientes.length > 0) {
-      const ingTotal = producto.ingredientes.reduce((sum, ing) => {
-        // Convertir a número con el operador + y asegurar que sea un número válido
-        const ingPrecio = +(ing.precio || 0);
-        return sum + ingPrecio;
-      }, 0);
-      precio += ingTotal;
-    }
-
-    // Verificar que el resultado sea un número válido
-    return total + (isNaN(precio) ? 0 : precio);
+    // Este precio YA incluye todo (producto + opción + extras + ingredientes)
+    let precio = parseFloat(producto.precio.toString()) || 0;
+    return total + precio;
   }, 0);
 
-  // Verificar que el resultado final sea un número válido
-  if (isNaN(this.totalCarrito)) {
-    console.error('Error: El total calculado no es un número válido', this.productosEnPedido);
-    this.totalCarrito = 0;
-  } else {
-    // Redondear a dos decimales para evitar problemas de precisión con números flotantes
-    this.totalCarrito = Math.round(this.totalCarrito * 100) / 100;
-  }
-
+  // Redondear a dos decimales
+  this.totalCarrito = Math.round(this.totalCarrito * 100) / 100;
+  
   console.log('Total calculado:', this.totalCarrito);
 }
 
@@ -233,12 +204,30 @@ calcularTotalCarrito(): void {
   }
 
   calcularPrecio() {
-    let base = parseFloat(this.selectedProduct.precio);
-    if (this.selectedOpcion) base += parseFloat(this.selectedOpcion.precio);
-    for (let extra of this.selectedExtras) {
-      base += parseFloat(extra.precio);
+    // Precio base del producto
+    let base = parseFloat(this.selectedProduct.precio) || 0;
+    
+    // Sumar opción seleccionada
+    if (this.selectedOpcion) {
+      base += parseFloat(this.selectedOpcion.precio) || 0;
     }
-    this.precioTotal = base;
+    
+    // Sumar extras seleccionados
+    for (let extra of this.selectedExtras) {
+      base += parseFloat(extra.precio) || 0;
+    }
+    
+    // Sumar ingredientes adicionales si tienen precio
+    if (this.ingredientes && this.ingredientes.length > 0) {
+      for (let ingrediente of this.ingredientes) {
+        if (ingrediente.precio) {
+          base += parseFloat(ingrediente.precio) || 0;
+        }
+      }
+    }
+    
+    this.precioTotal = Math.round(base * 100) / 100;
+    console.log('Precio calculado antes de agregar:', this.precioTotal);
   }
 
   async agregarACuenta() {

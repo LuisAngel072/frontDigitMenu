@@ -154,7 +154,7 @@
                   <th>Extras</th>
                   <th>Estado</th>
                   <th class="text-end">Precio</th>
-                  <th class="text-center">Acciones</th>
+                  <!-- <th class="text-center">Acciones</th> -->
                 </tr>
               </thead>
               <tbody>
@@ -190,13 +190,13 @@
                     </span>
                   </td>
                   <td class="text-end">${{ producto.precio }}</td>
-                  <td class="text-center">
+                  <!-- <td class="text-center">
                     <button class="btn btn-sm btn-outline-danger" 
                             (click)="eliminarProducto(producto)"
                             [disabled]="producto.estado !== 'Sin preparar'">
                       <i class="bi bi-trash"></i>
                     </button>
-                  </td>
+                  </td> -->
                 </tr>
               </tbody>
               <tfoot>
