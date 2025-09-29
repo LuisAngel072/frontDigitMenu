@@ -3,8 +3,8 @@ import { Injectable } from '@angular/core';
 import { AuthService } from './auth.service';
 import { environment } from '../../environment';
 import { lastValueFrom } from 'rxjs';
-import { ProductosDto } from '../dtos';
-import { Productos } from '../types';
+import { ProductosDto } from '../interfaces/dtos';
+import { Productos } from '../interfaces/types';
 
 @Injectable({
   providedIn: 'root',

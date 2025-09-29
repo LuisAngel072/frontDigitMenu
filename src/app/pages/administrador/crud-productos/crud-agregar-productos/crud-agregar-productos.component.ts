@@ -6,7 +6,7 @@ import {
   Ingredientes,
   Opciones,
   Sub_categorias,
-} from '../../../../types';
+} from '../../../../interfaces/types';
 import { AdministradorComponent } from '../../administrador.component';
 import {
   FormBuilder,
@@ -17,7 +17,7 @@ import {
 } from '@angular/forms';
 import { Router } from '@angular/router';
 import { ProductosService } from '../../../../services/productos.service';
-import { ProductosDto } from '../../../../dtos';
+import { ProductosDto } from '../../../../interfaces/dtos';
 import { NgxPaginationModule } from 'ngx-pagination';
 import { ActivatedRoute } from '@angular/router';
 

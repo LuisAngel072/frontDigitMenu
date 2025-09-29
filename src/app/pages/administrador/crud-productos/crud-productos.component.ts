@@ -1,7 +1,7 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { CommonModule, PercentPipe } from '@angular/common';
 import Swal from 'sweetalert2';
-import { Categorias, P_H_E, P_H_I, P_H_O, Productos } from '../../../types';
+import { Categorias, P_H_E, P_H_I, P_H_O, Productos } from '../../../interfaces/types';
 import { AdministradorComponent } from '../administrador.component';
 import { environment } from '../../../../environment';
 import { ProductosService } from '../../../services/productos.service';

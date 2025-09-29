@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { AuthService } from '../../../services/auth.service';
-import { Usuarios } from '../../../types';
+import { Usuarios } from '../../../interfaces/types';
 import { UsuariosService } from '../../../services/usuarios.service';
 import { environment } from '../../../../environment';
 import { SharedService } from '../../../services/shared.service';

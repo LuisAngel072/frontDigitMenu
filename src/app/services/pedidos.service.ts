@@ -7,7 +7,7 @@ import {
   EstadoPedidoHasProductos,
   Pedidos,
   Producto_extras_ingrSel,
-} from '../types';
+} from '../interfaces/types';
 import { AuthService } from './auth.service';
 
 @Injectable({
@@ -276,5 +276,23 @@ export class PedidosService {
     return this.http.delete<any>(`${this.baseUrl}/productos/${pedidoProdId}`, {
       headers: { Authorization: `Bearer ${this.authService.getToken()}` }
     });
+  }
+
+  async getProductosExtrasIngrSel(p_h_pr_id: number): Promise<Producto_extras_ingrSel> {
+    try {
+      const response$ = await this.http.get<Producto_extras_ingrSel>(
+        environment.ApiIP +
+          environment.ApiObtenerExtrasIngrProducto +
+          p_h_pr_id
+      );
+      const response: Producto_extras_ingrSel = await lastValueFrom(response$);
+      return response;
+    } catch (error) {
+      console.error(
+        `Ocurrió un error al intentar obtener los productos, extras e ingredientes seleccionados según el id ${p_h_pr_id}`,
+        error
+      );
+      throw error;
+    }
   }
 }

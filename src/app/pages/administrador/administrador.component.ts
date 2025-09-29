@@ -1,12 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { HeaderComponent } from '../comun-componentes/header/header.component';
 import { CommonModule } from '@angular/common';
-import { CrudEmpleadosComponent } from './crud-empleados/crud-empleados.component';
-import { CrudProductosComponent } from './crud-productos/crud-productos.component';
-import { CategoriasComponent } from '../../pages/administrador/categorias/categorias.component';
-import { CrudIngredientesComponent } from './crud-ingredientes/crud-ingredientes.component';
-import { MesasComponent } from './mesas/mesas.component';
-import { VentasComponent } from './ventas/ventas.component';
 import {
   Ingredientes,
   Roles,
@@ -16,7 +10,7 @@ import {
   Opciones,
   Sub_categorias,
   Productos,
-} from '../../types';
+} from '../../interfaces/types';
 import { UsuariosService } from '../../services/usuarios.service';
 import { RolesService } from '../../services/roles.service';
 import { CrudAgregarProductosComponent } from './crud-productos/crud-agregar-productos/crud-agregar-productos.component';
@@ -50,7 +44,6 @@ export class AdministradorComponent implements OnInit {
   public productos: Productos[] = [];
 
   constructor(
-    private readonly usuariosService: UsuariosService,
     private readonly rolesService: RolesService,
     private readonly ingredientesService: IngredientesService,
     private readonly extrasService: ExtrasService,
@@ -62,7 +55,6 @@ export class AdministradorComponent implements OnInit {
 
   async ngOnInit() {
     this.roles = await this.rolesService.obtenerRoles();
-    this.usuarios = await this.usuariosService.obtenerUsuariosYRoles();
     this.ingredientes = await this.ingredientesService.getIngredientes();
     this.extras = await this.extrasService.getExtras();
     this.opciones = await this.opcionesService.getOpciones();

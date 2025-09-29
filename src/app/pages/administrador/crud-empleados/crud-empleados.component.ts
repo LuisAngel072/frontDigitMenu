@@ -1,9 +1,15 @@
-import { Component, Input, SimpleChanges, ViewChild } from '@angular/core';
+import {
+  Component,
+  Input,
+  OnInit,
+  SimpleChanges,
+  ViewChild,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import Swal from 'sweetalert2';
 import { AdministradorComponent } from '../administrador.component';
-import { Roles, Usuarios_has_roles } from '../../../types';
-import { UsuariosDTO } from '../../../dtos';
+import { Roles, Usuarios_has_roles } from '../../../interfaces/types';
+import { UsuariosDTO } from '../../../interfaces/dtos';
 import { UsuariosService } from '../../../services/usuarios.service';
 import { FormsModule } from '@angular/forms';
 import { switchMap } from 'rxjs';
@@ -11,6 +17,7 @@ import { ChangeDetectorRef } from '@angular/core';
 import { SharedService } from '../../../services/shared.service';
 import { environment } from '../../../../environment';
 import { NgxPaginationModule } from 'ngx-pagination';
+import { RolesService } from '../../../services/roles.service';
 
 @Component({
   selector: 'app-crud-empleados',
@@ -19,9 +26,11 @@ import { NgxPaginationModule } from 'ngx-pagination';
   templateUrl: './crud-empleados.component.html',
   styleUrl: './crud-empleados.component.css',
 })
-export class CrudEmpleadosComponent {
-  @Input() usuarios: Usuarios_has_roles[] = [];
-  @Input() roles: Roles[] = [];
+export class CrudEmpleadosComponent implements OnInit {
+
+
+  public usuarios: Usuarios_has_roles[] = [];
+  public roles: Roles[] = [];
 
   pageSize: number = 7;
   currentPage: number = 0;
@@ -37,6 +46,7 @@ export class CrudEmpleadosComponent {
   constructor(
     private adminComponente: AdministradorComponent,
     private readonly usuariosService: UsuariosService,
+    private readonly rolesService: RolesService,
     private cdr: ChangeDetectorRef,
     private readonly sharedService: SharedService
   ) {
@@ -46,12 +56,27 @@ export class CrudEmpleadosComponent {
     this.activo = 0;
   }
 
-  ngOnInit() {
-    this.usuariosFiltrados = this.usuarios;
+  async ngOnInit() {
+    await this.cargarUsuarios();
+    this.roles = await this.rolesService.obtenerRoles();
   }
 
   async onPageChange(page: number) {
     this.currentPage = page;
+  }
+
+  async cargarUsuarios() {
+    try {
+      this.usuarios = await this.usuariosService.obtenerUsuariosYRoles();
+      this.usuariosFiltrados = this.usuarios; // Inicializa la lista filtrada con todos los usuarios
+    } catch (error) {
+      console.error('Error al cargar usuarios', error);
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'No se pudieron cargar los empleados.',
+      });
+    }
   }
 
   filtrarUsuarios(event: any) {

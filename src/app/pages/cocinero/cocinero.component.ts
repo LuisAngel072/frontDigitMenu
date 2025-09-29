@@ -4,10 +4,11 @@ import {
   EstadoPedidoHasProductos,
   Pedidos,
   Producto_extras_ingrSel,
-} from '../../types';
+} from '../../interfaces/types';
 import Swal from 'sweetalert2';
 import { CommonModule } from '@angular/common';
 import { HeaderComponent } from '../comun-componentes/header/header.component';
+import { CocinaSocketService } from '../../gateways/cocina-gateway.service';
 
 @Component({
   selector: 'app-cocinero',
@@ -24,17 +25,71 @@ export class CocineroComponent implements OnInit {
     tieneProductosPendientes: boolean;
   }[] = [];
 
-  constructor(private pedidosService: PedidosService) {}
+  constructor(private pedidosService: PedidosService, private cocinaSocket: CocinaSocketService) {}
 
   ngOnInit(): void {
-    this.cargarPedidos();
-  }
+  this.cargarPedidos();
+
+  this.cocinaSocket.onNuevoPedido().subscribe(async (pedido) => {
+    const detalles = await this.pedidosService
+      .getProductosExtrasIngrSel(pedido.pedido_id);
+
+    this.procesarPedidos(Array.isArray(detalles) ? detalles : [detalles]);
+  });
+
+    this.cocinaSocket.onPedidoActualizado().subscribe(async (pedido) => {
+    const detalles = await this.pedidosService
+      .getProductosExtrasIngrSel(pedido.pedido_id);
+
+    this.procesarPedidos(Array.isArray(detalles) ? detalles : [detalles]);
+  });
+}
+
+private procesarPedidos(data: Producto_extras_ingrSel[]): void {
+  const normalizado = data.map((p) => ({
+    ...p,
+    extras: p.extras ?? [],
+    ingredientes: p.ingredientes ?? [],
+    estado: p.estado ?? 'Sin preparar',
+  }));
+
+  const agrupados: { [id: number]: Producto_extras_ingrSel[] } = {};
+  normalizado.forEach((detalle) => {
+    const id = detalle.pedido_id.id_pedido;
+    if (!agrupados[id]) agrupados[id] = [];
+    agrupados[id].push(detalle);
+  });
+
+  let lista = Object.entries(agrupados).map(([_, productos]) => {
+    const tieneProductosPendientes = productos.some(
+      (p) => p.estado === 'Sin preparar' || p.estado === 'Preparado'
+    );
+
+    return {
+      pedidoId: productos[0].pedido_id,
+      productos,
+      expandido: true,
+      tieneProductosPendientes,
+    };
+  });
+
+  lista = lista.filter((entry) => entry.tieneProductosPendientes);
+
+  lista.sort(
+    (a, b) =>
+      new Date(b.pedidoId.fecha_pedido).getTime() -
+      new Date(a.pedidoId.fecha_pedido).getTime()
+  );
+
+  this.pedidosAgrupados = lista;
+}
+
 
   cargarPedidos(): void {
   this.pedidosService.getPedidosConProductosDetalles().subscribe({
     next: (data) => {
       console.log('Datos recibidos del servicio:', data);
-      
+
       // 1) Normalizar datos
       const normalizado = data.map((p) => ({
         ...p,
@@ -57,7 +112,7 @@ export class CocineroComponent implements OnInit {
         const tieneProductosPendientes = productos.some(
           p => p.estado === 'Sin preparar' || p.estado === 'Preparado'
         );
-        
+
         return {
           pedidoId: productos[0].pedido_id,
           productos,
@@ -70,14 +125,14 @@ export class CocineroComponent implements OnInit {
       lista = lista.filter(entry => entry.tieneProductosPendientes);
 
       // 5) Ordenar por fecha más reciente
-      lista.sort((a, b) => 
-        new Date(b.pedidoId.fecha_pedido).getTime() - 
+      lista.sort((a, b) =>
+        new Date(b.pedidoId.fecha_pedido).getTime() -
         new Date(a.pedidoId.fecha_pedido).getTime()
       );
 
       // 6) Asignar al componente
       this.pedidosAgrupados = lista;
-      
+
       console.log('Pedidos agrupados para cocina:', this.pedidosAgrupados);
     },
     error: (error) => {
@@ -144,14 +199,14 @@ export class CocineroComponent implements OnInit {
 
   async marcarPedidoComoElaborado(pedido_id: number): Promise<void> {
     const pedido = this.pedidosAgrupados.find(p => p.pedidoId.id_pedido === pedido_id);
-    
+
     if (!pedido) {
       return;
     }
 
     // Filtrar solo los productos que están "Sin preparar"
     const productosSinPreparar = pedido.productos.filter(p => p.estado === 'Sin preparar');
-    
+
     if (productosSinPreparar.length === 0) {
       Swal.fire({
         title: 'Información',
@@ -239,17 +294,17 @@ export class CocineroComponent implements OnInit {
   calcularTotalPedido(productos: Producto_extras_ingrSel[]): number {
     return productos.reduce((total, producto) => {
       let precioProducto = producto.precio;
-      
+
       // Sumar extras
       if (producto.extras && producto.extras.length > 0) {
         precioProducto += producto.extras.reduce((sum, extra) => sum + extra.precio, 0);
       }
-      
+
       // Sumar ingredientes adicionales
       if (producto.ingredientes && producto.ingredientes.length > 0) {
         precioProducto += producto.ingredientes.reduce((sum, ing) => sum + ing.precio, 0);
       }
-      
+
       return total + precioProducto;
     }, 0);
   }

@@ -145,14 +145,14 @@ export type Mesas = {
 
 // Datos de un producto sobre un pedido
 export type Producto_extras_ingrSel = {
-  pedido_prod_id: number; // ← AÑADIDO para que puedas usarlo en (click)
+  pedido_prod_id: number;
   pedido_id: Pedidos;
   producto_id: Productos;
   estado: EstadoPedidoHasProductos;
   precio: number;
   opcion_id: Opciones;
-  extras: Extras[]; // ← Ya no es opcional para evitar errores de undefined
-  ingredientes: Ingredientes[]; // ← Igual aquí
+  extras: Extras[];
+  ingredientes: Ingredientes[];
 };
 
 //Tabla pedidos_has_productos

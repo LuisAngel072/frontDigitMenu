@@ -11,8 +11,8 @@ import {
   RFC,
   Roles,
   Telefonos,
-} from '../types';
-import { UsuariosDTO } from '../dtos';
+} from '../interfaces/types';
+import { UsuariosDTO } from '../interfaces/dtos';
 import { Observable } from 'rxjs';
 
 @Injectable({

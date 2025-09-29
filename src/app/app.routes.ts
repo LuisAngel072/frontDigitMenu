@@ -8,11 +8,11 @@ import { ClientesMenuComponent } from './pages/clientes/clientes-menu/clientes-m
 import { CocineroComponent } from './pages/cocinero/cocinero.component'; // Importar CocineroComponent
 import { CrudEmpleadosComponent } from './pages/administrador/crud-empleados/crud-empleados.component';
 import { CajeroComponent } from './pages/caja/cajero.component';
+import { MesasComponent } from './pages/administrador/mesas/mesas.component';
 import { CrudAgregarProductosComponent } from './pages/administrador/crud-productos/crud-agregar-productos/crud-agregar-productos.component';
 import { CategoriasComponent } from './pages/administrador/categorias/categorias.component';
-import { CrudIngredientesComponent } from './pages/administrador/crud-ingredientes/crud-ingredientes.component';
-import { MesasComponent } from './pages/administrador/mesas/mesas.component';
 import { VentasComponent } from './pages/administrador/ventas/ventas.component';
+import { CrudIngredientesComponent } from './pages/administrador/crud-ingredientes/crud-ingredientes.component';
 
 export const routes: Routes = [
   {
@@ -23,19 +23,47 @@ export const routes: Routes = [
     path: 'Administrador',
     component: AdministradorComponent,
     children: [
-      { path: '', redirectTo: 'empleados', pathMatch: 'full' }, // Ruta por defecto
-      { path: 'empleados', component: CrudEmpleadosComponent },
-      { path: 'productos', component: CrudProductosComponent },
-      { path: 'productos/agregar', component: CrudAgregarProductosComponent },
+      { path: '', redirectTo: 'empleados', pathMatch: 'full' },
+      {
+        path: 'productos',
+        component: CrudProductosComponent,
+      },
+      {
+        path: 'productos/agregar',
+        component: CrudAgregarProductosComponent,
+      },
       {
         path: 'productos/editar/:id_prod',
         component: CrudAgregarProductosComponent,
       },
-      { path: 'categorias', component: CategoriasComponent },
-      { path: 'ingredientes', component: CrudIngredientesComponent },
       { path: 'mesas', component: MesasComponent },
-      { path: 'ventas', component: VentasComponent },
+      {
+        path: 'empleados',
+        component: CrudEmpleadosComponent,
+      },
+      {
+        path: 'categorias',
+        component: CategoriasComponent,
+      },
+      {
+        path: 'ventas',
+        component: VentasComponent,
+      },
+      {
+        path: 'ingredientes',
+        component: CrudIngredientesComponent,
+      },
     ],
+  },
+  // Redirección para asegurar case-sensitivity
+  {
+    path: 'administrador',
+    redirectTo: '/Administrador',
+    pathMatch: 'full',
+  },
+  {
+    path: 'empleados',
+    component: CrudEmpleadosComponent,
   },
   {
     path: 'clientes',
@@ -49,12 +77,30 @@ export const routes: Routes = [
     path: 'Cocinero', // Agregar ruta para el componente cocinero
     component: CocineroComponent,
   },
+  // Redirección para asegurar case-sensitivity
+  {
+    path: 'cocinero',
+    redirectTo: '/Cocinero',
+    pathMatch: 'full',
+  },
   {
     path: 'Mesero',
     component: MeserosComponent,
   },
+  // Redirección para asegurar case-sensitivity - ESTE ES EL QUE TE IMPORTA
+  {
+    path: 'mesero',
+    redirectTo: '/Mesero',
+    pathMatch: 'full',
+  },
   {
     path: 'Cajero',
     component: CajeroComponent,
-  }
+  },
+  // Redirección para asegurar case-sensitivity
+  {
+    path: 'cajero',
+    redirectTo: '/Cajero',
+    pathMatch: 'full',
+  },
 ];

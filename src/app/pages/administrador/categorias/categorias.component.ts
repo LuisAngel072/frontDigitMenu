@@ -2,11 +2,10 @@ import { Component, Input } from '@angular/core';
 import { CategoriasService } from '../../../services/categorias.service';
 import { SubcategoriasService } from '../../../services/subcategorias.service'; // Servicio para subcategorías
 import Swal from 'sweetalert2';
-import { Categorias, Sub_categorias } from '../../../types';
+import { Categorias, Sub_categorias } from '../../../interfaces/types';
 import { AdministradorComponent } from '../administrador.component';
 import { CommonModule } from '@angular/common';
-import { CategoriasDTO } from '../../../dtos';
-import { SubcategoriasDTO } from '../../../dtos'; // DTO para las subcategorías
+import { CategoriasDTO, SubcategoriasDTO  } from '../../../interfaces/dtos';
 import { switchMap } from 'rxjs';
 import { environment } from '../../../../environment';
 import { NgxPaginationModule } from 'ngx-pagination';

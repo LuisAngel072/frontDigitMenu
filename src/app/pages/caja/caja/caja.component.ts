@@ -5,7 +5,7 @@ import {
   EstadoPedidoHasProductos,
   Pedidos,
   Producto_extras_ingrSel,
-} from '../../../types';
+} from '../../../interfaces/types';
 import { CommonModule } from '@angular/common';
 import Swal from 'sweetalert2';
 
@@ -25,6 +25,7 @@ export class CajaComponent {
 
   ngOnInit(): void {
     this.cargarPedidos();
+    console.log(this.pedidosAgrupados);
   }
   /**
    * Obtiene todos los pedidos con sus productos relacionados
