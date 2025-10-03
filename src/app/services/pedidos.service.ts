@@ -257,4 +257,15 @@ export class PedidosService {
       estado,
     });
   }
+
+  /**
+   * Elimina un producto específico de un pedido
+   * @param pedidoProdId - ID del registro en pedidos_has_productos
+   * @returns Observable con el resultado de la eliminación
+  */
+  eliminarProductoDelPedido(pedidoProdId: number): Observable<any> {
+    return this.http.delete<any>(`${this.baseUrl}/productos/${pedidoProdId}`, {
+      headers: { Authorization: `Bearer ${this.authService.getToken()}` }
+    });
+  }
 }
