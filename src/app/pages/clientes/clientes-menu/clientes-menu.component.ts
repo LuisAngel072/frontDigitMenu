@@ -60,87 +60,76 @@ export class ClientesMenuComponent implements OnInit {
   cargarPedidoMesa(): void {
     if (!this.mesaId) return;
 
-    // Utilizamos el mismo servicio que utiliza el componente de cocina
     this.pedidosService.getPedidosConProductosDetalles().subscribe({
       next: (data) => {
-        // Normalizamos los datos igual que en el componente de cocina
         const normalizado = data.map(p => ({
           ...p,
           extras: p.extras ?? [],
           ingredientes: p.ingredientes ?? []
         }));
 
-        // Encontramos productos que pertenecen a la mesa actual
-        // Primero filtramos por mesa
-        const productosDeMiMesa = normalizado.filter(detalle =>
-          detalle.pedido_id.no_mesa.no_mesa === parseInt(this.mesaId!)
-        );
+        const productosDeMiMesa = normalizado.filter(detalle => {
+          const noMesa = detalle.pedido_id?.no_mesa?.no_mesa;
+          return noMesa === parseInt(this.mesaId!);
+        });
 
         if (productosDeMiMesa.length > 0) {
-          // Guardamos la referencia al pedido
           this.pedidoActual = productosDeMiMesa[0].pedido_id;
-
-          // Asignamos los productos al arreglo
           this.productosEnPedido = productosDeMiMesa;
-
-          // Calculamos el total del carrito
           this.calcularTotalCarrito();
-
-          console.log('Pedido cargado con éxito. Total de productos:', this.productosEnPedido.length);
         } else {
-          console.log('No se encontraron productos para la mesa:', this.mesaId);
           this.pedidoActual = null;
           this.productosEnPedido = [];
+          this.totalCarrito = 0;
         }
       },
       error: (error) => {
-        console.error('Error cargando productos del pedido:', error);
+        console.error('Error:', error);
       }
     });
   }
 
   // Calcula el total del carrito sumando los precios de todos los productos
-// Método corregido para calcular el total del carrito
-calcularTotalCarrito(): void {
-  this.totalCarrito = this.productosEnPedido.reduce((total, producto) => {
-    // Asegurarse de que todos los valores sean numéricos usando el operador +
-    let precio = +producto.precio || 0;
+  calcularTotalCarrito(): void {
+    this.totalCarrito = this.productosEnPedido.reduce((total, producto) => {
+      // Asegurarse de que todos los valores sean numéricos usando el operador +
+      let precio = +producto.precio || 0;
 
-    // Suma los precios de extras si los hay
-    if (producto.extras && producto.extras.length > 0) {
-      const extrasTotal = producto.extras.reduce((sum, extra) => {
-        // Convertir a número con el operador + y asegurar que sea un número válido
-        const extraPrecio = +(extra.precio || 0);
-        return sum + extraPrecio;
-      }, 0);
-      precio += extrasTotal;
+      // Suma los precios de extras si los hay
+      if (producto.extras && producto.extras.length > 0) {
+        const extrasTotal = producto.extras.reduce((sum, extra) => {
+          // Convertir a número con el operador + y asegurar que sea un número válido
+          const extraPrecio = +(extra.precio || 0);
+          return sum + extraPrecio;
+        }, 0);
+        precio += extrasTotal;
+      }
+
+      // Suma los precios de ingredientes adicionales si los hay
+      if (producto.ingredientes && producto.ingredientes.length > 0) {
+        const ingTotal = producto.ingredientes.reduce((sum, ing) => {
+          // Convertir a número con el operador + y asegurar que sea un número válido
+          const ingPrecio = +(ing.precio || 0);
+          return sum + ingPrecio;
+        }, 0);
+        precio += ingTotal;
+      }
+
+      // Verificar que el resultado sea un número válido
+      return total + (isNaN(precio) ? 0 : precio);
+    }, 0);
+
+    // Verificar que el resultado final sea un número válido
+    if (isNaN(this.totalCarrito)) {
+      console.error('Error: El total calculado no es un número válido', this.productosEnPedido);
+      this.totalCarrito = 0;
+    } else {
+      // Redondear a dos decimales para evitar problemas de precisión con números flotantes
+      this.totalCarrito = Math.round(this.totalCarrito * 100) / 100;
     }
 
-    // Suma los precios de ingredientes adicionales si los hay
-    if (producto.ingredientes && producto.ingredientes.length > 0) {
-      const ingTotal = producto.ingredientes.reduce((sum, ing) => {
-        // Convertir a número con el operador + y asegurar que sea un número válido
-        const ingPrecio = +(ing.precio || 0);
-        return sum + ingPrecio;
-      }, 0);
-      precio += ingTotal;
-    }
-
-    // Verificar que el resultado sea un número válido
-    return total + (isNaN(precio) ? 0 : precio);
-  }, 0);
-
-  // Verificar que el resultado final sea un número válido
-  if (isNaN(this.totalCarrito)) {
-    console.error('Error: El total calculado no es un número válido', this.productosEnPedido);
-    this.totalCarrito = 0;
-  } else {
-    // Redondear a dos decimales para evitar problemas de precisión con números flotantes
-    this.totalCarrito = Math.round(this.totalCarrito * 100) / 100;
+    console.log('Total calculado:', this.totalCarrito);
   }
-
-  console.log('Total calculado:', this.totalCarrito);
-}
 
   // Método para mostrar el modal del carrito
   mostrarCarrito(): void {

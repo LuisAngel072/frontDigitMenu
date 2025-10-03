@@ -98,14 +98,19 @@ export class PedidosService {
   buscarPedidoActivoPorMesa(numeroMesa: number): Observable<any | null> {
     return this.obtenerTodosPedidos().pipe(
       map((pedidos) => {
-        const pedidoExistente = pedidos.find(
-          (p) => p.no_mesa?.no_mesa === numeroMesa && p.estado === 'Iniciado'
-        );
-        return pedidoExistente || null;
+        const pedidosActivos = pedidos.filter((p) => {
+          const mesaMatch = p.no_mesa?.no_mesa === numeroMesa;
+          const estadoActivo = !p.estado || p.estado === 'Iniciado';
+          return mesaMatch && estadoActivo;
+        });
+        
+        if (pedidosActivos.length > 0) {
+          return pedidosActivos.sort((a, b) => b.id_pedido - a.id_pedido)[0];
+        }
+        return null;
       })
     );
   }
-
   /**
    * Obtiene el pedido iniciado del momento según el número de mesa
    * que se esté buscando. Esta función será utilizada para determinar
