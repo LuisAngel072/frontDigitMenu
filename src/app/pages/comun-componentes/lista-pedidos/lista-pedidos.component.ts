@@ -1,10 +1,9 @@
 // lista-pedidos.component.ts
 import { Component, OnInit } from '@angular/core';
 import { PedidosService } from '../../../services/pedidos.service';
-import { Producto_extras_ingrSel } from '../../../types';
 import Swal from 'sweetalert2';
 import { CommonModule } from '@angular/common';
-import { EstadoPedidoHasProductos } from '../../../types';
+import { EstadoPedidoHasProductos, Producto_extras_ingrSel } from '../../../interfaces/types';
 
 interface Order {
   id: number;
