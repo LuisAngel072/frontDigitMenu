@@ -1,12 +1,10 @@
 // lista-pedidos.component.ts
 import { Component, OnInit } from '@angular/core';
 import { PedidosService } from '../../../services/pedidos.service';
-import {
-  EstadoPedidoHasProductos,
-  Producto_extras_ingrSel,
-} from '../../../interfaces/types';
+import { Producto_extras_ingrSel } from '../../../types';
 import Swal from 'sweetalert2';
 import { CommonModule } from '@angular/common';
+import { EstadoPedidoHasProductos } from '../../../types';
 
 interface Order {
   id: number;
@@ -513,25 +511,6 @@ export class ListaPedidosComponent implements OnInit {
     this.updateUnreadCount();
   }
 
-  formatTime(date: Date): string {
-    const now = new Date();
-    const diffMinutes = Math.round(
-      (now.getTime() - date.getTime()) / (1000 * 60)
-    );
-
-    if (diffMinutes < 1) {
-      return 'Ahora mismo';
-    } else if (diffMinutes < 60) {
-      return `Hace ${diffMinutes} min`;
-    } else if (diffMinutes < 24 * 60) {
-      const hours = Math.floor(diffMinutes / 60);
-      return `Hace ${hours} ${hours === 1 ? 'hora' : 'horas'}`;
-    } else {
-      const days = Math.floor(diffMinutes / (24 * 60));
-      return `Hace ${days} ${days === 1 ? 'día' : 'días'}`;
-    }
-  }
-
   getStatusClass(status: string): string {
     switch (status) {
       case 'Sin preparar':
@@ -618,17 +597,6 @@ export class ListaPedidosComponent implements OnInit {
     this.loadOrders();
   }
 
-  // Formatear fecha para mostrar
-  formatOrderDate(date: Date): string {
-    return new Intl.DateTimeFormat('es-ES', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    }).format(date);
-  }
-
   // Calcular total del pedido
   getOrderTotal(order: Order): number {
     return order.items.reduce((total, item) => {
@@ -654,42 +622,20 @@ export class ListaPedidosComponent implements OnInit {
     }, 0);
   }
 
-  // Método auxiliar para calcular total de un producto específico
   calcularTotalProducto(item: OrderItem): number {
-    let precio = item.precio;
-
-    // Sumar extras si los hay
-    if (item.extras && item.extras.length > 0) {
-      const extrasTotal = item.extras.reduce((sum, extra: any) => {
-        return sum + (+(extra.precio || 0));
-      }, 0);
-      precio += extrasTotal;
-    }
-
-    // Sumar ingredientes adicionales si los hay
-    if (item.ingredientes && item.ingredientes.length > 0) {
-      const ingredientesTotal = item.ingredientes.reduce((sum, ing: any) => {
-        return sum + (+(ing.precio || 0));
-      }, 0);
-      precio += ingredientesTotal;
-    }
-
-    return precio;
+    return parseFloat(item.precio.toString());
   }
 
-  // Método para obtener nombres de extras (soluciona el error de tipado)
   obtenerNombresExtras(extras: any[]): string {
     if (!extras || extras.length === 0) {
       return '';
     }
 
     return extras.map((extra: any) => {
-      // Manejo más robusto del nombre del extra
       return extra.nombre_extra || extra.nombre || extra.name || 'Extra';
     }).join(', ');
   }
 
-  // Método para obtener nombres de ingredientes
   obtenerNombresIngredientes(ingredientes: any[]): string {
     if (!ingredientes || ingredientes.length === 0) {
       return '';
@@ -698,5 +644,121 @@ export class ListaPedidosComponent implements OnInit {
     return ingredientes.map((ing: any) => {
       return ing.nombre_ingrediente || ing.nombre || ing.name || 'Ingrediente';
     }).join(', ');
+  }
+
+  /**
+   * Elimina un producto específico del pedido
+   * @param order - Pedido que contiene el producto
+   * @param item - Producto a eliminar
+  */
+  async eliminarProducto(order: Order, item: OrderItem): Promise<void> {
+    // Verificar que el producto se puede eliminar
+    if (item.status !== 'Sin preparar') {
+      Swal.fire({
+        title: 'No se puede eliminar',
+        text: `El producto "${item.name}" ya está en estado "${item.status}" y no se puede eliminar`,
+        icon: 'warning',
+        timer: 3000,
+        showConfirmButton: false,
+      });
+      return;
+    }
+
+    const { isConfirmed } = await Swal.fire({
+      title: '¿Eliminar producto?',
+      html: `
+        <p>Se eliminará el producto:</p>
+        <p><strong>${item.name}</strong></p>
+        <p><small>Opción: ${item.opcion}</small></p>
+        <p><small>Precio: $${this.calcularTotalProducto(item)}</small></p>
+        <hr>
+        <p><strong>Esta acción no se puede deshacer</strong></p>
+      `,
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#3085d6',
+      confirmButtonText: 'Sí, eliminar',
+      cancelButtonText: 'Cancelar'
+    });
+
+    if (!isConfirmed) {
+      return;
+    }
+
+    try {
+      // Mostrar loading
+      Swal.fire({
+        title: 'Eliminando producto...',
+        html: 'Por favor, espere mientras se elimina el producto.',
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        allowEnterKey: false,
+        didOpen: () => Swal.showLoading(),
+      });
+
+      // Eliminar el producto del servidor
+      await this.pedidosService.eliminarProductoDelPedido(item.pedido_prod_id).toPromise();
+
+      // Remover el producto de la lista local
+      const itemIndex = order.items.indexOf(item);
+      if (itemIndex > -1) {
+        order.items.splice(itemIndex, 1);
+      }
+
+      // Si el pedido se quedó sin productos, removerlo completamente
+      if (order.items.length === 0) {
+        const orderIndex = this.orders.indexOf(order);
+        if (orderIndex > -1) {
+          this.orders.splice(orderIndex, 1);
+        }
+      }
+
+      Swal.close();
+      Swal.fire({
+        title: '¡Producto eliminado!',
+        text: `El producto "${item.name}" ha sido eliminado del pedido`,
+        icon: 'success',
+        timer: 2000,
+        showConfirmButton: false,
+      });
+
+      console.log(`Producto ${item.pedido_prod_id} eliminado exitosamente`);
+    } catch (error) {
+      Swal.close();
+      console.error('Error al eliminar el producto:', error);
+      
+      let errorMessage = 'Ocurrió un error al eliminar el producto';
+      
+      // Manejo específico de errores
+      if (error && typeof error === 'object') {
+        const err = error as any;
+        if (err.status === 400) {
+          errorMessage = 'No se puede eliminar el producto porque ya está en preparación';
+        } else if (err.status === 404) {
+          errorMessage = 'El producto no existe o ya fue eliminado';
+        } else if (err.status === 403) {
+          errorMessage = 'No tiene permisos para eliminar este producto';
+        }
+      }
+      
+      Swal.fire({
+        title: 'Error al eliminar',
+        text: errorMessage,
+        icon: 'error',
+        timer: 3000,
+        showConfirmButton: false,
+      });
+    }
+  }
+
+  /**
+   * Verifica si un producto puede ser eliminado
+   * Solo se pueden eliminar productos en estado "Sin preparar"
+   * @param item - Producto a verificar
+   * @returns true si el producto puede ser eliminado
+   */
+  puedeEliminarProducto(item: OrderItem): boolean {
+    return item.status === 'Sin preparar';
   }
 }
