@@ -13,6 +13,7 @@ import { CrudAgregarProductosComponent } from './pages/administrador/crud-produc
 import { CategoriasComponent } from './pages/administrador/categorias/categorias.component';
 import { VentasComponent } from './pages/administrador/ventas/ventas.component';
 import { CrudIngredientesComponent } from './pages/administrador/crud-ingredientes/crud-ingredientes.component';
+import { LogsComponent } from './pages/administrador/logs/logs.component';
 
 export const routes: Routes = [
   {
@@ -52,6 +53,10 @@ export const routes: Routes = [
       {
         path: 'ingredientes',
         component: CrudIngredientesComponent,
+      },
+      {
+        path: 'logs',
+        component: LogsComponent,
       },
     ],
   },

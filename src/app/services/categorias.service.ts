@@ -4,6 +4,7 @@ import { environment } from '../../environment';
 import { AuthService } from './auth.service';
 import { lastValueFrom, Observable } from 'rxjs';
 import { CategoriasDTO } from '../interfaces/dtos';
+import { Categorias } from '../interfaces/types';
 
 @Injectable({
   providedIn: 'root',
@@ -14,7 +15,7 @@ export class CategoriasService {
     private readonly authService: AuthService
   ) {}
 
-  async getCategorias() {
+  async getCategorias(): Promise<Categorias[]> {
     try {
       const response = this.http.get<any>(environment.ApiIP + environment.ApiObtenerCategorias).toPromise()
       return response;
@@ -24,7 +25,7 @@ export class CategoriasService {
     }
   }
 
-  crearCategoria(body: CategoriasDTO): Observable<any> {
+  crearCategoria(body: CategoriasDTO): Observable<Categorias> {
     try {
       const response$ = this.http.post<any>(
         environment.ApiIP + environment.ApiRegistrarCategoria,

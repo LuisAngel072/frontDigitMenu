@@ -26,6 +26,7 @@ export class CajaComponent {
   ngOnInit(): void {
     this.cargarPedidos();
     console.log(this.pedidosAgrupados);
+
   }
   /**
    * Obtiene todos los pedidos con sus productos relacionados

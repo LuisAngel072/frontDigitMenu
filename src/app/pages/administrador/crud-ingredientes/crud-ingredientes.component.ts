@@ -4,10 +4,16 @@ import Swal from 'sweetalert2';
 import { Extras, Ingredientes, Opciones } from '../../../interfaces/types';
 import { AdministradorComponent } from '../administrador.component';
 import { CommonModule } from '@angular/common';
-import { ExtrasDTO, IngredientesDTO, OpcionesDTO } from '../../../interfaces/dtos';
+import {
+  ExtrasDTO,
+  IngredientesDTO,
+  OpcionesDTO,
+} from '../../../interfaces/dtos';
 import { ExtrasService } from '../../../services/extras.service';
 import { OpcionesService } from '../../../services/opciones.service';
 import { NgxPaginationModule } from 'ngx-pagination';
+import { LogsService } from '../../../services/logs.service';
+import { LogsDto } from '../../../interfaces/dtos';
 @Component({
   selector: 'app-crud-ingredientes',
   standalone: true,
@@ -33,6 +39,7 @@ export class CrudIngredientesComponent {
     private readonly ingrServices: IngredientesService,
     private readonly opcionesService: OpcionesService,
     private readonly extrasService: ExtrasService,
+    private readonly logsService: LogsService,
     private adminComponente: AdministradorComponent
   ) {
     this.ingredientes = this.adminComponente.ingredientes;
@@ -43,7 +50,7 @@ export class CrudIngredientesComponent {
     this.opcionesFiltradas = this.opciones;
   }
 
-   ngOnInit() {
+  ngOnInit() {
     this.ingredientes = this.adminComponente.ingredientes;
     this.extras = this.adminComponente.extras;
     this.opciones = this.adminComponente.opciones;
@@ -55,7 +62,7 @@ export class CrudIngredientesComponent {
   async onPageChangeOpc(page: number) {
     this.currentPageOpc = page;
   }
-   async onPageChangeExt(page: number) {
+  async onPageChangeExt(page: number) {
     this.currentPageExt = page;
   }
   /**
@@ -218,7 +225,17 @@ export class CrudIngredientesComponent {
                   Swal.showLoading(); // Muestra el spinner de carga
                 },
               });
-              await this.ingrServices.crearIngrediente(formData);
+              const ingr = await this.ingrServices.crearIngrediente(formData);
+              const log: LogsDto = {
+                usuario:
+                  localStorage.getItem('codigo') +
+                  ' ' +
+                  localStorage.getItem('nombres'),
+                accion: 'Crear ingrediente',
+                modulo: 'Ingredientes',
+                descripcion: `Se creó el ingrediente ${ingr.nombre_ingrediente}`,
+              };
+              await this.logsService.crearLog(log);
               this.ingredientes = await this.ingrServices.getIngredientes();
               this.ingredientesFiltrados = this.ingredientes;
               this.adminComponente.ingredientes = this.ingredientes;
@@ -340,8 +357,18 @@ export class CrudIngredientesComponent {
                   Swal.showLoading(); // Muestra el spinner de carga
                 },
               });
-              this.ingrServices.upIngrediente(id_ingr, formData);
+              await this.ingrServices.upIngrediente(id_ingr, formData);
               Swal.close();
+              const log: LogsDto = {
+                usuario:
+                  localStorage.getItem('codigo') +
+                  ' ' +
+                  localStorage.getItem('nombres'),
+                accion: 'Editar ingrediente',
+                modulo: 'Ingredientes',
+                descripcion: `Se actualizó el ingrediente ${ingrediente.nombre_ingrediente}`,
+              };
+              await this.logsService.crearLog(log);
               this.ingredientes = await this.ingrServices.getIngredientes();
               this.adminComponente.ingredientes = this.ingredientes;
               Swal.fire({
@@ -412,7 +439,16 @@ export class CrudIngredientesComponent {
             });
 
             await this.ingrServices.delIngrediente(id_ingr);
-
+            const log: LogsDto = {
+              usuario:
+                localStorage.getItem('codigo') +
+                ' ' +
+                localStorage.getItem('nombres'),
+              accion: 'Eliminars ingrediente',
+              modulo: 'Ingredientes',
+              descripcion: `Se eliminó el ingrediente ${ingrediente.nombre_ingrediente}`,
+            };
+            await this.logsService.crearLog(log);
             Swal.close();
             Swal.fire({
               icon: 'success',
@@ -571,7 +607,18 @@ export class CrudIngredientesComponent {
                   Swal.showLoading(); // Muestra el spinner de carga
                 },
               });
-              await this.opcionesService.crearOpcion(formData);
+              const opcion = await this.opcionesService.crearOpcion(formData);
+              console.log(opcion)
+              const log: LogsDto = {
+                usuario:
+                  localStorage.getItem('codigo') +
+                  ' ' +
+                  localStorage.getItem('nombres'),
+                accion: 'Crear opción',
+                modulo: 'Ingredientes',
+                descripcion: `Se creó la opción ${opcion.nombre_opcion}`,
+              };
+              await this.logsService.crearLog(log);
               Swal.close();
               this.opciones = await this.opcionesService.getOpciones();
               this.adminComponente.opciones = this.opciones;
@@ -693,6 +740,16 @@ export class CrudIngredientesComponent {
                 },
               });
               this.opcionesService.upOpcion(id_opcion, formData);
+              const log: LogsDto = {
+                usuario:
+                  localStorage.getItem('codigo') +
+                  ' ' +
+                  localStorage.getItem('nombres'),
+                accion: 'Editar opción',
+                modulo: 'Ingredientes',
+                descripcion: `Se actualizó la opción ${opcionF.nombre_opcion}`,
+              };
+              await this.logsService.crearLog(log);
               Swal.close();
               this.opciones = await this.opcionesService.getOpciones();
               this.adminComponente.opciones = this.opciones;
@@ -769,7 +826,16 @@ export class CrudIngredientesComponent {
             });
 
             await this.opcionesService.delOpcion(id_opcion);
-
+            const log: LogsDto = {
+              usuario:
+                localStorage.getItem('codigo') +
+                ' ' +
+                localStorage.getItem('nombres'),
+              accion: 'Eliminar opción',
+              modulo: 'Ingredientes',
+              descripcion: `Se eliminó la opción ${opcionF.nombre_opcion}`,
+            };
+            await this.logsService.crearLog(log);
             Swal.close();
 
             Swal.fire({
@@ -927,7 +993,17 @@ export class CrudIngredientesComponent {
                   Swal.showLoading(); // Muestra el spinner de carga
                 },
               });
-              await this.extrasService.crearExtra(formData);
+              const extra = await this.extrasService.crearExtra(formData);
+              const log: LogsDto = {
+                usuario:
+                  localStorage.getItem('codigo') +
+                  ' ' +
+                  localStorage.getItem('nombres'),
+                accion: 'Crear extra',
+                modulo: 'Ingredientes',
+                descripcion: `Se creó el extra ${extra.nombre_extra}`,
+              };
+              await this.logsService.crearLog(log);
               this.extras = await this.extrasService.getExtras();
               this.adminComponente.extras = this.extras;
               Swal.close();
@@ -1046,7 +1122,17 @@ export class CrudIngredientesComponent {
                 },
               });
 
-              this.extrasService.upExtra(id_extra, formData);
+              await this.extrasService.upExtra(id_extra, formData);
+              const log: LogsDto = {
+                usuario:
+                  localStorage.getItem('codigo') +
+                  ' ' +
+                  localStorage.getItem('nombres'),
+                accion: 'Editar extra',
+                modulo: 'Ingredientes',
+                descripcion: `Se actualizó el extra ${extraF.nombre_extra}`,
+              };
+              await this.logsService.crearLog(log);
               this.extras = await this.extrasService.getExtras();
               this.adminComponente.extras = this.extras;
               Swal.close();
@@ -1125,6 +1211,16 @@ export class CrudIngredientesComponent {
               text: 'Extra eliminado con éxito',
               timer: 2000,
             });
+            const log: LogsDto = {
+              usuario:
+                localStorage.getItem('codigo') +
+                ' ' +
+                localStorage.getItem('nombres'),
+              accion: 'Eliminar extra',
+              modulo: 'Ingredientes',
+              descripcion: `Se eliminó el extra ${extraF.nombre_extra}`,
+            };
+            await this.logsService.crearLog(log);
             this.extras = await this.extrasService.getExtras();
             this.adminComponente.extras = this.extras;
             return;

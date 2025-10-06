@@ -5,10 +5,16 @@ import Swal from 'sweetalert2';
 import { Categorias, Sub_categorias } from '../../../interfaces/types';
 import { AdministradorComponent } from '../administrador.component';
 import { CommonModule } from '@angular/common';
-import { CategoriasDTO, SubcategoriasDTO  } from '../../../interfaces/dtos';
+import {
+  CategoriasDTO,
+  LogsDto,
+  SubcategoriasDTO,
+} from '../../../interfaces/dtos';
 import { switchMap } from 'rxjs';
 import { environment } from '../../../../environment';
 import { NgxPaginationModule } from 'ngx-pagination';
+import { LogsService } from '../../../services/logs.service';
+import { AuthService } from '../../../services/auth.service';
 
 @Component({
   selector: 'app-crud-categorias',
@@ -35,6 +41,8 @@ export class CategoriasComponent {
   constructor(
     private readonly catServices: CategoriasService,
     private readonly subcatServices: SubcategoriasService, // Servicio para subcategorías
+    private readonly logsServices: LogsService,
+    private readonly authService: AuthService,
     private adminComponente: AdministradorComponent
   ) {}
 
@@ -172,6 +180,16 @@ export class CategoriasComponent {
               },
             });
             await this.catServices.delCategoria(id_cat); // Llama al servicio para eliminar
+            const log: LogsDto = {
+              usuario:
+                localStorage.getItem('codigo') +
+                ' ' +
+                localStorage.getItem('nombres'),
+              accion: 'Crear categoría',
+              modulo: 'Categorías',
+              descripcion: `Se eliminó la categoría ${categoria.nombre_cat}`,
+            };
+            await this.logsServices.crearLog(log);
             Swal.close();
             Swal.fire({
               icon: 'success',
@@ -287,6 +305,16 @@ export class CategoriasComponent {
                   .subscribe({
                     next: async (response) => {
                       Swal.close();
+                      const log: LogsDto = {
+                        usuario:
+                          localStorage.getItem('codigo') +
+                          ' ' +
+                          localStorage.getItem('nombres'),
+                        accion: 'Crear categoría',
+                        modulo: 'Categorías',
+                        descripcion: `Se creó la categoría ${response.nombre_cat}`,
+                      };
+                      await this.logsServices.crearLog(log);
                       this.categorias = await this.catServices.getCategorias();
                       this.adminComponente.categorias = this.categorias;
                       Swal.fire({
@@ -452,6 +480,16 @@ export class CategoriasComponent {
                   });
               }
               Swal.close();
+              const log: LogsDto = {
+                usuario:
+                  localStorage.getItem('codigo') +
+                  ' ' +
+                  localStorage.getItem('nombres'),
+                accion: 'Editar categoría',
+                modulo: 'Categorías',
+                descripcion: `Se actualizó la categoría ${categoria.nombre_cat}`,
+              };
+              await this.logsServices.crearLog(log);
               this.categorias = await this.catServices.getCategorias();
               this.adminComponente.categorias = this.categorias;
               Swal.fire({
@@ -652,6 +690,16 @@ export class CategoriasComponent {
                       Swal.close();
                       this.subcategorias =
                         await this.subcatServices.obtenerSubcategorias();
+                      const log: LogsDto = {
+                        usuario:
+                          localStorage.getItem('codigo') +
+                          ' ' +
+                          localStorage.getItem('nombres'),
+                        accion: 'Editar subcategoría',
+                        modulo: 'Categorías',
+                        descripcion: `Se actualizó la subcategoría ${subcategoria.nombre_subcat}`,
+                      };
+                      await this.logsServices.crearLog(log);
                       this.adminComponente.subcategorias = this.subcategorias;
                       Swal.fire({
                         icon: 'success',
@@ -729,9 +777,20 @@ export class CategoriasComponent {
               title: 'Subcategoría eliminada',
               text: 'Subcategoría eliminada con éxito.',
             });
+            const log: LogsDto = {
+              usuario:
+                localStorage.getItem('codigo') +
+                ' ' +
+                localStorage.getItem('nombres'),
+              accion: 'Eliminar subcategoría',
+              modulo: 'Categorías',
+              descripcion: `Se eliminó la subcategoría ${subcategoria.nombre_subcat}`,
+            };
             this.subcategorias =
               await this.subcatServices.obtenerSubcategorias();
             this.adminComponente.subcategorias = this.subcategorias;
+
+            await this.logsServices.crearLog(log);
           } catch (error) {
             Swal.close();
             Swal.fire({
@@ -854,6 +913,16 @@ export class CategoriasComponent {
                       Swal.close();
                       this.subcategorias =
                         await this.subcatServices.obtenerSubcategorias();
+                      const log: LogsDto = {
+                        usuario:
+                          localStorage.getItem('codigo') +
+                          ' ' +
+                          localStorage.getItem('nombres'),
+                        accion: 'Crear subcategoría',
+                        modulo: 'Categorías',
+                        descripcion: `Se creó la subcategoría ${response.nombre_subcat}`,
+                      };
+                      await this.logsServices.crearLog(log);
                       this.adminComponente.subcategorias = this.subcategorias;
                       Swal.fire({
                         icon: 'success',

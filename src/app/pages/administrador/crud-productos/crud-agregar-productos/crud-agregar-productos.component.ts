@@ -5,6 +5,10 @@ import {
   Extras,
   Ingredientes,
   Opciones,
+  Pedidos_has_extrassel,
+  Pedidos_has_ingrsel,
+  Pedidos_has_productos,
+  Productos,
   Sub_categorias,
 } from '../../../../interfaces/types';
 import { AdministradorComponent } from '../../administrador.component';
@@ -20,6 +24,8 @@ import { ProductosService } from '../../../../services/productos.service';
 import { ProductosDto } from '../../../../interfaces/dtos';
 import { NgxPaginationModule } from 'ngx-pagination';
 import { ActivatedRoute } from '@angular/router';
+import { LogsService } from '../../../../services/logs.service';
+import { LogsDto } from '../../../../interfaces/dtos';
 
 @Component({
   selector: 'app-crud-agregar-productos',
@@ -51,6 +57,8 @@ export class CrudAgregarProductosComponent implements OnInit {
   @Input() opciones: Opciones[] = [];
   @Input() sub_categorias: Sub_categorias[] = [];
 
+  producto: Productos | undefined = undefined;
+
   ingredientesFiltrados: Ingredientes[] = [];
   extrasFiltrados: Extras[] = [];
   opcionesFiltradas: Opciones[] = [];
@@ -69,6 +77,7 @@ export class CrudAgregarProductosComponent implements OnInit {
   constructor(
     public readonly administradorComponent: AdministradorComponent,
     private readonly productosService: ProductosService,
+    private readonly logsService: LogsService,
     private fb: FormBuilder,
     private route: ActivatedRoute,
     private router: Router,
@@ -152,14 +161,14 @@ export class CrudAgregarProductosComponent implements OnInit {
   }
 
   async cargarProducto(id: number) {
-    const producto = await this.productosService.obtenerProducto(id);
-    console.log(producto);
+    this.producto = await this.productosService.obtenerProducto(id);
+    console.log(this.producto);
     this.form.patchValue({
-      nombre_prod: producto.nombre_prod,
-      descripcion: producto.descripcion,
-      img_prod: producto.img_prod,
-      precio: producto.precio,
-      sub_cat_id: producto.sub_cat_id.id_subcat,
+      nombre_prod: this.producto.nombre_prod,
+      descripcion: this.producto.descripcion,
+      img_prod: this.producto.img_prod,
+      precio: this.producto.precio,
+      sub_cat_id: this.producto.sub_cat_id.id_subcat,
     });
 
     // Limpiar selecciones previas para evitar estados inconsistentes
@@ -174,13 +183,13 @@ export class CrudAgregarProductosComponent implements OnInit {
       this.productosService.obtenerOpcionesDeProducto(id),
     ]);
 
-    ingredientesProd.forEach((ing: any) =>
+    ingredientesProd.forEach((ing: Pedidos_has_ingrsel) =>
       this.selectedIngredientes.add(ing.ingrediente_id.id_ingr)
     );
-    extrasProd.forEach((ext: any) =>
+    extrasProd.forEach((ext: Pedidos_has_extrassel) =>
       this.selectedExtras.add(ext.extra_id.id_extra)
     );
-    opcionesProd.forEach((opc: any) =>
+    opcionesProd.forEach((opc: Pedidos_has_productos) =>
       this.selectedOpciones.add(opc.opcion_id.id_opcion)
     );
     console.log([ingredientesProd, extrasProd, opcionesProd]);
@@ -318,20 +327,42 @@ export class CrudAgregarProductosComponent implements OnInit {
             dto as ProductosDto
           );
           Swal.fire('Éxito', 'Producto actualizado', 'success');
+          const log: LogsDto = {
+            usuario:
+              localStorage.getItem('codigo') +
+              ' ' +
+              localStorage.getItem('nombres'),
+            accion: 'Editar producto',
+            modulo: 'Productos',
+            descripcion: `Se actualizó el producto ${this.producto?.nombre_prod ?? ''}`,
+          };
+          await this.logsService.crearLog(log);
           this.resetSelections();
           this.form.reset();
-          this.administradorComponent.productos = await this.productosService.obtenerProductos();
+          this.administradorComponent.productos =
+            await this.productosService.obtenerProductos();
           this.router.navigate(['/Administrador/productos']);
         } else {
           console.log(dto);
-          await this.productosService.registrarProducto(dto as ProductosDto);
+          const prodCr = await this.productosService.registrarProducto(dto as ProductosDto);
+
           Swal.fire('Éxito', 'Producto creado', 'success');
+          const log: LogsDto = {
+            usuario:
+              localStorage.getItem('codigo') +
+              ' ' +
+              localStorage.getItem('nombres'),
+            accion: 'Crear producto',
+            modulo: 'Productos',
+            descripcion: `Se creó el producto ${prodCr.nombre_prod ?? ''}`,
+          };
+          await this.logsService.crearLog(log);
         }
 
         this.resetSelections();
         this.form.reset();
-        this.administradorComponent.productos = await this.productosService.obtenerProductos();
-
+        this.administradorComponent.productos =
+          await this.productosService.obtenerProductos();
       }
     } catch (error) {
       if (this.modoEdicion) {

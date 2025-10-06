@@ -76,28 +76,6 @@ justify-content: center;
 margin-bottom: 20px;
 }
 
-.btn-pag {
-padding: 6px 12px;
-border: 1px solid #007bff;
-background-color: white;
-color: #007bff;
-border-radius: 4px;
-cursor: pointer;
-}
-
-.btn-pag:disabled {
-cursor: not-allowed;
-opacity: 0.6;
-}
-
-.btn-pag:hover:not(:disabled) {
-background-color: #007bff;
-color: white;
-}
-
-.pagina-actual {
-font-weight: bold;
-}
 
 /* Sección opcional para estadísticas */
 .estadisticas {
