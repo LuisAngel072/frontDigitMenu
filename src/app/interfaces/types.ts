@@ -181,6 +181,16 @@ export type Pedidos_has_ingrsel = {
   ingrediente_id: Ingredientes; // ← Corregir esto también
 }
 
+export type Logs = {
+  id_log: number; //Llave primaria
+  usuario: string; //Se almacena directamente como texto, para evitar problemas si se elimina el usuario
+  accion: string; //Acción realizada (Crear, Actualizar, Eliminar, Iniciar sesión, etc.)
+  modulo: string; //Módulo donde se realizó la acción (Usuarios, Productos, Pedidos, etc.)
+  fecha: Date; //Fecha y hora de la acción
+  ip: string; //Dirección IP desde donde se realizó la acción
+  descripcion?: string; //Opcional, puede ser undefined
+}
+
 export enum EstadoPedidoHasProductos {
   sin_preparar = 'Sin preparar',
   preparado = 'Preparado',

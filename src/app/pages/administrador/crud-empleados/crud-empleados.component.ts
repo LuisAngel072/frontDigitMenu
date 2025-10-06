@@ -9,7 +9,7 @@ import { CommonModule } from '@angular/common';
 import Swal from 'sweetalert2';
 import { AdministradorComponent } from '../administrador.component';
 import { Roles, Usuarios_has_roles } from '../../../interfaces/types';
-import { UsuariosDTO } from '../../../interfaces/dtos';
+import { LogsDto, UsuariosDTO } from '../../../interfaces/dtos';
 import { UsuariosService } from '../../../services/usuarios.service';
 import { FormsModule } from '@angular/forms';
 import { switchMap } from 'rxjs';
@@ -18,6 +18,7 @@ import { SharedService } from '../../../services/shared.service';
 import { environment } from '../../../../environment';
 import { NgxPaginationModule } from 'ngx-pagination';
 import { RolesService } from '../../../services/roles.service';
+import { LogsService } from '../../../services/logs.service';
 
 @Component({
   selector: 'app-crud-empleados',
@@ -27,8 +28,6 @@ import { RolesService } from '../../../services/roles.service';
   styleUrl: './crud-empleados.component.css',
 })
 export class CrudEmpleadosComponent implements OnInit {
-
-
   public usuarios: Usuarios_has_roles[] = [];
   public roles: Roles[] = [];
 
@@ -48,7 +47,8 @@ export class CrudEmpleadosComponent implements OnInit {
     private readonly usuariosService: UsuariosService,
     private readonly rolesService: RolesService,
     private cdr: ChangeDetectorRef,
-    private readonly sharedService: SharedService
+    private readonly sharedService: SharedService,
+    private readonly logsService: LogsService
   ) {
     this.usuarios = this.adminComponente.usuarios;
     this.roles = this.adminComponente.roles;
@@ -487,13 +487,23 @@ export class CrudEmpleadosComponent implements OnInit {
                   })
                 )
                 .subscribe({
-                  next: (response) => {
+                  next: async (response) => {
                     Swal.close();
                     Swal.fire({
                       title: 'Empleado registrado correctamente',
                       icon: 'success',
                       timer: 2000,
                     });
+                    const log: LogsDto = {
+                      usuario:
+                        localStorage.getItem('codigo') +
+                        ' ' +
+                        localStorage.getItem('nombres'),
+                      accion: 'Crear usuario',
+                      modulo: 'Empleados',
+                      descripcion: `Se creó el usuario ${response.codigo} ${response.nombres} ${response.primer_apellido} ${response.segundo_apellido}`,
+                    };
+                    await this.logsService.crearLog(log);
                     // Actualiza la lista de usuarios después del registro exitoso
                     this.usuariosService
                       .obtenerUsuariosYRoles()
@@ -1055,7 +1065,7 @@ export class CrudEmpleadosComponent implements OnInit {
                   })
                 )
                 .subscribe({
-                  next: (response) => {
+                  next: async (response) => {
                     console.log(this.formData);
                     Swal.close();
                     Swal.fire({
@@ -1063,6 +1073,16 @@ export class CrudEmpleadosComponent implements OnInit {
                       icon: 'success',
                       timer: 2000,
                     });
+                    const log: LogsDto = {
+                      usuario:
+                        localStorage.getItem('codigo') +
+                        ' ' +
+                        localStorage.getItem('nombres'),
+                      accion: 'Editar usuario',
+                      modulo: 'Empleados',
+                      descripcion: `Se actualizó el usuario ${usF.usuario_id.codigo} ${usF.usuario_id.nombres} ${usF.usuario_id.primer_apellido} ${usF.usuario_id.segundo_apellido}`,
+                    };
+                    await this.logsService.crearLog(log);
                     // Actualiza la lista de usuarios después del registro exitoso
                     //this.headerComponente.profileImageUrl = this.formData.img_perfil.img_ruta;
                     this.usuariosService
@@ -1186,6 +1206,16 @@ export class CrudEmpleadosComponent implements OnInit {
               icon: 'success',
               timer: 2000,
             });
+            const log: LogsDto = {
+              usuario:
+                localStorage.getItem('codigo') +
+                ' ' +
+                localStorage.getItem('nombres'),
+              accion: 'Desactivar usuario',
+              modulo: 'Empleados',
+              descripcion: `Se desactivó el usuario ${usF.usuario_id.codigo} ${usF.usuario_id.nombres} ${usF.usuario_id.primer_apellido} ${usF.usuario_id.segundo_apellido}`,
+            };
+            await this.logsService.crearLog(log);
             this.usuarios = await this.usuariosService.obtenerUsuariosYRoles();
 
             this.adminComponente.usuarios = this.usuarios;
@@ -1259,6 +1289,16 @@ export class CrudEmpleadosComponent implements OnInit {
               timer: 2000,
               showConfirmButton: false,
             });
+            const log: LogsDto = {
+              usuario:
+                localStorage.getItem('codigo') +
+                ' ' +
+                localStorage.getItem('nombres'),
+              accion: 'Reactivar usuario',
+              modulo: 'Empleados',
+              descripcion: `Se reactivó el usuario ${usF.usuario_id.codigo} ${usF.usuario_id.nombres} ${usF.usuario_id.primer_apellido} ${usF.usuario_id.segundo_apellido}`,
+            };
+            await this.logsService.crearLog(log);
             this.usuarios = await this.usuariosService.obtenerUsuariosYRoles();
 
             this.adminComponente.usuarios = this.usuarios;

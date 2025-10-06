@@ -99,4 +99,12 @@ export const environment = {
   ApiCrearNotificacion: "notificaciones", // POST
   ApiObtenerNotificacionesPorMesa: "notificaciones/mesa/", // GET /:mesaId
   ApiAtenderNotificacion: "notificaciones/", // PATCH /:id/atender
+
+  /**
+   * Logs
+   */
+  ApiObtenerLogs: "logsdb", // GET
+  ApiObtenerLog: "logsdb/", // GET /:id_log
+  ApiCrearLog: "logsdb/registrar", // POST
+
 }

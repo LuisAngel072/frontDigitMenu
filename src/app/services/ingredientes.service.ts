@@ -4,6 +4,7 @@ import { environment } from '../../environment';
 import { AuthService } from './auth.service';
 import { lastValueFrom } from 'rxjs';
 import { IngredientesDTO } from '../interfaces/dtos';
+import { Ingredientes } from '../interfaces/types';
 
 @Injectable({
   providedIn: 'root',
@@ -31,7 +32,7 @@ export class IngredientesService {
     }
   }
 
-  async crearIngrediente(body: IngredientesDTO) {
+  async crearIngrediente(body: IngredientesDTO): Promise<Ingredientes> {
     try {
       console.log(body)
       const response$ = this.http.post<any>(

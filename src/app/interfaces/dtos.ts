@@ -92,3 +92,10 @@ export type UpPedidoDto = {
   total: number; //Actualiza el total del pedido, conforme se agregan productos al mismo
   estado: EstadoPedido; //Actualiza el estado del pedido, si este fue pagado/terminado
 }
+
+export type LogsDto = {
+  usuario: string; //Se almacena directamente como texto, para evitar problemas si se elimina el usuario
+  accion: string; //Acción realizada (Crear, Actualizar, Eliminar, Iniciar sesión, etc.)
+  modulo: string; //Módulo donde se realizó la acción (Usuarios, Productos, Pedidos, etc.)
+  descripcion?: string; //Opcional, puede ser undefined
+}

@@ -1,13 +1,21 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { CommonModule, PercentPipe } from '@angular/common';
 import Swal from 'sweetalert2';
-import { Categorias, P_H_E, P_H_I, P_H_O, Productos } from '../../../interfaces/types';
+import {
+  Categorias,
+  P_H_E,
+  P_H_I,
+  P_H_O,
+  Productos,
+} from '../../../interfaces/types';
 import { AdministradorComponent } from '../administrador.component';
 import { environment } from '../../../../environment';
 import { ProductosService } from '../../../services/productos.service';
 import { NgxPaginationModule } from 'ngx-pagination';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import { LogsService } from '../../../services/logs.service';
+import { LogsDto } from '../../../interfaces/dtos';
 @Component({
   selector: 'app-crud-productos',
   standalone: true,
@@ -27,7 +35,8 @@ export class CrudProductosComponent {
   constructor(
     private readonly adminComponente: AdministradorComponent,
     private readonly productosService: ProductosService,
-    private router: Router,
+    private readonly logsService: LogsService,
+    private router: Router
   ) {
     this.productos = adminComponente.productos;
     this.categorias = adminComponente.categorias;
@@ -203,6 +212,18 @@ export class CrudProductosComponent {
   }
 
   async eliminarProducto(id_prod: number) {
+    const producto = this.productos.find(
+      (producto) => producto.id_prod === id_prod
+    );
+    if (!producto) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'No se encontró el producto',
+        timer: 2000,
+      });
+      return;
+    }
     Swal.fire({
       title: '¿Estás seguro?',
       text: 'Esta acción no se puede deshacer.',
@@ -218,7 +239,18 @@ export class CrudProductosComponent {
       if (result.isConfirmed) {
         try {
           await this.productosService.eliminarProducto(id_prod);
-          this.adminComponente.productos = await this.productosService.obtenerProductos();
+          const log: LogsDto = {
+            usuario:
+              localStorage.getItem('codigo') +
+              ' ' +
+              localStorage.getItem('nombres'),
+            accion: 'Eliminar producto',
+            modulo: 'Productos',
+            descripcion: `Se eliminó el producto ${producto.nombre_prod}`,
+          };
+          await this.logsService.crearLog(log);
+          this.adminComponente.productos =
+            await this.productosService.obtenerProductos();
           this.productos = this.adminComponente.productos;
           Swal.fire({
             icon: 'success',
