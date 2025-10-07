@@ -6,7 +6,8 @@ import { CrudProductosComponent } from './pages/administrador/crud-productos/cru
 import { ClientesComponent } from './pages/clientes/clientes.component';
 import { ClientesMenuComponent } from './pages/clientes/clientes-menu/clientes-menu.component';
 import { ListaPedidosComponent } from './pages/comun-componentes/lista-pedidos/lista-pedidos.component';
-import { CocineroComponent } from './pages/cocinero/cocinero.component'; // Importar CocineroComponent
+import { CocineroComponent } from './pages/cocinero/cocinero.component'; 
+import { CajaComponent } from './pages/caja/caja.component';
 
 export const routes: Routes = [
     {
@@ -40,5 +41,9 @@ export const routes: Routes = [
     {
         path: "cocinero", // Agregar ruta para el componente cocinero
         component: CocineroComponent
-    }
+    },
+    {
+        path: 'caja',
+    component: CajaComponent, // ✔️ Este debe apuntar a tu componente correctamente
+  }
 ];
