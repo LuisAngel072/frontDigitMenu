@@ -3,239 +3,298 @@
     <h1 class="mb-4 text-center">Ingredientes, opciones y extras</h1>
     <div class="row">
       <!-- Ingredientes -->
-      <div class="col-lg-4 col-md-6 col-sm-12">
-        <h3 class="text-center">Ingredientes</h3>
-        <div class="row mb-3 align-items-center">
-          <!-- Columna para el input -->
-          <div class="col">
-            <input
-              type="search"
-              class="form-control"
-              placeholder="Buscar ingrediente"
-              (keyup)="filtrarIngredientes($event)"
-            />
-          </div>
+      <div class="col-lg-4 col-md-6 col-sm-12 mb-4">
+        <div class="card h-100">
+          <div class="card-body d-flex flex-column">
+            <h3 class="text-center">Ingredientes</h3>
+            <div class="row mb-3 align-items-center">
+              <!-- Columna para el input -->
+              <div class="col">
+                <input
+                  type="search"
+                  class="form-control"
+                  placeholder="Buscar ingrediente"
+                  (keyup)="filtrarIngredientes($event)"
+                />
+              </div>
 
-          <!-- Columna para el botón -->
-          <div class="col-auto">
-            <button class="btn icon icon-add d-flex align-items-center">
-              <span
-                class="material-symbols-outlined"
-                (click)="crearIngrediente()"
-                >add</span
-              >
-            </button>
-          </div>
-        </div>
+              <!-- Columna para el botón -->
+              <div class="col-auto">
+                <button class="btn icon icon-add d-flex align-items-center">
+                  <span
+                    class="material-symbols-outlined"
+                    (click)="crearIngrediente()"
+                    >add</span
+                  >
+                </button>
+              </div>
+            </div>
 
-        <div class="table-responsive">
-          <table class="table table-striped ingredientes-table">
-            <thead>
-              <tr>
-                <th>Ingrediente</th>
-                <th>Precio</th>
-                <th>Acciones</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr *ngFor="let ingr of ingredientesFiltrados">
-                <td>{{ ingr.nombre_ingrediente }}</td>
-                <td>{{ ingr.precio }}</td>
-                <td>
-                  <span
-                    class="material-symbols-outlined icon icon-eye"
-                    (click)="verIngrediente(ingr.id_ingr)"
+            <div class="table-responsive flex-grow-1">
+              <table class="table table-striped ingredientes-table">
+                <thead>
+                  <tr>
+                    <th>Ingrediente</th>
+                    <th>Precio</th>
+                    <th>Acciones</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr
+                    *ngFor="
+                      let ingr of ingredientesFiltrados
+                        | paginate
+                          : {
+                              itemsPerPage: pageSize,
+                              currentPage: currentPageIngr,
+                              id: 'ingredientes-pagination'
+                            }
+                    "
                   >
-                    visibility
-                  </span>
-                  <span
-                    class="material-symbols-outlined icon icon-edit"
-                    (click)="actualizarIngrediente(ingr.id_ingr)"
-                  >
-                    edit_square
-                  </span>
-                  <span
-                    class="material-symbols-outlined icon icon-trash"
-                    (click)="delIngrediente(ingr.id_ingr)"
-                  >
-                    delete
-                  </span>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-          <div class="pagination-container row">
-            <div class="col-12 d-flex justify-content-center">
-              <mat-paginator
-                *ngIf="this.ingredientes.length > 5"
-                [length]="this.ingredientes.length"
-                [pageSize]="this.pageSizeIngr"
-                [hidePageSize]="true"
-                [pageSizeOptions]="[5, 7, 10]"
-                (page)="onPageChangeIngr($event)"
+                    <td>{{ ingr.nombre_ingrediente }}</td>
+                    <td>{{ ingr.precio }}</td>
+                    <td>
+                      <span
+                        class="material-symbols-outlined icon icon-eye"
+                        (click)="verIngrediente(ingr.id_ingr)"
+                      >
+                        visibility
+                      </span>
+                      <span
+                        class="material-symbols-outlined icon icon-edit"
+                        (click)="actualizarIngrediente(ingr.id_ingr)"
+                      >
+                        edit_square
+                      </span>
+                      <span
+                        class="material-symbols-outlined icon icon-trash"
+                        (click)="delIngrediente(ingr.id_ingr)"
+                      >
+                        delete
+                      </span>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <!-- Paginador -->
+            <div class="mt-auto">
+              <div
+                class="pagination-container"
+                *ngIf="ingredientesFiltrados.length > pageSize"
               >
-              </mat-paginator>
+                <div class="d-flex justify-content-center">
+                  <pagination-controls
+                    id="ingredientes-pagination"
+                    (pageChange)="onPageChangeIngr($event)"
+                    class="pagination"
+                    previousLabel="Anterior"
+                    nextLabel="Siguiente"
+                  ></pagination-controls>
+                </div>
+              </div>
+              <h5 class="text-center text-muted" *ngIf="this.ingredientes.length === 0">
+                ¡Vaya! No existen ingredientes registrados.
+              </h5>
             </div>
           </div>
-          <h3 class="text-center" *ngIf="this.ingredientes.length === 0">
-            ¡Vaya! No existen ingredientes registrados.
-          </h3>
         </div>
       </div>
 
       <!-- Opciones -->
-      <div class="col-lg-4 col-md-6 col-sm-12">
-        <h3 class="text-center">Opciones</h3>
-        <div class="row mb-3 align-items-center">
-          <!-- Columna para el input -->
-          <div class="col">
-            <input
-              type="search"
-              class="form-control"
-              placeholder="Buscar opciones"
-              (keyup)="filtrarOpciones($event)"
-            />
-          </div>
+      <div class="col-lg-4 col-md-6 col-sm-12 mb-4">
+        <div class="card h-100">
+          <div class="card-body d-flex flex-column">
+            <h3 class="text-center">Opciones</h3>
+            <div class="row mb-3 align-items-center">
+              <!-- Columna para el input -->
+              <div class="col">
+                <input
+                  type="search"
+                  class="form-control"
+                  placeholder="Buscar opciones"
+                  (keyup)="filtrarOpciones($event)"
+                />
+              </div>
 
-          <!-- Columna para el botón -->
-          <div class="col-auto">
-            <button class="btn icon icon-add d-flex align-items-center">
-              <span class="material-symbols-outlined" (click)="crearOpcion()"
-                >add</span
+              <!-- Columna para el botón -->
+              <div class="col-auto">
+                <button class="btn icon icon-add d-flex align-items-center">
+                  <span class="material-symbols-outlined" (click)="crearOpcion()"
+                    >add</span
+                  >
+                </button>
+              </div>
+            </div>
+
+            <div class="table-responsive flex-grow-1">
+              <table class="table table-striped opciones-table">
+                <thead>
+                  <tr>
+                    <th>Opción</th>
+                    <th>Porcentaje</th>
+                    <th>Acciones</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr
+                    *ngFor="
+                      let opcion of opcionesFiltradas
+                        | paginate
+                          : {
+                              itemsPerPage: pageSize,
+                              currentPage: currentPageOpc,
+                              id: 'opciones-pagination'
+                            }
+                    "
+                  >
+                    <td>{{ opcion.nombre_opcion }}</td>
+                    <td>{{ opcion.porcentaje }}</td>
+                    <td>
+                      <span
+                        class="material-symbols-outlined icon icon-eye"
+                        (click)="verOpcion(opcion.id_opcion)"
+                      >
+                        visibility
+                      </span>
+                      <span
+                        class="material-symbols-outlined icon icon-edit"
+                        (click)="actualizarOpcion(opcion.id_opcion)"
+                      >
+                        edit_square
+                      </span>
+                      <span
+                        class="material-symbols-outlined icon icon-trash"
+                        (click)="delOpcion(opcion.id_opcion)"
+                      >
+                        delete
+                      </span>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <!-- Paginador -->
+            <div class="mt-auto">
+              <div
+                class="pagination-container"
+                *ngIf="opcionesFiltradas.length > pageSize"
               >
-            </button>
-          </div>
-        </div>
-        <div class="table-responsive">
-          <table class="table table-striped opciones-table">
-            <thead>
-              <tr>
-                <th>Opción</th>
-                <th>Porcentaje</th>
-                <th>Acciones</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr *ngFor="let opcion of opcionesFiltradas">
-                <td>{{ opcion.nombre_opcion }}</td>
-                <td>{{ opcion.porcentaje }}</td>
-                <td>
-                  <span
-                    class="material-symbols-outlined icon icon-eye"
-                    (click)="verOpcion(opcion.id_opcion)"
-                  >
-                    visibility
-                  </span>
-                  <span
-                    class="material-symbols-outlined icon icon-edit"
-                    (click)="actualizarOpcion(opcion.id_opcion)"
-                  >
-                    edit_square
-                  </span>
-                  <span
-                    class="material-symbols-outlined icon icon-trash"
-                    (click)="delOpcion(opcion.id_opcion)"
-                  >
-                    delete
-                  </span>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-          <div class="pagination-container row">
-            <div class="col-12 d-flex justify-content-center">
-              <mat-paginator
-                *ngIf="this.opciones.length > 5"
-                [length]="this.opciones.length"
-                [pageSize]="this.pageSizeOpc"
-                [hidePageSize]="true"
-                [pageSizeOptions]="[5, 7, 10]"
-                (page)="onPageChangeOpc($event)"
-              >
-              </mat-paginator>
+                <div class="d-flex justify-content-center">
+                  <pagination-controls
+                    id="opciones-pagination"
+                    (pageChange)="onPageChangeOpc($event)"
+                    class="pagination"
+                    previousLabel="Anterior"
+                    nextLabel="Siguiente"
+                  ></pagination-controls>
+                </div>
+              </div>
+              <h5 class="text-center text-muted" *ngIf="this.opciones.length === 0">
+                ¡Vaya! No existen opciones registradas.
+              </h5>
             </div>
           </div>
-          <h3 class="text-center" *ngIf="this.opciones.length === 0">
-            ¡Vaya! No existen opciones registradas.
-          </h3>
         </div>
       </div>
 
       <!-- Extras -->
-      <div class="col-lg-4 col-md-6 col-sm-12">
-        <h3 class="text-center">Extras</h3>
-        <div class="row mb-3 align-items-center">
-          <!-- Columna para el input -->
-          <div class="col">
-            <input
-              type="search"
-              class="form-control"
-              placeholder="Buscar extras"
-              (keyup)="filtrarExtras($event)"
-            />
-          </div>
+      <div class="col-lg-4 col-md-6 col-sm-12 mb-4">
+        <div class="card h-100">
+          <div class="card-body d-flex flex-column">
+            <h3 class="text-center">Extras</h3>
+            <div class="row mb-3 align-items-center">
+              <!-- Columna para el input -->
+              <div class="col">
+                <input
+                  type="search"
+                  class="form-control"
+                  placeholder="Buscar extras"
+                  (keyup)="filtrarExtras($event)"
+                />
+              </div>
 
-          <!-- Columna para el botón -->
-          <div class="col-auto">
-            <button class="btn icon icon-add d-flex align-items-center">
-              <span class="material-symbols-outlined" (click)="crearExtra()"
-                >add</span
+              <!-- Columna para el botón -->
+              <div class="col-auto">
+                <button class="btn icon icon-add d-flex align-items-center">
+                  <span class="material-symbols-outlined" (click)="crearExtra()"
+                    >add</span
+                  >
+                </button>
+              </div>
+            </div>
+
+            <div class="table-responsive flex-grow-1">
+              <table class="table table-striped extras-table">
+                <thead>
+                  <tr>
+                    <th>Extras</th>
+                    <th>Precio</th>
+                    <th>Acciones</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr
+                    *ngFor="
+                      let extra of extrasFiltrados
+                        | paginate
+                          : {
+                              itemsPerPage: pageSize,
+                              currentPage: currentPageExt,
+                              id: 'extras-pagination'
+                            }
+                    "
+                  >
+                    <td>{{ extra.nombre_extra }}</td>
+                    <td>{{ extra.precio }}</td>
+                    <td>
+                      <span
+                        class="material-symbols-outlined icon icon-eye"
+                        (click)="verExtra(extra.id_extra)"
+                      >
+                        visibility
+                      </span>
+                      <span
+                        class="material-symbols-outlined icon icon-edit"
+                        (click)="actualizarExtra(extra.id_extra)"
+                      >
+                        edit_square
+                      </span>
+                      <span
+                        class="material-symbols-outlined icon icon-trash"
+                        (click)="delExtra(extra.id_extra)"
+                      >
+                        delete
+                      </span>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <!-- Paginador -->
+            <div class="mt-auto">
+              <div
+                class="pagination-container"
+                *ngIf="extrasFiltrados.length > pageSize"
               >
-            </button>
-          </div>
-        </div>
-        <div class="table-responsive">
-          <table class="table table-striped extras-table">
-            <thead>
-              <tr>
-                <th>Extras</th>
-                <th>Precio</th>
-                <th>Acciones</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr *ngFor="let extra of extrasFiltrados">
-                <td>{{ extra.nombre_extra }}</td>
-                <td>{{ extra.precio }}</td>
-                <td>
-                  <span
-                    class="material-symbols-outlined icon icon-eye"
-                    (click)="verExtra(extra.id_extra)"
-                  >
-                    visibility
-                  </span>
-                  <span
-                    class="material-symbols-outlined icon icon-edit"
-                    (click)="actualizarExtra(extra.id_extra)"
-                  >
-                    edit_square
-                  </span>
-                  <span
-                    class="material-symbols-outlined icon icon-trash"
-                    (click)="delExtra(extra.id_extra)"
-                  >
-                    delete
-                  </span>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-          <div class="pagination-container row">
-            <div class="col-12 d-flex justify-content-center">
-              <mat-paginator
-                *ngIf="this.extras.length > 5"
-                [length]="this.extras.length"
-                [pageSize]="this.pageSizeExt"
-                [hidePageSize]="true"
-                [pageSizeOptions]="[5, 7, 10]"
-                (page)="onPageChangeExt($event)"
-              >
-              </mat-paginator>
+                <div class="d-flex justify-content-center">
+                  <pagination-controls
+                    id="extras-pagination"
+                    (pageChange)="onPageChangeExt($event)"
+                    class="pagination"
+                    previousLabel="Anterior"
+                    nextLabel="Siguiente"
+                  ></pagination-controls>
+                </div>
+              </div>
+              <h5 class="text-center text-muted" *ngIf="this.extras.length === 0">
+                ¡Vaya! No existen extras registrados.
+              </h5>
             </div>
           </div>
-          <h3 class="text-center" *ngIf="this.extras.length === 0">
-            ¡Vaya! No existen extras registrados.
-          </h3>
         </div>
       </div>
     </div>

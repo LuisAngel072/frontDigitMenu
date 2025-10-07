@@ -11,8 +11,10 @@ import {
   RFC,
   Roles,
   Telefonos,
-} from '../types';
-import { UsuariosDTO } from '../dtos';
+  Usuarios,
+  Usuarios_has_roles,
+} from '../interfaces/types';
+import { UsuariosDTO } from '../interfaces/dtos';
 import { Observable } from 'rxjs';
 
 @Injectable({
@@ -146,7 +148,7 @@ export class UsuariosService {
     }
   }
 
-  registrarUsuario(body: UsuariosDTO): Observable<any> {
+  registrarUsuario(body: UsuariosDTO): Observable<Usuarios> {
     try {
       const response$ = this.http.post<any>(
         environment.ApiIP + environment.ApiCrearUsuario,

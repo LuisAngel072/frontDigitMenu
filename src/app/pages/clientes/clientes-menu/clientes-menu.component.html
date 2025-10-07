@@ -1,18 +1,35 @@
-<div class="container">
+<div class="clientes-menu-wrapper container">
   <header class="header">
-    <input type="text" class="search-bar" placeholder="Buscar platillo...">
-    <button class="material-symbols-outlined">
-      shopping_cart
-    </button>
+    <input
+      type="text"
+      class="search-bar"
+      placeholder="Buscar platillo..."
+      [(ngModel)]="searchTerm"
+      (input)="filtrarProductos()"
+    />
+
+  <button class="btn btn-concierge position-relative" >
+    <span class="material-symbols-outlined" (click)="llamarMesero()">concierge</span>
+  </button>
+ <button class="btn btn-primary position-relative" (click)="mostrarCarrito()">
+    <span class="material-symbols-outlined">shopping_cart</span>
+    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" 
+          *ngIf="productosEnPedido.length > 0">
+      {{ productosEnPedido.length }}
+    </span>
+  </button>
   </header>
 
   <div class="accordion" id="menuAccordion">
     <div *ngFor="let cat of categorias; let i = index" class="accordion-item">
       <h2 class="accordion-header" [id]="'heading' + i">
-        <button class="accordion-button custom-button" type="button" data-bs-toggle="collapse"
-          [attr.data-bs-target]="'#collapse' + i" aria-expanded="false"
-          [attr.aria-controls]="'collapse' + i">
-          <img [src]="baseUrl + cat.ruta_img" alt="{{ cat.nombre_cat }}" class="img-cat">
+        <button class="accordion-button custom-button"
+          type="button"
+          data-bs-toggle="collapse"
+          [attr.data-bs-target]="'#collapse' + i"
+          aria-expanded="false"
+          [attr.aria-controls]="'collapse' + i"
+          [ngStyle]="{'background-image': 'url(' + baseUrl + cat.ruta_img + ')'}">
           {{ cat.nombre_cat }}
         </button>
       </h2>
@@ -22,11 +39,13 @@
         <div class="accordion-body">
           <div class="list-group">
             <div *ngFor="let sub of cat.subcategorias">
-              <button class="list-group-item list-group-item-action boton-categoria" data-bs-toggle="collapse"
-                [attr.data-bs-target]="'#subcat-' + sub.id_subcat">
-                <img [src]="baseUrl + sub.ruta_img" alt="{{ sub.nombre_subcat }}" class="img-subcat">
+              <button class="list-group-item list-group-item-action boton-categoria"
+                      data-bs-toggle="collapse"
+                      [attr.data-bs-target]="'#subcat-' + sub.id_subcat"
+                      [ngStyle]="{'background-image': 'url(' + baseUrl + sub.ruta_img + ')'}">
                 {{ sub.nombre_subcat }}
               </button>
+
 
               <div class="collapse" [id]="'subcat-' + sub.id_subcat">
                 <div *ngIf="sub.productos?.length > 0">
@@ -55,40 +74,147 @@
   </div>
 
   <!-- PRODUCT MODAL -->
-<div class="modal fade" id="productModal" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog modal-fullscreen">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title">{{ selectedProduct?.nombre_prod }}</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
-      </div>
-      <div class="modal-body p-3">
-        <img [src]="baseUrl + selectedProduct?.img_prod" class="img-fluid rounded mb-3" alt="Producto">
-        <p>{{ selectedProduct?.descripcion }}</p>
-
-        <div class="mb-3">
-          <h6>Tamaño:</h6>
-          <div *ngFor="let opc of opciones">
-            <input type="radio" name="tamano" [value]="opc" [(ngModel)]="selectedOpcion" (change)="calcularPrecio()">
-            {{ opc.opcion_id.nombre_opcion }} (+$ {{ opc.precio }})
-          </div>
+  <div class="modal fade" id="productModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+      <div class="modal-content custom-modal-bg shadow-lg rounded-4">
+        <div class="modal-header border-0">
+          <h5 class="modal-title fw-bold fs-3">{{ selectedProduct?.nombre_prod }}</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
         </div>
+        <div class="modal-body">
+          <div class="row">
+            <div class="col-md-5 text-center mb-3 mb-md-0">
+              <img [src]="baseUrl + selectedProduct?.img_prod" class="img-fluid rounded-3 shadow-sm" alt="Producto">
+            </div>
+            <div class="col-md-7">
+              <p class="">{{ selectedProduct?.descripcion }}</p>
 
-        <div class="mb-3">
-          <h6>Extras:</h6>
-          <div *ngFor="let ext of extras">
-            <input type="checkbox" [value]="ext" (change)="toggleExtra(ext)">
-            {{ ext.extra_id.nombre_extra }} (+$ {{ ext.precio }})
+              <div class="mb-3">
+                <h6 class="fw-semibold">Tamaño:</h6>
+                <div *ngFor="let opc of opciones" class="form-check">
+                  <input class="form-check-input" type="radio" name="tamano" [value]="opc" [(ngModel)]="selectedOpcion" (change)="calcularPrecio()">
+                  <label class="form-check-label">
+                    {{ opc.opcion_id.nombre_opcion }} (+$ {{ opc.precio }})
+                  </label>
+                </div>
+              </div>
+
+              <div class="mb-3">
+                <h6 class="fw-semibold">Extras:</h6>
+                <div *ngFor="let ext of extras" class="form-check">
+                  <input class="form-check-input" type="checkbox" [value]="ext" (change)="toggleExtra(ext)">
+                  <label class="form-check-label">
+                    {{ ext.extra_id.nombre_extra }} (+$ {{ ext.precio }})
+                  </label>
+                </div>
+              </div>
+
+              <div class="mb-3">
+                <h6 class="fw-semibold">Ingredientes:</h6>
+                <ul class="list-unstyled ps-3">
+                  <li *ngFor="let ing of ingredientes" class="mb-1">• {{ ing.nombre_ingrediente }}</li>
+                </ul>
+              </div>
+
+              <div class="mt-4">
+                <h5 class="fw-bold">Total: ${{ precioTotal }}</h5>
+                <button class="btn btn-prim mt-3 w-100" (click)="agregarACuenta()">Agregar a la cuenta</button>
+              </div>
+            </div>
           </div>
-        </div>
-
-        <h5 class="mt-4">Precio total: ${{ precioTotal }}</h5>
-        <div class="text-center">
-          <button class="btn btn-prim mt-2" (click)="agregarACuenta()">Agregar a la cuenta</button>
         </div>
       </div>
     </div>
   </div>
 </div>
 
+<div class="modal fade" id="carritoModal" tabindex="-1" aria-labelledby="carritoModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header bg-dark text-white">
+        <h5 class="modal-title" id="carritoModalLabel">
+          <i class="bi bi-cart-fill me-2"></i>Tu Pedido - Mesa #{{ mesaId }}
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div *ngIf="productosEnPedido.length === 0" class="text-center py-5">
+          <i class="bi bi-cart-x" style="font-size: 3rem; color: #ccc;"></i>
+          <p class="mt-3">Tu carrito está vacío</p>
+          <p class="text-muted">Añade productos desde el menú para comenzar tu pedido</p>
+        </div>
+
+        <div *ngIf="productosEnPedido.length > 0">
+          <div class="table-responsive">
+            <table class="table table-hover">
+              <thead class="table-light">
+                <tr>
+                  <th>Producto</th>
+                  <th>Opción</th>
+                  <th>Extras</th>
+                  <th>Estado</th>
+                  <th class="text-end">Precio</th>
+                  <!-- <th class="text-center">Acciones</th> -->
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let producto of productosEnPedido">
+                  <td>{{ producto.producto_id.nombre_prod }}</td>
+                  <td>{{ producto.opcion_id.nombre_opcion }}</td>
+                  <td>
+                    <small *ngIf="producto.extras.length > 0">
+                      <ul class="list-unstyled mb-0">
+                        <li *ngFor="let extra of producto.extras">
+                          ✅ {{ extra.nombre_extra }}
+                        </li>
+                      </ul>
+                    </small>
+                    <small *ngIf="producto.ingredientes.length > 0">
+                      <ul class="list-unstyled mb-0">
+                        <li *ngFor="let ing of producto.ingredientes">
+                          🧂 {{ ing.nombre_ingrediente }}
+                        </li>
+                      </ul>
+                    </small>
+                    <span *ngIf="producto.extras.length === 0 && producto.ingredientes.length === 0">-</span>
+                  </td>
+                  <td>
+                    <span class="badge"
+                      [ngClass]="{
+                        'bg-warning': producto.estado === 'Sin preparar',
+                        'bg-success': producto.estado === 'Preparado',
+                        'bg-info': producto.estado === 'Entregado',
+                        'bg-secondary': producto.estado === 'Pagado'
+                      }">
+                      {{ producto.estado }}
+                    </span>
+                  </td>
+                  <td class="text-end">${{ producto.precio }}</td>
+                  <!-- <td class="text-center">
+                    <button class="btn btn-sm btn-outline-danger" 
+                            (click)="eliminarProducto(producto)"
+                            [disabled]="producto.estado !== 'Sin preparar'">
+                      <i class="bi bi-trash"></i>
+                    </button>
+                  </td> -->
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <td colspan="4" class="text-end fw-bold">Total:</td>
+                  <td class="text-end fw-bold">${{ totalCarrito }}</td>
+                  <td></td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+          Cerrar
+        </button>
+      </div>
+    </div>
+  </div>
 </div>

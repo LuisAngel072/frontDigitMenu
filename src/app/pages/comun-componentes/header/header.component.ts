@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { AuthService } from '../../../services/auth.service';
-import { Usuarios } from '../../../types';
+import { Usuarios } from '../../../interfaces/types';
 import { UsuariosService } from '../../../services/usuarios.service';
 import { environment } from '../../../../environment';
 import { SharedService } from '../../../services/shared.service';
@@ -8,11 +8,11 @@ import { Subscription } from 'rxjs';
 import { CommonModule } from '@angular/common';
 
 @Component({
-  selector: 'app-header',
-  standalone: true,
-  imports: [CommonModule],
-  templateUrl: './header.component.html',
-  styleUrl: './header.component.css',
+    selector: 'app-header',
+    standalone: true,
+    imports: [CommonModule],
+    templateUrl: './header.component.html',
+    styleUrl: './header.component.css'
 })
 export class HeaderComponent {
   public usuario: Usuarios | undefined;

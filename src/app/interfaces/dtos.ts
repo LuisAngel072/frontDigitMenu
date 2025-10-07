@@ -1,4 +1,4 @@
-import { Extras, Ingredientes, Opciones } from "./types";
+import { EstadoPedido, Extras, Ingredientes, Opciones } from "./types";
 
 export type UsuariosDTO = {
   codigo: string;
@@ -26,7 +26,7 @@ export type UsuariosDTO = {
     no_int?: string; //Opcional, posible undefined, no mas de 5 caracteres
     municipio: string;
   };
-  img_perfil: { img_ruta: string };
+  img_perfil?: { img_ruta: string };
   rol: {
     id_rol: number;
     rol: string;
@@ -71,4 +71,31 @@ export type ProductosDto = {
   extras: Extras[];
   opciones: Opciones[];
   ingredientes: Ingredientes[];
+}
+
+//Solo manejar las llaves primarias
+export type Pedidos_has_ProductosDto = {
+  pedido_id: number;
+  producto_id: number;
+  precio: number;
+  opcion_id: number;
+  extras: number[]; //Llaves primarias de los extras
+  ingr: number[]; //Llaves primarias de los ingredientes
+}
+
+export type CrPedidoDto = {
+  no_mesa: number; //Para crear un pedido, crealo simplemente con el no. de mesa
+  //donde se encuentran los clientes
+}
+
+export type UpPedidoDto = {
+  total: number; //Actualiza el total del pedido, conforme se agregan productos al mismo
+  estado: EstadoPedido; //Actualiza el estado del pedido, si este fue pagado/terminado
+}
+
+export type LogsDto = {
+  usuario: string; //Se almacena directamente como texto, para evitar problemas si se elimina el usuario
+  accion: string; //Acción realizada (Crear, Actualizar, Eliminar, Iniciar sesión, etc.)
+  modulo: string; //Módulo donde se realizó la acción (Usuarios, Productos, Pedidos, etc.)
+  descripcion?: string; //Opcional, puede ser undefined
 }

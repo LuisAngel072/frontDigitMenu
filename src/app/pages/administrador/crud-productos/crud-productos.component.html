@@ -15,11 +15,10 @@
         />
       </div>
       <div class="col-auto">
-        <select class="form-select btn">
-          <option selected>Filtrar por categoria</option>
-          <option>Cortes finos</option>
-          <option>Especialidad</option>
-          <option>Comida de mar</option>
+        <select class="form-select btn" (change)="filtrarProductosPorCategoria($event)">
+          <option value="0" selected>Filtrar por categoria</option>
+          <option value="0">Todos</option>
+          <option *ngFor="let categoria of categoriasFiltradas" value="{{ categoria.id_cat }}">{{ categoria.nombre_cat }}</option>
         </select>
       </div>
     </div>
@@ -35,7 +34,12 @@
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let producto of productosFiltrados">
+        <tr
+          *ngFor="
+            let producto of productosFiltrados
+              | paginate : { itemsPerPage: pageSize, currentPage: currentPage }
+          "
+        >
           <!-- <td>{{ product.id }}</td> -->
           <td>{{ producto.nombre_prod }}</td>
           <td>{{ producto.sub_cat_id.categoria_id.nombre_cat }}</td>
@@ -51,12 +55,12 @@
               </span>
             </button>
             <button class="btn">
-              <span class="material-symbols-outlined icon-edit">
+              <span class="material-symbols-outlined icon-edit" (click)="editarProducto(producto.id_prod)">
                 edit_square
               </span>
             </button>
             <button class="btn">
-              <span class="material-symbols-outlined icon-trash"> delete </span>
+              <span class="material-symbols-outlined icon-trash" (click)="eliminarProducto(producto.id_prod)"> delete </span>
             </button>
           </td>
         </tr>
@@ -64,20 +68,23 @@
     </table>
 
     <div class="pagination-container row">
-      <div class="col-12 d-flex justify-content-center">
-        <mat-paginator
-          *ngIf="this.productos.length > 7"
-          [length]="this.productos.length"
-          [pageSize]="this.pageSize"
-          [hidePageSize]="true"
-          [pageSizeOptions]="[5, 7, 10]"
-          (page)="onPageChange($event)"
-        >
-        </mat-paginator>
+      <div class="col-12 d-flex justify-content-center"></div>
+    </div>
+    <div class="d-flex justify-content-center">
+      <div
+        class="d-flex justify-content-center"
+        *ngIf="productosFiltrados.length > 7"
+      >
+        <pagination-controls
+          (pageChange)="onPageChange($event)"
+          class="pagination"
+          previousLabel="Anterior"
+          nextLabel="Siguiente"
+        ></pagination-controls>
+      </div>
+      <div class="text-center" *ngIf="productosFiltrados.length === 0">
+        <h2>¡Vaya! No hay registros de productos</h2>
       </div>
     </div>
-    <h3 class="text-center" *ngIf="this.productos.length === 0">
-      ¡Vaya! No existen productos registrados.
-    </h3>
   </main>
 </div>

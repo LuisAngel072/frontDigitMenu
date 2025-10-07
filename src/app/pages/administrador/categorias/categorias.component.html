@@ -12,12 +12,16 @@
               type="search"
               class="form-control"
               placeholder="Buscar categoría"
+              (keyup)="filtrarCategorias($event)"
             />
           </div>
 
           <!-- Botón agregar -->
           <div class="col-auto">
-            <button class="btn icon icon-add d-flex align-items-center" (click)="crearCategoria()">
+            <button
+              class="btn icon icon-add d-flex align-items-center"
+              (click)="crearCategoria()"
+            >
               <span class="material-symbols-outlined">add</span>
             </button>
           </div>
@@ -33,22 +37,42 @@
               </tr>
             </thead>
             <tbody>
-              <tr *ngFor="let cat of categorias">
+              <tr *ngFor="let cat of categoriasFiltradas">
                 <td>{{ cat.nombre_cat }}</td>
                 <td>
-                  <span class="material-symbols-outlined icon icon-eye" (click)="verCategoria(cat.id_cat)">
+                  <span
+                    class="material-symbols-outlined icon icon-eye"
+                    (click)="verCategoria(cat.id_cat)"
+                  >
                     visibility
                   </span>
-                  <span class="material-symbols-outlined icon icon-edit" (click)="actualizarCategoria(cat.id_cat)">
+                  <span
+                    class="material-symbols-outlined icon icon-edit"
+                    (click)="actualizarCategoria(cat.id_cat)"
+                  >
                     edit_square
                   </span>
-                  <span class="material-symbols-outlined icon icon-trash" (click)="delCategoria(cat.id_cat)">
+                  <span
+                    class="material-symbols-outlined icon icon-trash"
+                    (click)="delCategoria(cat.id_cat)"
+                  >
                     delete
                   </span>
                 </td>
               </tr>
             </tbody>
           </table>
+          <div
+            class="d-flex justify-content-center"
+            *ngIf="categoriasFiltradas.length > 7"
+          >
+            <pagination-controls
+              (pageChange)="onPageChangeCat($event)"
+              class="pagination"
+              previousLabel="Anterior"
+              nextLabel="Siguiente"
+            ></pagination-controls>
+          </div>
           <h3 class="text-center" *ngIf="categorias.length === 0">
             ¡Vaya! No existen categorías registradas.
           </h3>
@@ -64,13 +88,17 @@
             <input
               type="search"
               class="form-control"
-              placeholder="Buscar subcategoría"
+              placeholder="🔎 Buscar subcategoría"
+              (keyup)="filtrarSubCategorias($event)"
             />
           </div>
 
           <!-- Botón agregar -->
           <div class="col-auto">
-            <button class="btn icon icon-add d-flex align-items-center" (click)="crearSubcategoria()">
+            <button
+              class="btn icon icon-add d-flex align-items-center"
+              (click)="crearSubcategoria()"
+            >
               <span class="material-symbols-outlined">add</span>
             </button>
           </div>
@@ -87,23 +115,43 @@
               </tr>
             </thead>
             <tbody>
-              <tr *ngFor="let sub of subcategorias">
+              <tr *ngFor="let sub of subCategoriasFiltradas">
                 <td>{{ sub.nombre_subcat }}</td>
                 <td>{{ sub.categoria_id.nombre_cat }}</td>
                 <td>
-                  <span class="material-symbols-outlined icon icon-eye" (click)="verSubcategoria(sub.id_subcat)">
+                  <span
+                    class="material-symbols-outlined icon icon-eye"
+                    (click)="verSubcategoria(sub.id_subcat)"
+                  >
                     visibility
                   </span>
-                  <span class="material-symbols-outlined icon icon-edit" (click)="actualizarSubcategoria(sub.id_subcat)">
+                  <span
+                    class="material-symbols-outlined icon icon-edit"
+                    (click)="actualizarSubcategoria(sub.id_subcat)"
+                  >
                     edit_square
                   </span>
-                  <span class="material-symbols-outlined icon icon-trash" (click)="delSubcategoria(sub.id_subcat)">
+                  <span
+                    class="material-symbols-outlined icon icon-trash"
+                    (click)="delSubcategoria(sub.id_subcat)"
+                  >
                     delete
                   </span>
                 </td>
               </tr>
             </tbody>
           </table>
+          <div
+            class="d-flex justify-content-center"
+            *ngIf="subCategoriasFiltradas.length > 7"
+          >
+            <pagination-controls
+              (pageChange)="onPageChangeSubCat($event)"
+              class="pagination"
+              previousLabel="Anterior"
+              nextLabel="Siguiente"
+            ></pagination-controls>
+          </div>
           <h3 class="text-center" *ngIf="subcategorias.length === 0">
             ¡Vaya! No existen subcategorías registradas.
           </h3>

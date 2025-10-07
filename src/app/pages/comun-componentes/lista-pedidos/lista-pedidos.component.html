@@ -73,21 +73,64 @@
               </div>
               
               <div class="order-items">
-                <div class="order-item d-flex justify-content-between align-items-center mb-2" *ngFor="let item of order.items">
-                  <div>
-                    <span class="item-name">{{ item.name }}</span>
+                <div class="order-item d-flex justify-content-between align-items-center mb-2 position-relative" 
+                    *ngFor="let item of order.items">
+                  
+                  <!-- Información del producto -->
+                  <div class="item-details flex-grow-1">
+                    <span class="item-name d-block">{{ item.name }}</span>
+                    <small class="text-muted d-block">{{ item.opcion }}</small>
+                    
+                    <!-- Mostrar extras si los hay -->
+                    <small class="text-info d-block" *ngIf="item.extras && item.extras.length > 0">
+                      Extras: {{ obtenerNombresExtras(item.extras) }}
+                    </small>
+                    
+                    <!-- Mostrar ingredientes si los hay -->
+                    <small class="text-secondary d-block" *ngIf="item.ingredientes && item.ingredientes.length > 0">
+                      Ingredientes: {{ obtenerNombresIngredientes(item.ingredientes) }}
+                    </small>
+                    
+                    <!-- Precio total del producto -->
+                    <small class="fw-bold text-success d-block">
+                      ${{ calcularTotalProducto(item) }}
+                    </small>
+                    
+                    <!-- Estado del producto -->
                     <small [ngClass]="getStatusClass(item.status)" class="d-block status-text">
                       {{ getStatusText(item.status) }}
                     </small>
                   </div>
-                  <div class="status-controls">
+
+                  <!-- Controles del lado derecho -->
+                  <div class="item-controls d-flex align-items-center">
+                    
+                    <!-- Botón de eliminar producto (solo si se puede eliminar) -->
+                    <button 
+                      *ngIf="puedeEliminarProducto(item)"
+                      class="btn btn-sm btn-outline-danger me-2 delete-product-btn"
+                      (click)="eliminarProducto(order, item)"
+                      title="Eliminar producto"
+                      style="padding: 4px 8px;">
+                      <i class="bi bi-trash" style="font-size: 12px;"></i>
+                    </button>
+                    
+                    <!-- Texto informativo si no se puede eliminar -->
+                    <span *ngIf="!puedeEliminarProducto(item)" 
+                          class="text-muted me-2" 
+                          style="font-size: 10px;">
+                      No eliminable
+                    </span>
+                    
+                    <!-- Checkbox para marcar como entregado -->
                     <div class="form-check">
                       <input 
                         type="checkbox" 
                         class="form-check-input" 
-                        [checked]="item.status === 'delivered'"
+                        [checked]="item.status === 'Entregado'"
                         (change)="toggleItemStatus(order, item)"
-                        id="item-{{order.id}}-{{item.name}}">
+                        id="item-{{order.id}}-{{item.name}}-{{item.pedido_prod_id}}"
+                        [disabled]="item.status === 'Pagado'">
                     </div>
                   </div>
                 </div>
@@ -114,7 +157,6 @@
           <div class="notification-content">
             <div class="notification-header d-flex justify-content-between">
               <span class="notification-table fw-bold">Mesa {{ notification.tableNumber }}</span>
-              <span class="notification-time">{{ formatTime(notification.time) }}</span>
             </div>
             <div class="notification-message">
               {{ notification.message }}

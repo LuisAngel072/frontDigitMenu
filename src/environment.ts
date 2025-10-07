@@ -81,14 +81,30 @@ export const environment = {
     ApiEliminarProducto: "productos/eliminar/", //DELETE /:id_producto
     ApiSubirImgProducto: "productos/subir-img_prod", //POST
 
-      /**
+  /**
    * Pedidos
    */
   ApiObtenerPedidos: "pedidos", // GET
+  ApiObtenerPedidoIniciadoByNoMesa: 'pedidos/no_mesa/', //GET  /:no_mesa
   ApiObtenerProductosDePedido: "pedidos/productos/", // GET /:id_pedido
-   ApiObtenerExtrasIngrProducto: "pedidos/productos/extrasIngrs", // GET /pedidos/productos/extrasIngrs/:p_h_pr_id
+  ApiObtenerExtrasIngrProducto: "pedidos/productos/extrasIngrs", // GET /pedidos/productos/extrasIngrs/:p_h_pr_id
   ApiCrearPedido: "pedidos/registrar", // POST
   ApiAgregarProductoAlPedido: "pedidos/registrar/productos", // POST
   ApiActualizarPedido: "pedidos/actualizar/", // PATCH /:id_pedido
-  ApiCambiarEstadoProducto: "pedidos/actualizar/", // PATCH /:pedido_prod_id
+  ApiCambiarEstadoProducto: "pedidos/pedido_prod/actualizar/", // PATCH /:pedido_prod_id
+
+  /**
+   * Notificaciones
+  */
+  ApiCrearNotificacion: "notificaciones", // POST
+  ApiObtenerNotificacionesPorMesa: "notificaciones/mesa/", // GET /:mesaId
+  ApiAtenderNotificacion: "notificaciones/", // PATCH /:id/atender
+
+  /**
+   * Logs
+   */
+  ApiObtenerLogs: "logsdb", // GET
+  ApiObtenerLog: "logsdb/", // GET /:id_log
+  ApiCrearLog: "logsdb/registrar", // POST
+
 }

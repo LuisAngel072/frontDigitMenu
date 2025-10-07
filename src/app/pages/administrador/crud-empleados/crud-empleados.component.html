@@ -40,7 +40,7 @@
       </div>
     </div>
 
-    <table class="table table-striped">
+    <table class="table table-hover table-striped">
       <thead>
         <tr>
           <th>Codigo</th>
@@ -50,8 +50,8 @@
           <th>Acciones</th>
         </tr>
       </thead>
-      <tbody *ngIf="usuarios.length > 0">
-        <tr *ngFor="let usuario of usuariosFiltrados">
+      <tbody *ngIf="usuariosFiltrados.length > 0">
+        <tr *ngFor="let usuario of usuariosFiltrados | paginate: { itemsPerPage: pageSize, currentPage: currentPage }" >
           <td>{{ usuario.usuario_id.codigo }}</td>
           <td>{{ usuario.usuario_id.nombres }}</td>
           <td>
@@ -94,17 +94,16 @@
       </tbody>
     </table>
     <div class="pagination-container row">
-      <div class="col-12 d-flex justify-content-center">
-        <mat-paginator
-          *ngIf="this.usuarios.length > 7"
-          [length]="this.usuarios.length"
-          [pageSize]="this.pageSize"
-          [hidePageSize]="true"
-          [pageSizeOptions]="[5, 7, 10]"
-          (page)="onPageChange($event)"
-
-        >
-        </mat-paginator>
+      <div
+        class="d-flex justify-content-center"
+        *ngIf="usuariosFiltrados.length > pageSize"
+      >
+        <pagination-controls
+          (pageChange)="onPageChange($event)"
+          class="pagination"
+          previousLabel="Anterior"
+          nextLabel="Siguiente"
+        ></pagination-controls>
       </div>
     </div>
     <h3 class="text-center" *ngIf="usuarios.length === 0">

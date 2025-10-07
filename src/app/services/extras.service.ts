@@ -3,7 +3,8 @@ import { Injectable } from '@angular/core';
 import { AuthService } from './auth.service';
 import { environment } from '../../environment';
 import { lastValueFrom } from 'rxjs';
-import { ExtrasDTO } from '../dtos';
+import { ExtrasDTO } from '../interfaces/dtos';
+import { Extras } from '../interfaces/types';
 
 @Injectable({
   providedIn: 'root',
@@ -14,9 +15,9 @@ export class ExtrasService {
     private readonly authService: AuthService
   ) {}
 
-  async getExtras() {
+  async getExtras(): Promise<Extras[]> {
     try {
-      const response$ = this.http.get<any>(
+      const response$ = this.http.get<Extras[]>(
         environment.ApiIP + environment.ApiObtenerExtras,
         { headers: { Authorization: `Bearer ${this.authService.getToken()}` } }
       );
@@ -31,9 +32,9 @@ export class ExtrasService {
     }
   }
 
-  async crearExtra(body: ExtrasDTO) {
+  async crearExtra(body: ExtrasDTO): Promise<Extras> {
     try {
-      const response$ = this.http.post<any>(
+      const response$ = this.http.post<Extras>(
         environment.ApiIP + environment.ApiCrearExtra,
         body,
         {

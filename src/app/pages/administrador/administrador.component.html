@@ -5,49 +5,57 @@
         <li class="nav-item">
           <a
             class="nav-link"
-            [ngClass]="{ 'active-link': selectedSection === 'seccion1' }"
-            (click)="selectSection('seccion1')"
+            routerLink="empleados"
+            routerLinkActive="active-link"
             >Empleados</a
           >
         </li>
         <li class="nav-item">
           <a
             class="nav-link"
-            [ngClass]="{ 'active-link': selectedSection === 'seccion2' }"
-            (click)="selectSection('seccion2')"
+            routerLink="productos"
+            routerLinkActive="active-link"
             >Productos</a
           >
         </li>
         <li class="nav-item">
           <a
             class="nav-link"
-            [ngClass]="{ 'active-link': selectedSection === 'seccion3' }"
-            (click)="selectSection('seccion3')"
+            routerLink="categorias"
+            routerLinkActive="active-link"
             >Categorías</a
           >
         </li>
         <li class="nav-item">
           <a
             class="nav-link"
-            [ngClass]="{ 'active-link': selectedSection === 'seccion4' }"
-            (click)="selectSection('seccion4')"
+            routerLink="ingredientes"
+            routerLinkActive="active-link"
             >Ingredientes</a
           >
         </li>
         <li class="nav-item">
           <a
             class="nav-link"
-            [ngClass]="{ 'active-link': selectedSection === 'seccion5' }"
-            (click)="selectSection('seccion5')"
+            routerLink="mesas"
+            routerLinkActive="active-link"
             >Mesas</a
           >
         </li>
         <li class="nav-item">
           <a
             class="nav-link"
-            [ngClass]="{ 'active-link': selectedSection === 'seccion6' }"
-            (click)="selectSection('seccion6')"
+            routerLink="ventas"
+            routerLinkActive="active-link"
             >Ventas</a
+          >
+        </li>
+        <li class="nav-item">
+          <a
+            class="nav-link"
+            routerLink="logs"
+            routerLinkActive="active-link"
+            >Logs</a
           >
         </li>
       </ul>
@@ -56,43 +64,5 @@
 </app-header>
 
 <div class="col-12">
-  <div *ngIf="selectedSection === 'seccion1'">
-    <app-crud-empleados
-      [usuarios]="usuarios"
-      [roles]="roles"
-    ></app-crud-empleados>
-  </div>
-  <div *ngIf="selectedSection === 'seccion2'">
-    <app-crud-productos
-      (cambiarComponente)="cambiarComponente($event)"
-      [productos]="productos"
-    ></app-crud-productos>
-  </div>
-  <div *ngIf="selectedSection === 'seccion3'">
-    <app-crud-categorias
-      [categorias]="categorias"
-      [subcategorias]="subcategorias"
-    >
-    </app-crud-categorias>
-  </div>
-  <div *ngIf="selectedSection === 'seccion4'">
-    <app-crud-ingredientes
-      [ingredientes]="ingredientes"
-      [extras]="extras"
-      [opciones]="opciones"
-    ></app-crud-ingredientes>
-  </div>
-  <div *ngIf="selectedSection === 'seccion5'">
-    <app-mesas></app-mesas>
-  </div>
-  <div *ngIf="selectedSection === 'seccion6'">
-    <app-ventas></app-ventas>
-  </div>
-  <div *ngIf="selectedSection === 'seccion7'">
-    <app-crud-agregar-productos
-      [ingredientes]="ingredientes"
-      [extras]="extras"
-      [opciones]="opciones"
-    ></app-crud-agregar-productos>
-  </div>
+  <router-outlet></router-outlet>
 </div>

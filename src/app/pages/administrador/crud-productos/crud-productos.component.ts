@@ -2,27 +2,24 @@ import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { CommonModule, PercentPipe } from '@angular/common';
 import Swal from 'sweetalert2';
 import {
-  Extras,
-  Ingredientes,
+  Categorias,
   P_H_E,
   P_H_I,
   P_H_O,
   Productos,
-} from '../../../types';
-import {
-  MatPaginator,
-  MatPaginatorIntl,
-  MatPaginatorModule,
-  PageEvent,
-} from '@angular/material/paginator';
-import { CustomPaginatorIntl } from '../../../../matPaginator';
+} from '../../../interfaces/types';
 import { AdministradorComponent } from '../administrador.component';
 import { environment } from '../../../../environment';
 import { ProductosService } from '../../../services/productos.service';
+import { NgxPaginationModule } from 'ngx-pagination';
+import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
+import { LogsService } from '../../../services/logs.service';
+import { LogsDto } from '../../../interfaces/dtos';
 @Component({
   selector: 'app-crud-productos',
   standalone: true,
-  imports: [CommonModule, MatPaginator],
+  imports: [CommonModule, NgxPaginationModule, FormsModule],
   templateUrl: './crud-productos.component.html',
   styleUrl: './crud-productos.component.css',
 })
@@ -32,37 +29,47 @@ export class CrudProductosComponent {
   currentPage: number = 0;
 
   @Input() productos: Productos[] = [];
+  @Input() categorias: Categorias[] = [];
   productosFiltrados: Productos[] = [];
-
+  categoriasFiltradas: Categorias[] = [];
   constructor(
     private readonly adminComponente: AdministradorComponent,
-    private readonly productosService: ProductosService
+    private readonly productosService: ProductosService,
+    private readonly logsService: LogsService,
+    private router: Router
   ) {
     this.productos = adminComponente.productos;
+    this.categorias = adminComponente.categorias;
     console.log(this.productos);
   }
 
   async ngOnInit() {
     this.productosFiltrados = this.productos;
+    this.categoriasFiltradas = this.categorias;
   }
 
   agregarProductosBoton() {
-    this.cambiarComponente.emit('seccion7'); // Emite el nombre del componente que se debe mostrar
+    this.router.navigate(['/Administrador/productos/agregar']);
   }
 
-  onPageChange(event: PageEvent) {
-    this.currentPage = event.pageIndex;
-    this.pageSize = event.pageSize;
-    this.updateProductosFiltrados();
+  editarProducto(id_prod: number) {
+    this.router.navigate(['/Administrador/productos/editar', id_prod]);
   }
 
-  /**
-   * Permite paginar los productos
-   */
-  updateProductosFiltrados() {
-    const startIndex = this.currentPage * this.pageSize;
-    const endIndex = startIndex + this.pageSize;
-    this.productosFiltrados = this.productos.slice(startIndex, endIndex);
+  filtrarProductosPorCategoria(event: any) {
+    const categoriaSeleccionada = parseInt(event.target.value);
+    if (categoriaSeleccionada) {
+      this.productosFiltrados = this.productos.filter(
+        (producto) =>
+          producto.sub_cat_id.categoria_id.id_cat === categoriaSeleccionada
+      );
+    } else {
+      this.productosFiltrados = this.productos;
+    }
+  }
+
+  async onPageChange(page: number) {
+    this.currentPage = page;
   }
 
   async verProducto(id_producto: number) {
@@ -202,5 +209,64 @@ export class CrudProductosComponent {
         timer: 2500,
       });
     }
+  }
+
+  async eliminarProducto(id_prod: number) {
+    const producto = this.productos.find(
+      (producto) => producto.id_prod === id_prod
+    );
+    if (!producto) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'No se encontró el producto',
+        timer: 2000,
+      });
+      return;
+    }
+    Swal.fire({
+      title: '¿Estás seguro?',
+      text: 'Esta acción no se puede deshacer.',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Aceptar',
+      cancelButtonText: 'Cancelar',
+      customClass: {
+        confirmButton: 'btn btn-peligro',
+        cancelButton: 'btn btn-terc',
+      },
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        try {
+          await this.productosService.eliminarProducto(id_prod);
+          const log: LogsDto = {
+            usuario:
+              localStorage.getItem('codigo') +
+              ' ' +
+              localStorage.getItem('nombres'),
+            accion: 'Eliminar producto',
+            modulo: 'Productos',
+            descripcion: `Se eliminó el producto ${producto.nombre_prod}`,
+          };
+          await this.logsService.crearLog(log);
+          this.adminComponente.productos =
+            await this.productosService.obtenerProductos();
+          this.productos = this.adminComponente.productos;
+          Swal.fire({
+            icon: 'success',
+            title: 'Éxito',
+            text: 'Producto eliminado correctamente',
+            timer: 2500,
+          });
+        } catch (error) {
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'Ocurrió un error al intentar eliminar el producto',
+            timer: 2500,
+          });
+        }
+      }
+    });
   }
 }

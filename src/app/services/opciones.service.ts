@@ -3,7 +3,8 @@ import { Injectable } from '@angular/core';
 import { AuthService } from './auth.service';
 import { environment } from '../../environment';
 import { lastValueFrom } from 'rxjs';
-import { OpcionesDTO } from '../dtos';
+import { Opciones } from '../interfaces/types';
+import { OpcionesDTO } from '../interfaces/dtos';
 
 @Injectable({
   providedIn: 'root',
@@ -14,9 +15,9 @@ export class OpcionesService {
     private readonly authService: AuthService
   ) {}
 
-  async getOpciones() {
+  async getOpciones(): Promise<Opciones[]> {
     try {
-      const response$ = this.http.get<any>(
+      const response$ = this.http.get<Opciones[]>(
         environment.ApiIP + environment.ApiObtenerOpciones,
         { headers: { Authorization: `Bearer ${this.authService.getToken()}` } }
       );
@@ -24,16 +25,16 @@ export class OpcionesService {
       return response;
     } catch (error) {
       console.error(
-        'Error al obtener las opciones. ERROR -> getOpciones.service.ts -> obtenerOpciones()',
+        'Error al obtener las opciones. ERROR -> opciones.service.ts -> getOpciones()',
         error
       );
       throw error;
     }
   }
 
-  async crearOpcion(body: OpcionesDTO) {
+  async crearOpcion(body: OpcionesDTO): Promise<Opciones> {
     try {
-      const response$ = this.http.post<any>(
+      const response$ = this.http.post<Opciones>(
         environment.ApiIP + environment.ApiCrearOpcion,
         body,
         {
@@ -42,6 +43,7 @@ export class OpcionesService {
         }
       );
       const response = await lastValueFrom(response$);
+      return response;
     } catch (error) {
       console.error(
         'Error inesperado en opciones.service.ts -> crearOpcion()',

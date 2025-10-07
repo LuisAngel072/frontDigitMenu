@@ -135,7 +135,6 @@ export type Pedidos = {
   no_mesa: Mesas;
   fecha_pedido: Date;
   total: number;
-  estado: EstadoPedido;
 };
 // Tabla mesas
 export type Mesas = {
@@ -144,16 +143,53 @@ export type Mesas = {
   qr_code_url: string;
 };
 
+// Datos de un producto sobre un pedido
 export type Producto_extras_ingrSel = {
-  pedido_prod_id: number; // ← AÑADIDO para que puedas usarlo en (click)
+  pedido_prod_id: number;
   pedido_id: Pedidos;
   producto_id: Productos;
   estado: EstadoPedidoHasProductos;
   precio: number;
   opcion_id: Opciones;
-  extras: Extras[]; // ← Ya no es opcional para evitar errores de undefined
-  ingredientes: Ingredientes[]; // ← Igual aquí
+  extras: Extras[];
+  ingredientes: Ingredientes[];
 };
+
+//Tabla pedidos_has_productos
+export type Pedidos_has_productos = {
+  pedido_prod_id: number; //Llave primaria
+  pedido_id: Pedidos; //Llave foránea a pedidos
+  producto_id: Productos; //Llave foranea a productos
+  estado: EstadoPedidoHasProductos; //Enum estado
+  precio: number; //Precio calculado al escoger los ingr, extras y opcion del producto en el pedido
+  opcion_id: Opciones; //Llave foranea de opciones, la opcion seleccionada que el cliente escogió
+}
+
+// Tabla pedidos_has_extrassel
+export type Pedidos_has_extrassel = {
+  pedido_extra_id: number; //Llave primaria
+  precio: number; //Precio del extra registrado en el momento
+  pedido_prod_id: Pedidos_has_productos; //Llave que referencia al producto del pedido que
+  // se están seleccionando los extras
+  extra_id: Extras; //Extra seleccionado
+}
+// Tabla pedidos_has_ingrsel
+export type Pedidos_has_ingrsel = {
+  ped_ingr_id: number;
+  precio: number;
+  pedido_prod_id: Pedidos_has_productos;
+  ingrediente_id: Ingredientes; // ← Corregir esto también
+}
+
+export type Logs = {
+  id_log: number; //Llave primaria
+  usuario: string; //Se almacena directamente como texto, para evitar problemas si se elimina el usuario
+  accion: string; //Acción realizada (Crear, Actualizar, Eliminar, Iniciar sesión, etc.)
+  modulo: string; //Módulo donde se realizó la acción (Usuarios, Productos, Pedidos, etc.)
+  fecha: Date; //Fecha y hora de la acción
+  ip: string; //Dirección IP desde donde se realizó la acción
+  descripcion?: string; //Opcional, puede ser undefined
+}
 
 export enum EstadoPedidoHasProductos {
   sin_preparar = 'Sin preparar',

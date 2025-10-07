@@ -1,37 +1,35 @@
-import { Component, Input, SimpleChanges, ViewChild } from '@angular/core';
+import {
+  Component,
+  Input,
+  OnInit,
+  SimpleChanges,
+  ViewChild,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import Swal from 'sweetalert2';
 import { AdministradorComponent } from '../administrador.component';
-import { Roles, Usuarios_has_roles } from '../../../types';
-import { UsuariosDTO } from '../../../dtos';
+import { Roles, Usuarios_has_roles } from '../../../interfaces/types';
+import { LogsDto, UsuariosDTO } from '../../../interfaces/dtos';
 import { UsuariosService } from '../../../services/usuarios.service';
 import { FormsModule } from '@angular/forms';
 import { switchMap } from 'rxjs';
-import {
-  MatPaginator,
-  MatPaginatorIntl,
-  MatPaginatorModule,
-  PageEvent,
-} from '@angular/material/paginator';
-import { CustomPaginatorIntl } from '../../../../matPaginator';
-import { HeaderComponent } from '../../comun-componentes/header/header.component';
 import { ChangeDetectorRef } from '@angular/core';
 import { SharedService } from '../../../services/shared.service';
 import { environment } from '../../../../environment';
+import { NgxPaginationModule } from 'ngx-pagination';
+import { RolesService } from '../../../services/roles.service';
+import { LogsService } from '../../../services/logs.service';
 
 @Component({
   selector: 'app-crud-empleados',
   standalone: true,
-  imports: [CommonModule, FormsModule, MatPaginatorModule],
+  imports: [CommonModule, FormsModule, NgxPaginationModule],
   templateUrl: './crud-empleados.component.html',
   styleUrl: './crud-empleados.component.css',
-  providers: [{ provide: MatPaginatorIntl, useClass: CustomPaginatorIntl }],
 })
-export class CrudEmpleadosComponent {
-  @Input() usuarios: Usuarios_has_roles[] = [];
-  @Input() roles: Roles[] = [];
-
-  @ViewChild(MatPaginator) paginator!: MatPaginator;
+export class CrudEmpleadosComponent implements OnInit {
+  public usuarios: Usuarios_has_roles[] = [];
+  public roles: Roles[] = [];
 
   pageSize: number = 7;
   currentPage: number = 0;
@@ -47,8 +45,10 @@ export class CrudEmpleadosComponent {
   constructor(
     private adminComponente: AdministradorComponent,
     private readonly usuariosService: UsuariosService,
+    private readonly rolesService: RolesService,
     private cdr: ChangeDetectorRef,
-    private readonly sharedService: SharedService
+    private readonly sharedService: SharedService,
+    private readonly logsService: LogsService
   ) {
     this.usuarios = this.adminComponente.usuarios;
     this.roles = this.adminComponente.roles;
@@ -57,27 +57,26 @@ export class CrudEmpleadosComponent {
   }
 
   async ngOnInit() {
-    this.usuarios = this.adminComponente.usuarios;
-    this.roles = this.adminComponente.roles;
-    this.updateUsuariosFiltrados();
+    await this.cargarUsuarios();
+    this.roles = await this.rolesService.obtenerRoles();
   }
 
-  ngOnChanges(changes: SimpleChanges): void {
-    if (changes['usuarios'] && this.usuarios) {
-      this.updateUsuariosFiltrados();
+  async onPageChange(page: number) {
+    this.currentPage = page;
+  }
+
+  async cargarUsuarios() {
+    try {
+      this.usuarios = await this.usuariosService.obtenerUsuariosYRoles();
+      this.usuariosFiltrados = this.usuarios; // Inicializa la lista filtrada con todos los usuarios
+    } catch (error) {
+      console.error('Error al cargar usuarios', error);
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'No se pudieron cargar los empleados.',
+      });
     }
-  }
-
-  onPageChange(event: PageEvent) {
-    this.currentPage = event.pageIndex;
-    this.pageSize = event.pageSize;
-    this.updateUsuariosFiltrados();
-  }
-
-  updateUsuariosFiltrados() {
-    const startIndex = this.currentPage * this.pageSize;
-    const endIndex = startIndex + this.pageSize;
-    this.usuariosFiltrados = this.usuarios.slice(startIndex, endIndex);
   }
 
   filtrarUsuarios(event: any) {
@@ -488,13 +487,23 @@ export class CrudEmpleadosComponent {
                   })
                 )
                 .subscribe({
-                  next: (response) => {
+                  next: async (response) => {
                     Swal.close();
                     Swal.fire({
                       title: 'Empleado registrado correctamente',
                       icon: 'success',
                       timer: 2000,
                     });
+                    const log: LogsDto = {
+                      usuario:
+                        localStorage.getItem('codigo') +
+                        ' ' +
+                        localStorage.getItem('nombres'),
+                      accion: 'Crear usuario',
+                      modulo: 'Empleados',
+                      descripcion: `Se creó el usuario ${response.codigo} ${response.nombres} ${response.primer_apellido} ${response.segundo_apellido}`,
+                    };
+                    await this.logsService.crearLog(log);
                     // Actualiza la lista de usuarios después del registro exitoso
                     this.usuariosService
                       .obtenerUsuariosYRoles()
@@ -1056,7 +1065,7 @@ export class CrudEmpleadosComponent {
                   })
                 )
                 .subscribe({
-                  next: (response) => {
+                  next: async (response) => {
                     console.log(this.formData);
                     Swal.close();
                     Swal.fire({
@@ -1064,6 +1073,16 @@ export class CrudEmpleadosComponent {
                       icon: 'success',
                       timer: 2000,
                     });
+                    const log: LogsDto = {
+                      usuario:
+                        localStorage.getItem('codigo') +
+                        ' ' +
+                        localStorage.getItem('nombres'),
+                      accion: 'Editar usuario',
+                      modulo: 'Empleados',
+                      descripcion: `Se actualizó el usuario ${usF.usuario_id.codigo} ${usF.usuario_id.nombres} ${usF.usuario_id.primer_apellido} ${usF.usuario_id.segundo_apellido}`,
+                    };
+                    await this.logsService.crearLog(log);
                     // Actualiza la lista de usuarios después del registro exitoso
                     //this.headerComponente.profileImageUrl = this.formData.img_perfil.img_ruta;
                     this.usuariosService
@@ -1175,7 +1194,7 @@ export class CrudEmpleadosComponent {
               allowOutsideClick: false, // Evita que se pueda cerrar
               allowEscapeKey: false, // Evita que se cierre con la tecla Escape
               allowEnterKey: false, // Evita que se cierre con Enter
-              showConfirmButton:false,
+              showConfirmButton: false,
               didOpen: () => {
                 Swal.showLoading(); // Muestra el spinner de carga
               },
@@ -1187,6 +1206,16 @@ export class CrudEmpleadosComponent {
               icon: 'success',
               timer: 2000,
             });
+            const log: LogsDto = {
+              usuario:
+                localStorage.getItem('codigo') +
+                ' ' +
+                localStorage.getItem('nombres'),
+              accion: 'Desactivar usuario',
+              modulo: 'Empleados',
+              descripcion: `Se desactivó el usuario ${usF.usuario_id.codigo} ${usF.usuario_id.nombres} ${usF.usuario_id.primer_apellido} ${usF.usuario_id.segundo_apellido}`,
+            };
+            await this.logsService.crearLog(log);
             this.usuarios = await this.usuariosService.obtenerUsuariosYRoles();
 
             this.adminComponente.usuarios = this.usuarios;
@@ -1258,8 +1287,18 @@ export class CrudEmpleadosComponent {
               title: 'Empleado reactivado correctamente',
               icon: 'success',
               timer: 2000,
-              showConfirmButton:false,
+              showConfirmButton: false,
             });
+            const log: LogsDto = {
+              usuario:
+                localStorage.getItem('codigo') +
+                ' ' +
+                localStorage.getItem('nombres'),
+              accion: 'Reactivar usuario',
+              modulo: 'Empleados',
+              descripcion: `Se reactivó el usuario ${usF.usuario_id.codigo} ${usF.usuario_id.nombres} ${usF.usuario_id.primer_apellido} ${usF.usuario_id.segundo_apellido}`,
+            };
+            await this.logsService.crearLog(log);
             this.usuarios = await this.usuariosService.obtenerUsuariosYRoles();
 
             this.adminComponente.usuarios = this.usuarios;

@@ -3,7 +3,8 @@ import { Injectable } from '@angular/core';
 import { AuthService } from './auth.service';
 import { environment } from '../../environment';
 import { lastValueFrom, Observable } from 'rxjs';
-import { SubcategoriasDTO } from '../dtos';
+import { SubcategoriasDTO } from '../interfaces/dtos';
+import { Sub_categorias } from '../interfaces/types';
 
 @Injectable({
   providedIn: 'root',
@@ -33,7 +34,7 @@ export class SubcategoriasService {
     }
   }
 
-  registrarSubCategoria(body: SubcategoriasDTO): Observable<any> {
+  registrarSubCategoria(body: SubcategoriasDTO): Observable<Sub_categorias> {
     try {
       const response$ = this.http.post<any>(
         environment.ApiIP + environment.ApiRegistrarSubCategoria,

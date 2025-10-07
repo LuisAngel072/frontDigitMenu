@@ -1,17 +1,15 @@
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../services/auth.service';
-import { SHA256 } from 'crypto-js';
 import Swal from 'sweetalert2';
 import { Router } from '@angular/router';
-import { JwtHelperService } from '@auth0/angular-jwt';
 
 @Component({
-  selector: 'app-login',
-  standalone: true,
-  imports: [FormsModule],
-  templateUrl: './login.component.html',
-  styleUrl: './login.component.css',
+    selector: 'app-login',
+    standalone: true,
+    imports: [FormsModule],
+    templateUrl: './login.component.html',
+    styleUrl: './login.component.css'
 })
 export class LoginComponent {
   codigo: string = '';
@@ -42,6 +40,7 @@ export class LoginComponent {
       .autenticar(data)
       .then((isSuccessful: boolean) => {
         if (!isSuccessful) {
+          Swal.close();
           Swal.fire({
             title: 'Uy algo salió mal...',
             text: 'Credenciales inválidas o usuario desactivado',
@@ -49,6 +48,7 @@ export class LoginComponent {
             customClass: { confirmButton: 'btn btn-terc' },
           });
         } else {
+          Swal.close();
           Swal.fire({
             title: 'Credenciales válidas',
             text: 'Iniciando sesión',
@@ -61,8 +61,13 @@ export class LoginComponent {
         }
       })
       .catch((error) => {
-        if (error.status == 401) {
-        }
+        Swal.close();
+        Swal.fire({
+          title: 'Uy algo salió mal...',
+          text: 'Credenciales inválidas o usuario desactivado',
+          icon: 'warning',
+          customClass: { confirmButton: 'btn btn-terc' },
+        });
       });
   }
 }

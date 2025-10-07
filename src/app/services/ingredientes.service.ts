@@ -3,7 +3,8 @@ import { Injectable } from '@angular/core';
 import { environment } from '../../environment';
 import { AuthService } from './auth.service';
 import { lastValueFrom } from 'rxjs';
-import { IngredientesDTO } from '../dtos';
+import { IngredientesDTO } from '../interfaces/dtos';
+import { Ingredientes } from '../interfaces/types';
 
 @Injectable({
   providedIn: 'root',
@@ -31,7 +32,7 @@ export class IngredientesService {
     }
   }
 
-  async crearIngrediente(body: IngredientesDTO) {
+  async crearIngrediente(body: IngredientesDTO): Promise<Ingredientes> {
     try {
       console.log(body)
       const response$ = this.http.post<any>(
@@ -84,7 +85,7 @@ export class IngredientesService {
         }
       );
       const response = await lastValueFrom(response$);
-      return response; 
+      return response;
     } catch (error) {
       console.error(
         'Error inesperado en ingredientes.service.ts -> delIngrediente()',
@@ -92,6 +93,6 @@ export class IngredientesService {
       );
       throw error;
     }
-    
+
   }
 }

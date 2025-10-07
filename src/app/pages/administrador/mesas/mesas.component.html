@@ -1,13 +1,25 @@
-<main>
-  <div class="botones-qr">
-    <button class="btn btn-primary" (click)="agregarQR()">Agregar QR</button>
-    <button class="btn btn-danger" (click)="eliminarQR()" [disabled]="mesas.length === 0">Eliminar QR</button>
-  </div>
-  
-  <div class="qr-container">
-    <div *ngFor="let mesa of mesas" class="qr-item">
-      <p>Mesa {{ mesa.id }}</p>
-      <qrcode [qrdata]="mesa.qrData" [width]="200" [errorCorrectionLevel]="'M'"></qrcode>
+<div class="main-container">
+  <main>
+    <div class="botones-qr">
+      <button class="btn btn-primary" (click)="agregarQR()">Agregar QR</button>
+      <button
+        class="btn btn-danger"
+        (click)="eliminarQR()"
+        [disabled]="mesas.length === 0"
+      >
+        Eliminar QR
+      </button>
     </div>
-  </div>
-</main>
+
+    <div class="qr-container">
+      <div *ngFor="let mesa of mesas" class="qr-item">
+        <p>Mesa {{ mesa.id }}</p>
+        <qrcode
+          [qrdata]="mesa.qrData"
+          [width]="200"
+          [errorCorrectionLevel]="'M'"
+        ></qrcode>
+      </div>
+    </div>
+  </main>
+</div>

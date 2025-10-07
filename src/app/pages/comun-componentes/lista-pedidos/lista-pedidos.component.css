@@ -2,7 +2,7 @@
 .order-system-container {
   display: flex;
   flex-direction: column;
-  height: 100vh;
+  min-height: 100vh;
 }
 
 /* Navbar styling */
@@ -84,7 +84,7 @@
   display: flex;
   flex: 1;
   position: relative;
-  overflow: hidden;
+  overflow-y: auto;
 }
 
 /* Sidebar styling - shared properties */
@@ -216,16 +216,6 @@
       background-color: #5aa4d2;
     }
   }
-  
-  .order-content {
-    max-height: 0;
-    overflow: hidden;
-    transition: max-height 0.3s ease-out;
-    
-    &.show {
-      max-height: 500px;
-    }
-  }
 }
 
 /* Order items styling */
@@ -300,4 +290,18 @@
   .main-content.shifted {
     margin-left: 0;
   }
+}
+
+.order-item {
+  padding: 12px !important;
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  background-color: #f8f9fa;
+  margin-bottom: 8px !important;
+  transition: all 0.2s ease;
+}
+
+.order-item:hover {
+  background-color: #e9ecef;
+  border-color: #dee2e6;
 }

@@ -1,0 +1,82 @@
+<div class="main-container">
+  <main>
+    <h1 class="mb-4">Logs</h1>
+    <div class="row mb-3">
+      <div class="col">
+        <label for="buscadorLogs">Buscador</label>
+        <input type="search" class="form-control" placeholder="Buscar logs" (change)="filtrarLogs($event)" id="buscadorLogs"/>
+      </div>
+      <div class="filtro-item col">
+        <label for="fecha-inicio">Fecha inicio</label>
+        <input class="form-control" id="fecha-inicio" type="date" />
+      </div>
+
+      <div class="filtro-item col">
+        <label for="fecha-fin">Fecha fin</label>
+        <input class="form-control" id="fecha-fin" type="date" />
+      </div>
+      <div class="filtro-item col">
+        <br>
+        <button class="btn btn-prim">Filtrar</button>
+      </div>
+    </div>
+
+    <table class="table table-striped">
+      <thead>
+        <tr>
+          <th>Usuario</th>
+          <th>Acción</th>
+          <th>Módulo</th>
+          <th>Fecha</th>
+          <th>IP</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr
+          *ngFor="
+            let log of logsFiltrados
+              | paginate : { itemsPerPage: pageSize, currentPage: currentPage }
+          "
+        >
+
+          <td>{{ log.usuario }}</td>
+          <td>{{ log.accion }}</td>
+          <td>{{ log.modulo }}</td>
+          <td>{{ formatDate(log.fecha) }}</td>
+          <td>{{ log.ip }}</td>
+          <td class="icons-space">
+            <button class="btn">
+              <span
+                class="material-symbols-outlined icon-eye"
+                (click)="verLog(log.id_log)"
+              >
+                visibility
+              </span>
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="pagination-container row">
+      <div class="col-12 d-flex justify-content-center"></div>
+    </div>
+    <div class="d-flex justify-content-center">
+      <div
+        class="d-flex justify-content-center"
+        *ngIf="logsFiltrados.length > 7"
+      >
+        <pagination-controls
+          (pageChange)="onPageChange($event)"
+          class="pagination"
+          previousLabel="Anterior"
+          nextLabel="Siguiente"
+        ></pagination-controls>
+      </div>
+      <div class="text-center" *ngIf="logsFiltrados.length === 0">
+        <h2>¡Vaya! No hay registros</h2>
+      </div>
+    </div>
+  </main>
+</div>
