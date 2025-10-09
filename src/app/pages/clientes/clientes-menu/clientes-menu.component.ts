@@ -22,6 +22,7 @@ export class ClientesMenuComponent implements OnInit {
   mesaId: string | null = null;
   categorias: any[] = [];
   categoriasOriginales: any[] = [];
+  baseUrl = environment.ApiUp;
   
   // Producto seleccionado
   selectedProduct: any = null;
