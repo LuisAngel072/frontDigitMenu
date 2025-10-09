@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, forkJoin, from, lastValueFrom, of, throwError } from 'rxjs';
+import { Observable, forkJoin, lastValueFrom, throwError } from 'rxjs';
 import { catchError, map, switchMap } from 'rxjs/operators';
 import { environment } from '../../environment';
 import {
@@ -139,40 +139,26 @@ export class PedidosService {
 
   /**
    * Obtiene o crea un pedido para una mesa
+   * Si existe un pedido activo lo retorna, si no, crea uno nuevo
    * @param numeroMesa - Número de la mesa
    * @returns Observable con el ID del pedido
-  */
+   */
   obtenerOCrearPedidoPorMesa(numeroMesa: number): Observable<number> {
-    // Convertimos la función async a Observable usando from()
-    return from(this.getPedidoIniciadoByNoMesa(numeroMesa)).pipe(
+    return this.buscarPedidoActivoPorMesa(numeroMesa).pipe(
       switchMap((pedidoExistente) => {
-        if (pedidoExistente && pedidoExistente.id_pedido) {
-          console.log('Pedido existente encontrado:', pedidoExistente.id_pedido);
+        if (pedidoExistente) {
           // Retorna el ID del pedido existente
-          return of(pedidoExistente.id_pedido);
+          return new Observable<number>((observer) => {
+            observer.next(pedidoExistente.id_pedido);
+            observer.complete();
+          });
         } else {
-          console.log('No existe pedido, creando uno nuevo para mesa:', numeroMesa);
           // Crea nuevo pedido y retorna su ID
           return this.crearNuevoPedido(numeroMesa).pipe(
-            switchMap(() => {
-              // Después de crear, obtenemos el pedido recién creado
-              return from(this.getPedidoIniciadoByNoMesa(numeroMesa)).pipe(
-                map((nuevoPedido) => {
-                  if (nuevoPedido && nuevoPedido.id_pedido) {
-                    console.log('Nuevo pedido creado con ID:', nuevoPedido.id_pedido);
-                    return nuevoPedido.id_pedido;
-                  } else {
-                    throw new Error('Error al crear el pedido');
-                  }
-                })
-              );
-            })
+            switchMap(() => this.obtenerUltimoPedidoPorMesa(numeroMesa)),
+            map((ultimoPedido) => ultimoPedido.id_pedido)
           );
         }
-      }),
-      catchError((error) => {
-        console.error('Error en obtenerOCrearPedidoPorMesa:', error);
-        return throwError(() => error);
       })
     );
   }

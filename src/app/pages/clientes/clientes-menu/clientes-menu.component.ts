@@ -89,19 +89,19 @@ export class ClientesMenuComponent implements OnInit {
     });
   }
 
-// Calcula el total del carrito sumando los precios de todos los productos
-calcularTotalCarrito(): void {
-  this.totalCarrito = this.productosEnPedido.reduce((total, producto) => {
-    // Este precio YA incluye todo (producto + opción + extras + ingredientes)
-    let precio = parseFloat(producto.precio.toString()) || 0;
-    return total + precio;
-  }, 0);
+  // Calcula el total del carrito sumando los precios de todos los productos
+  calcularTotalCarrito(): void {
+    this.totalCarrito = this.productosEnPedido.reduce((total, producto) => {
+      // Este precio YA incluye todo (producto + opción + extras + ingredientes)
+      let precio = parseFloat(producto.precio.toString()) || 0;
+      return total + precio;
+    }, 0);
 
-  // Redondear a dos decimales
-  this.totalCarrito = Math.round(this.totalCarrito * 100) / 100;
-
-  console.log('Total calculado:', this.totalCarrito);
-}
+    // Redondear a dos decimales
+    this.totalCarrito = Math.round(this.totalCarrito * 100) / 100;
+    
+    console.log('Total calculado:', this.totalCarrito);
+  }
 
   // Método para mostrar el modal del carrito
   mostrarCarrito(): void {
@@ -172,7 +172,7 @@ calcularTotalCarrito(): void {
 
     } catch (error) {
       console.error('Error cargando producto:', error);
-      this.ingredientes = [];
+      this.ingredientes = []; 
     }
   }
 
@@ -187,30 +187,12 @@ calcularTotalCarrito(): void {
   }
 
   calcularPrecio() {
-    // Precio base del producto
-    let base = parseFloat(this.selectedProduct.precio) || 0;
-
-    // Sumar opción seleccionada
-    if (this.selectedOpcion) {
-      base += parseFloat(this.selectedOpcion.precio) || 0;
-    }
-
-    // Sumar extras seleccionados
+    let base = parseFloat(this.selectedProduct.precio);
+    if (this.selectedOpcion) base += parseFloat(this.selectedOpcion.precio);
     for (let extra of this.selectedExtras) {
-      base += parseFloat(extra.precio) || 0;
+      base += parseFloat(extra.precio);
     }
-
-    // Sumar ingredientes adicionales si tienen precio
-    if (this.ingredientes && this.ingredientes.length > 0) {
-      for (let ingrediente of this.ingredientes) {
-        if (ingrediente.precio) {
-          base += parseFloat(ingrediente.precio) || 0;
-        }
-      }
-    }
-
-    this.precioTotal = Math.round(base * 100) / 100;
-    console.log('Precio calculado antes de agregar:', this.precioTotal);
+    this.precioTotal = base;
   }
 
   async agregarACuenta() {
@@ -274,7 +256,7 @@ calcularTotalCarrito(): void {
           );
           return { ...cat, subcategorias: subcatFiltradas };
         });
-        this.categoriasOriginales = JSON.parse(JSON.stringify(this.categorias));
+        this.categoriasOriginales = JSON.parse(JSON.stringify(this.categorias)); 
         });
       });
     });
