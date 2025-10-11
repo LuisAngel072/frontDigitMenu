@@ -30,7 +30,7 @@ export class VentasComponent {
     await console.log(this.pedidosAgrupados);
   }
   async cargarPedidos() {
-    this.pedidosService.getPedidosConProductosDetalles().subscribe({
+    this.pedidosService.getPedidosConProductosDetalles('ventas').subscribe({
       next: (data) => {
         // 1) Normalizar
         const normalizado = data.map((p) => ({

@@ -61,7 +61,7 @@ export class ClientesMenuComponent implements OnInit {
     if (!this.mesaId) return;
 
     // Utilizamos el mismo servicio que utiliza el componente de cocina
-    this.pedidosService.getPedidosConProductosDetalles().subscribe({
+    this.pedidosService.getPedidosConProductosDetalles('').subscribe({
       next: (data) => {
         // Normalizamos los datos igual que en el componente de cocina
         const normalizado = data.map(p => ({
@@ -109,7 +109,7 @@ calcularTotalCarrito(): void {
 
   // Redondear a dos decimales
   this.totalCarrito = Math.round(this.totalCarrito * 100) / 100;
-  
+
   console.log('Total calculado:', this.totalCarrito);
 }
 
@@ -206,17 +206,17 @@ calcularTotalCarrito(): void {
   calcularPrecio() {
     // Precio base del producto
     let base = parseFloat(this.selectedProduct.precio) || 0;
-    
+
     // Sumar opción seleccionada
     if (this.selectedOpcion) {
       base += parseFloat(this.selectedOpcion.precio) || 0;
     }
-    
+
     // Sumar extras seleccionados
     for (let extra of this.selectedExtras) {
       base += parseFloat(extra.precio) || 0;
     }
-    
+
     // Sumar ingredientes adicionales si tienen precio
     if (this.ingredientes && this.ingredientes.length > 0) {
       for (let ingrediente of this.ingredientes) {
@@ -225,7 +225,7 @@ calcularTotalCarrito(): void {
         }
       }
     }
-    
+
     this.precioTotal = Math.round(base * 100) / 100;
     console.log('Precio calculado antes de agregar:', this.precioTotal);
   }

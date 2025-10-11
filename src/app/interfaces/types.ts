@@ -191,6 +191,13 @@ export type Logs = {
   descripcion?: string; //Opcional, puede ser undefined
 }
 
+export interface PedidoAgrupado {
+  pedidoId: Pedidos;
+  productos: Producto_extras_ingrSel[];
+  expandido: boolean;
+  tieneProductosPendientes: boolean;
+}
+
 export enum EstadoPedidoHasProductos {
   sin_preparar = 'Sin preparar',
   preparado = 'Preparado',

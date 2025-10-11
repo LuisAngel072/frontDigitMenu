@@ -1,11 +1,20 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, forkJoin, from, lastValueFrom, of, throwError } from 'rxjs';
-import { catchError, map, switchMap } from 'rxjs/operators';
+import {
+  Observable,
+  forkJoin,
+  from,
+  lastValueFrom,
+  of,
+  throwError,
+} from 'rxjs';
+import { catchError, map, switchMap, tap } from 'rxjs/operators';
 import { environment } from '../../environment';
 import {
   EstadoPedidoHasProductos,
+  PedidoAgrupado,
   Pedidos,
+  Pedidos_has_productos,
   Producto_extras_ingrSel,
 } from '../interfaces/types';
 import { AuthService } from './auth.service';
@@ -21,30 +30,86 @@ export class PedidosService {
     private readonly authService: AuthService
   ) {}
 
+  getPedidosActivosConDetalles(rol: string | null): Observable<PedidoAgrupado[]> {
+  console.log('Iniciando getPedidosActivosConDetalles (Optimizado)...');
+
+  return this.http.get<PedidoAgrupado[]>(`${this.baseUrl}/activos/${rol}`).pipe(
+    tap(resultado => console.log('Respuesta completa del backend:', resultado)),
+    catchError(err => {
+      console.error('Error al obtener los pedidos activos con detalles', err);
+      return throwError(() => err);
+    })
+  );
+}
   // Función existente
-  getPedidosConProductosDetalles(): Observable<Producto_extras_ingrSel[]> {
-    return this.http.get<any[]>(`${this.baseUrl}`).pipe(
+  getPedidosConProductosDetalles(
+    rol: string | null
+  ): Observable<Producto_extras_ingrSel[]> {
+    console.log('Iniciando getPedidosConProductosDetalles...');
+
+    return this.http.get<Pedidos[]>(`${this.baseUrl}`).pipe(
+      // Toca aquí para ver los pedidos iniciales que llegan de la API
+      tap((pedidos) => console.log('1. Pedidos recibidos:', pedidos)),
+
       switchMap((pedidos) => {
-        const detalles$ = pedidos.map((pedido) =>
-          this.http
-            .get<any[]>(`${this.baseUrl}/productos/${pedido.id_pedido}`)
-            .pipe(
-              switchMap((productos: any[]) => {
-                const detallesProductos$ = productos.map((prod) =>
-                  this.http.get<Producto_extras_ingrSel>(
-                    `${this.baseUrl}/productos/extrasIngrs/${prod.pedido_prod_id}`
-                  )
-                );
-                return forkJoin(detallesProductos$);
-              })
-            )
-        );
-        return forkJoin(detalles$).pipe(
-          map((detallesAnidados: Producto_extras_ingrSel[][]) =>
-            detallesAnidados.flat()
+        // Si no hay pedidos, retornamos un array vacío inmediatamente
+        if (!pedidos || pedidos.length === 0) {
+          return of([]);
+        }
+
+        // Creamos un array de observables, uno por cada pedido, para obtener sus productos
+        const observablesDeProductos = pedidos.map((pedido) =>
+          this.http.get<Pedidos_has_productos[]>(
+            `${this.baseUrl}/productos/${pedido.id_pedido}/${rol}`
           )
         );
-      })
+
+        // Ejecutamos todas las peticiones de productos en paralelo
+        return forkJoin(observablesDeProductos);
+      }),
+
+      // Toca aquí para ver los productos (llegarán como un array de arrays)
+      tap((productosAgrupados) =>
+        console.log('2. Productos agrupados por pedido:', productosAgrupados)
+      ),
+
+      // Aplanamos el array de arrays en un solo array de productos
+      map((productosAgrupados: Pedidos_has_productos[][]) =>
+        productosAgrupados.flat()
+      ),
+
+      // Toca aquí para ver la lista de todos los productos juntos
+      tap((todosLosProductos) =>
+        console.log(
+          '3. Todos los productos en una sola lista:',
+          todosLosProductos
+        )
+      ),
+
+      switchMap((todosLosProductos) => {
+        // Si no hay productos en total, retornamos un array vacío
+        if (!todosLosProductos || todosLosProductos.length === 0) {
+          return of([]);
+        }
+
+        // Creamos un array de observables, uno por cada producto, para obtener sus detalles
+        const observablesDeDetalles = todosLosProductos.map((prod) =>
+          this.http.get<Producto_extras_ingrSel>(
+            `${this.baseUrl}/productos/extrasIngrs/${prod.pedido_prod_id}`
+          )
+        );
+
+        // Ejecutamos todas las peticiones de detalles en paralelo
+        return forkJoin(observablesDeDetalles);
+      }),
+
+      // Toca aquí para ver el resultado final antes de que se entregue al componente
+      tap((resultadoFinal) =>
+        console.log(
+          '4. Resultado final con todos los detalles:',
+          resultadoFinal
+        )
+      )
     );
   }
 
@@ -136,17 +201,23 @@ export class PedidosService {
    * Obtiene o crea un pedido para una mesa
    * @param numeroMesa - Número de la mesa
    * @returns Observable con el ID del pedido
-  */
+   */
   obtenerOCrearPedidoPorMesa(numeroMesa: number): Observable<number> {
     // Convertimos la función async a Observable usando from()
     return from(this.getPedidoIniciadoByNoMesa(numeroMesa)).pipe(
       switchMap((pedidoExistente) => {
         if (pedidoExistente && pedidoExistente.id_pedido) {
-          console.log('Pedido existente encontrado:', pedidoExistente.id_pedido);
+          console.log(
+            'Pedido existente encontrado:',
+            pedidoExistente.id_pedido
+          );
           // Retorna el ID del pedido existente
           return of(pedidoExistente.id_pedido);
         } else {
-          console.log('No existe pedido, creando uno nuevo para mesa:', numeroMesa);
+          console.log(
+            'No existe pedido, creando uno nuevo para mesa:',
+            numeroMesa
+          );
           // Crea nuevo pedido y retorna su ID
           return this.crearNuevoPedido(numeroMesa).pipe(
             switchMap(() => {
@@ -154,7 +225,10 @@ export class PedidosService {
               return from(this.getPedidoIniciadoByNoMesa(numeroMesa)).pipe(
                 map((nuevoPedido) => {
                   if (nuevoPedido && nuevoPedido.id_pedido) {
-                    console.log('Nuevo pedido creado con ID:', nuevoPedido.id_pedido);
+                    console.log(
+                      'Nuevo pedido creado con ID:',
+                      nuevoPedido.id_pedido
+                    );
                     return nuevoPedido.id_pedido;
                   } else {
                     throw new Error('Error al crear el pedido');
@@ -271,19 +345,19 @@ export class PedidosService {
    * Elimina un producto específico de un pedido
    * @param pedidoProdId - ID del registro en pedidos_has_productos
    * @returns Observable con el resultado de la eliminación
-  */
+   */
   eliminarProductoDelPedido(pedidoProdId: number): Observable<any> {
     return this.http.delete<any>(`${this.baseUrl}/productos/${pedidoProdId}`, {
-      headers: { Authorization: `Bearer ${this.authService.getToken()}` }
+      headers: { Authorization: `Bearer ${this.authService.getToken()}` },
     });
   }
 
-  async getProductosExtrasIngrSel(p_h_pr_id: number): Promise<Producto_extras_ingrSel> {
+  async getProductosExtrasIngrSel(
+    p_h_pr_id: number
+  ): Promise<Producto_extras_ingrSel> {
     try {
       const response$ = await this.http.get<Producto_extras_ingrSel>(
-        environment.ApiIP +
-          environment.ApiObtenerExtrasIngrProducto +
-          p_h_pr_id
+        environment.ApiIP + environment.ApiObtenerExtrasIngrProducto + p_h_pr_id
       );
       const response: Producto_extras_ingrSel = await lastValueFrom(response$);
       return response;

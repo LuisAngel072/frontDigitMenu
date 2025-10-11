@@ -76,7 +76,7 @@ export class MeserosComponent implements OnInit, OnDestroy {
         const notificaciones = await this.notificacionesService.obtenerPorMesa(mesa.no_mesa);
         console.log(`Notificaciones mesa ${mesa.no_mesa}:`, notificaciones);
         // Filtrar solo pendientes (comparación case-insensitive)
-        const pendientes = notificaciones.filter(n => 
+        const pendientes = notificaciones.filter(n =>
           n.estado && n.estado.toLowerCase() === 'pendiente'
         );
         this.notificaciones.set(mesa.no_mesa, pendientes);
@@ -97,7 +97,7 @@ export class MeserosComponent implements OnInit, OnDestroy {
   async atenderNotificacion(notificacionId: number, mesaId: number): Promise<void> {
     try {
       await this.notificacionesService.atenderNotificacion(notificacionId);
-      
+
       // Actualizar localmente
       const notifs = this.notificaciones.get(mesaId) || [];
       const actualizadas = notifs.filter(n => n.id_notf !== notificacionId);
@@ -117,7 +117,7 @@ export class MeserosComponent implements OnInit, OnDestroy {
 
   mostrarNotificaciones(mesa: Mesa): void {
     const notifs = this.obtenerNotificacionesPorMesa(mesa.no_mesa);
-    
+
     if (notifs.length === 0) {
       Swal.fire('Sin notificaciones', `Mesa ${mesa.no_mesa} no tiene notificaciones`, 'info');
       return;
@@ -162,12 +162,12 @@ export class MeserosComponent implements OnInit, OnDestroy {
       });
 
       // Buscar pedidos de la mesa usando el mismo método que usa el carrito
-      this.pedidosService.getPedidosConProductosDetalles().subscribe({
+      this.pedidosService.getPedidosConProductosDetalles('mesero').subscribe({
         next: (data) => {
           console.log('Todos los pedidos obtenidos:', data);
-          
+
           // Filtrar productos que pertenecen a la mesa seleccionada
-          const productosDeMesa = data.filter(detalle => 
+          const productosDeMesa = data.filter(detalle =>
             detalle.pedido_id?.no_mesa?.no_mesa === mesa.no_mesa
           );
 
@@ -219,19 +219,19 @@ export class MeserosComponent implements OnInit, OnDestroy {
   // Método auxiliar para mostrar pedidos en modal si no hay componente hijo
   private mostrarPedidosEnModal(mesa: Mesa, productos: any[]): void {
     const pedidosAgrupados = this.agruparProductosPorPedido(productos);
-    
+
     let html = `<h4>Pedidos de Mesa ${mesa.no_mesa}</h4>`;
-    
+
     Object.keys(pedidosAgrupados).forEach(pedidoId => {
       const productosDelPedido = pedidosAgrupados[pedidoId];
       const totalPedido = this.calcularTotalPedido(productosDelPedido);
-      
+
       html += `
         <div class="mb-3 border p-3">
           <h5>Pedido #${pedidoId}</h5>
           <div class="row">
       `;
-      
+
       productosDelPedido.forEach(producto => {
         html += `
           <div class="col-12 mb-2">
@@ -246,7 +246,7 @@ export class MeserosComponent implements OnInit, OnDestroy {
           </div>
         `;
       });
-      
+
       html += `
           </div>
           <div class="text-end">
@@ -281,14 +281,14 @@ export class MeserosComponent implements OnInit, OnDestroy {
   private calcularTotalPedido(productos: any[]): number {
     return productos.reduce((total, producto) => {
       let precio = +(producto.precio || 0);
-      
+
       if (producto.extras && producto.extras.length > 0) {
         const extrasTotal = producto.extras.reduce((sum: number, extra: any) => {
           return sum + (+(extra.precio || 0));
         }, 0);
         precio += extrasTotal;
       }
-      
+
       return total + precio;
     }, 0);
   }

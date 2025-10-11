@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { PedidosService } from '../../services/pedidos.service';
 import {
   EstadoPedidoHasProductos,
+  PedidoAgrupado,
   Pedidos,
   Producto_extras_ingrSel,
 } from '../../interfaces/types';
@@ -15,138 +16,85 @@ import { CocinaSocketService } from '../../gateways/cocina-gateway.service';
   standalone: true,
   templateUrl: './cocinero.component.html',
   styleUrls: ['./cocinero.component.css'],
-  imports: [CommonModule, HeaderComponent]
+  imports: [CommonModule, HeaderComponent],
 })
 export class CocineroComponent implements OnInit {
-  pedidosAgrupados: {
-    pedidoId: Pedidos;
-    productos: Producto_extras_ingrSel[];
-    expandido: boolean;
-    tieneProductosPendientes: boolean;
-  }[] = [];
+  pedidosAgrupados: PedidoAgrupado[] = [];
 
-  constructor(private pedidosService: PedidosService, private cocinaSocket: CocinaSocketService) {}
+  constructor(
+    private pedidosService: PedidosService,
+    private cocinaSocket: CocinaSocketService
+  ) {}
 
   ngOnInit(): void {
-  this.cargarPedidos();
+    this.cargarPedidos();
 
-  this.cocinaSocket.onNuevoPedido().subscribe(async (pedido) => {
-    const detalles = await this.pedidosService
-      .getProductosExtrasIngrSel(pedido.pedido_id);
-
-    this.procesarPedidos(Array.isArray(detalles) ? detalles : [detalles]);
-  });
-
-    this.cocinaSocket.onPedidoActualizado().subscribe(async (pedido) => {
-    const detalles = await this.pedidosService
-      .getProductosExtrasIngrSel(pedido.pedido_id);
-
-    this.procesarPedidos(Array.isArray(detalles) ? detalles : [detalles]);
-  });
-}
-
-private procesarPedidos(data: Producto_extras_ingrSel[]): void {
-  const normalizado = data.map((p) => ({
-    ...p,
-    extras: p.extras ?? [],
-    ingredientes: p.ingredientes ?? [],
-    estado: p.estado ?? 'Sin preparar',
-  }));
-
-  const agrupados: { [id: number]: Producto_extras_ingrSel[] } = {};
-  normalizado.forEach((detalle) => {
-    const id = detalle.pedido_id.id_pedido;
-    if (!agrupados[id]) agrupados[id] = [];
-    agrupados[id].push(detalle);
-  });
-
-  let lista = Object.entries(agrupados).map(([_, productos]) => {
-    const tieneProductosPendientes = productos.some(
-      (p) => p.estado === 'Sin preparar' || p.estado === 'Preparado'
-    );
-
-    return {
-      pedidoId: productos[0].pedido_id,
-      productos,
-      expandido: true,
-      tieneProductosPendientes,
-    };
-  });
-
-  lista = lista.filter((entry) => entry.tieneProductosPendientes);
-
-  lista.sort(
-    (a, b) =>
-      new Date(b.pedidoId.fecha_pedido).getTime() -
-      new Date(a.pedidoId.fecha_pedido).getTime()
-  );
-
-  this.pedidosAgrupados = lista;
-}
-
-
-  cargarPedidos(): void {
-  this.pedidosService.getPedidosConProductosDetalles().subscribe({
-    next: (data) => {
-      console.log('Datos recibidos del servicio:', data);
-
-      // 1) Normalizar datos
-      const normalizado = data.map((p) => ({
-        ...p,
-        extras: p.extras ?? [],
-        ingredientes: p.ingredientes ?? [],
-        // ✅ Normalizar estados null a 'Sin preparar'
-        estado: p.estado ?? 'Sin preparar'
-      }));
-
-      // 2) Agrupar por pedido
-      const agrupados: { [id: number]: Producto_extras_ingrSel[] } = {};
-      normalizado.forEach((detalle) => {
-        const id = detalle.pedido_id.id_pedido;
-        if (!agrupados[id]) agrupados[id] = [];
-        agrupados[id].push(detalle);
-      });
-
-      // 3) Convertir a array y determinar si tienen productos pendientes
-      let lista = Object.entries(agrupados).map(([_, productos]) => {
-        const tieneProductosPendientes = productos.some(
-          p => p.estado === 'Sin preparar' || p.estado === 'Preparado'
-        );
-
-        return {
-          pedidoId: productos[0].pedido_id,
-          productos,
-          expandido: true,
-          tieneProductosPendientes
-        };
-      });
-
-      // 4) Filtrar solo pedidos que tengan al menos un producto pendiente
-      lista = lista.filter(entry => entry.tieneProductosPendientes);
-
-      // 5) Ordenar por fecha más reciente
-      lista.sort((a, b) =>
-        new Date(b.pedidoId.fecha_pedido).getTime() -
-        new Date(a.pedidoId.fecha_pedido).getTime()
+    this.cocinaSocket.onNuevoPedido().subscribe(async (pedido) => {
+      const detalles = await this.pedidosService.getProductosExtrasIngrSel(
+        pedido.pedido_id
       );
 
-      // 6) Asignar al componente
-      this.pedidosAgrupados = lista;
+      this.procesarPedidos(Array.isArray(detalles) ? detalles : [detalles]);
+    });
 
-      console.log('Pedidos agrupados para cocina:', this.pedidosAgrupados);
-    },
-    error: (error) => {
-      console.error('Error cargando pedidos:', error);
-      Swal.fire({
-        title: 'Error',
-        text: 'No se pudieron cargar los pedidos',
-        icon: 'error',
-        timer: 3000,
-        showConfirmButton: false,
+    this.cocinaSocket.onPedidoActualizado().subscribe(async (pedido) => {
+      const detalles = await this.pedidosService.getProductosExtrasIngrSel(
+        pedido.pedido_id
+      );
+
+      this.procesarPedidos(Array.isArray(detalles) ? detalles : [detalles]);
+    });
+  }
+
+  private procesarPedidos(data: Producto_extras_ingrSel[]): void {
+    const normalizado = data.map((p) => ({
+      ...p,
+      extras: p.extras ?? [],
+      ingredientes: p.ingredientes ?? [],
+      estado: p.estado ?? 'Sin preparar',
+    }));
+    console.log(normalizado);
+    console.log;
+
+    const agrupados: { [id: number]: Producto_extras_ingrSel[] } = {};
+    normalizado.forEach((detalle) => {
+      const id = detalle.pedido_id.id_pedido;
+      if (!agrupados[id]) agrupados[id] = [];
+      agrupados[id].push(detalle);
+    });
+
+    let lista = Object.entries(agrupados).map(([_, productos]) => {
+      const tieneProductosPendientes = productos.some(
+        (p) => p.estado === 'Sin preparar' || p.estado === 'Preparado'
+      );
+
+      return {
+        pedidoId: productos[0].pedido_id,
+        productos,
+        expandido: true,
+        tieneProductosPendientes,
+      };
+    });
+
+    lista = lista.filter((entry) => entry.tieneProductosPendientes);
+
+    lista.sort(
+      (a, b) =>
+        new Date(b.pedidoId.fecha_pedido).getTime() -
+        new Date(a.pedidoId.fecha_pedido).getTime()
+    );
+
+    this.pedidosAgrupados = lista;
+  }
+
+  cargarPedidos(): void {
+    console.log('Cargando pedidos...');
+    this.pedidosService
+      .getPedidosActivosConDetalles('cocinero')
+      .subscribe((pedidos: PedidoAgrupado[]) => {
+        this.pedidosAgrupados = pedidos;
       });
-    },
-  });
-}
+  }
 
   toggleExpand(pedido: any): void {
     pedido.expandido = !pedido.expandido;
@@ -198,14 +146,18 @@ private procesarPedidos(data: Producto_extras_ingrSel[]): void {
   }
 
   async marcarPedidoComoElaborado(pedido_id: number): Promise<void> {
-    const pedido = this.pedidosAgrupados.find(p => p.pedidoId.id_pedido === pedido_id);
+    const pedido = this.pedidosAgrupados.find(
+      (p) => p.pedidoId.id_pedido === pedido_id
+    );
 
     if (!pedido) {
       return;
     }
 
     // Filtrar solo los productos que están "Sin preparar"
-    const productosSinPreparar = pedido.productos.filter(p => p.estado === 'Sin preparar');
+    const productosSinPreparar = pedido.productos.filter(
+      (p) => p.estado === 'Sin preparar'
+    );
 
     if (productosSinPreparar.length === 0) {
       Swal.fire({
@@ -297,12 +249,18 @@ private procesarPedidos(data: Producto_extras_ingrSel[]): void {
 
       // Sumar extras
       if (producto.extras && producto.extras.length > 0) {
-        precioProducto += producto.extras.reduce((sum, extra) => sum + extra.precio, 0);
+        precioProducto += producto.extras.reduce(
+          (sum, extra) => sum + extra.precio,
+          0
+        );
       }
 
       // Sumar ingredientes adicionales
       if (producto.ingredientes && producto.ingredientes.length > 0) {
-        precioProducto += producto.ingredientes.reduce((sum, ing) => sum + ing.precio, 0);
+        precioProducto += producto.ingredientes.reduce(
+          (sum, ing) => sum + ing.precio,
+          0
+        );
       }
 
       return total + precioProducto;
@@ -315,23 +273,26 @@ private procesarPedidos(data: Producto_extras_ingrSel[]): void {
     entregados: number;
     pagados: number;
   } {
-    return productos.reduce((contador, producto) => {
-      switch (producto.estado) {
-        case 'Sin preparar':
-          contador.sinPreparar++;
-          break;
-        case 'Preparado':
-          contador.preparados++;
-          break;
-        case 'Entregado':
-          contador.entregados++;
-          break;
-        case 'Pagado':
-          contador.pagados++;
-          break;
-      }
-      return contador;
-    }, { sinPreparar: 0, preparados: 0, entregados: 0, pagados: 0 });
+    return productos.reduce(
+      (contador, producto) => {
+        switch (producto.estado) {
+          case 'Sin preparar':
+            contador.sinPreparar++;
+            break;
+          case 'Preparado':
+            contador.preparados++;
+            break;
+          case 'Entregado':
+            contador.entregados++;
+            break;
+          case 'Pagado':
+            contador.pagados++;
+            break;
+        }
+        return contador;
+      },
+      { sinPreparar: 0, preparados: 0, entregados: 0, pagados: 0 }
+    );
   }
 
   // Método para refrescar datos

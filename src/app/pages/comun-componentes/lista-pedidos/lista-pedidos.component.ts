@@ -95,7 +95,7 @@ export class ListaPedidosComponent implements OnInit {
   }
 
   loadOrders(): void {
-    this.pedidosService.getPedidosConProductosDetalles().subscribe({
+    this.pedidosService.getPedidosConProductosDetalles('mesero').subscribe({
       next: (data: Producto_extras_ingrSel[]) => {
         // 1) Normalizar datos
         const normalizado = data.map(p => ({
@@ -762,9 +762,9 @@ export class ListaPedidosComponent implements OnInit {
     } catch (error) {
       Swal.close();
       console.error('Error al eliminar el producto:', error);
-      
+
       let errorMessage = 'Ocurrió un error al eliminar el producto';
-      
+
       // Manejo específico de errores
       if (error && typeof error === 'object') {
         const err = error as any;
@@ -776,7 +776,7 @@ export class ListaPedidosComponent implements OnInit {
           errorMessage = 'No tiene permisos para eliminar este producto';
         }
       }
-      
+
       Swal.fire({
         title: 'Error al eliminar',
         text: errorMessage,

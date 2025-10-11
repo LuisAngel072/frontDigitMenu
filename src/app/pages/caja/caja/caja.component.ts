@@ -32,7 +32,7 @@ export class CajaComponent {
    * Obtiene todos los pedidos con sus productos relacionados
    */
   async cargarPedidos() {
-    this.pedidosService.getPedidosConProductosDetalles().subscribe({
+    this.pedidosService.getPedidosConProductosDetalles('caja').subscribe({
       next: (data) => {
         // 1) Normalizar
         const normalizado = data.map((p) => ({
