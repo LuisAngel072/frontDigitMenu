@@ -311,7 +311,21 @@ export class ListaPedidosComponent implements OnInit {
     if (this.navOpen) {
       this.navOpen = false;
     }
+    
+    // Si vamos a CERRAR el sidebar 
+    if (this.sidebarOpen) {
+      // Resetear el filtro
+      this.mesaSeleccionada = null;
+      this.mostrandoSoloMesa = false;
+      this.productosDelPedido = [];
+    }
+    
     this.sidebarOpen = !this.sidebarOpen;
+    
+    // Si vamos a ABRIR el sidebar
+    if (this.sidebarOpen) {
+      this.loadOrders();
+    }
   }
 
   toggleNotifications(): void {
@@ -343,6 +357,16 @@ export class ListaPedidosComponent implements OnInit {
 
   toggleOrderExpanded(order: Order): void {
     order.expanded = !order.expanded;
+  }
+
+  closeSidebar(): void {
+    if (this.sidebarOpen) {
+      // Resetear el filtro de mesa antes de cerrar
+      this.mesaSeleccionada = null;
+      this.mostrandoSoloMesa = false;
+      this.productosDelPedido = [];
+      this.sidebarOpen = false;
+    }
   }
 
   async toggleItemStatus(order: Order, item: OrderItem): Promise<void> {

@@ -50,7 +50,14 @@
     <!-- Orders Sidebar -->
     <div class="sidebar orders-sidebar" [class.open]="sidebarOpen">
       <div class="sidebar-header">
-        <h4 class="m-3">Pedidos Activos</h4>
+        <div class="d-flex justify-content-around">
+          <h4 class="m-3">Pedidos Activos</h4>
+          <button class="btn btn-outline-danger btn-sm border-0"
+            (click)="closeSidebar()"
+            title="Cerrar">
+              <i class="bi bi-x-lg"></i>
+          </button>
+        </div>
       </div>
       <div class="orders-container">
         <div class="order-accordion" *ngFor="let order of orders" id="order-{{order.id}}">
