@@ -1,73 +1,116 @@
-/* Contenedor de las columnas de las mesas */
-.columna-pedidos {
-  display: flex;
-  flex-wrap: wrap; /* Permite que las mesas se ajusten a nuevas filas si es necesario */
-  gap: 20px; /* Espaciado entre las mesas */
-  justify-content: space-evenly; /* Asegura que el espacio entre columnas se reparta equitativamente */
+/* Estilo para el contenedor principal que centrará todo */
+.main-content {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 90px 20px 0 20px;
+  box-sizing: border-box;
 }
 
-/* Cada columna tiene un ancho fijo y un tamaño mínimo */
-.columna {
-  flex: 1 1 23%; /* Asigna un tamaño flexible para las columnas, siempre 4 por fila */
-  min-width: 200px; /* Establece un tamaño mínimo para las columnas */
-  max-width: 300px; /* Limita el tamaño máximo de las columnas */
+/* ============================================= */
+/* ==   ESTILOS PARA LA ESTRUCTURA DEL CARRUSEL == */
+/* ============================================= */
+.carousel-container {
+  position: relative;
+  width: 100%;
   display: flex;
-  flex-direction: column; /* Organiza los elementos de cada mesa de forma vertical */
-  justify-content: space-between; /* Asegura que el contenido se distribuya de manera equitativa */
+  /* Esto asegura que todas las tarjetas tengan la misma altura (la de la más alta) */
+  align-items: stretch; 
+  justify-content: center;
+  /* === CAMBIO 1: Añadimos un margen superior para que el header no tape las tarjetas === */
+  margin-top: 2rem; 
 }
 
-/* Diseño de cada mesa */
-.mesa {
-  background-color: #fff;
+.pedidos-wrapper {
+  overflow: hidden;
+  width: 100%;
+}
+
+.pedidos-slider {
+  display: flex;
+  transition: transform 0.5s ease-in-out;
+}
+
+.nav-button {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background-color: rgba(0, 0, 0, 0.5);
+  color: white;
+  border: none;
+  font-size: 2rem;
+  cursor: pointer;
+  z-index: 10;
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.nav-button.prev { left: 10px; }
+.nav-button.next { right: 10px; }
+.nav-button:disabled {
+  background-color: rgba(0, 0, 0, 0.2);
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+/* ============================================= */
+/* ==   ESTILOS PARA TUS TARJETAS DE PEDIDO   == */
+/* ============================================= */
+.pedido-card {
+  flex: 0 0 calc(100% / 3);
+  padding: 0 15px;
+  box-sizing: border-box;
+  display: flex;
+}
+
+.pedido-card .card {
+  width: 100%;
   border: 2px solid #ccc;
-  padding: 15px;
   border-radius: 8px;
+  min-height: 450px;
   display: flex;
   flex-direction: column;
-  justify-content: space-between; /* Asegura que el botón se mantenga en la parte inferior */
-  min-height: 300px; /* Define una altura mínima */
-  text-align: center;
-  box-sizing: border-box; /* Incluye el padding en el cálculo del tamaño total */
+  /* La tarjeta ocupará el 100% de la altura del contenedor estirado */
+  height: 100%; 
 }
 
-/* Cambiar la fuente de "Pedidos" */
-h1 {
-  font-family: 'cocogoose-letter', sans-serif;
+.pedido-card .card-header {
+  padding: 0.5rem 1rem;
+}
+.pedido-card .card-header strong {
+  font-family: 'cocogoose', sans-serif;
   font-weight: bold;
-  font-size: 2rem; /* Tamaño de la fuente para "Pedidos" */
-  text-align: center;
-  margin-bottom: 20px;
+  font-size: 1.2rem;
 }
 
-/* Cambiar la fuente de "Mesa" */
-.mesa-titulo {
-  font-family: 'cocogoose', sans-serif;  /* Fuente para el título de la mesa */
-  font-weight: bold;
-  font-size: 1.5rem; /* Ajusta el tamaño de la fuente */
-  margin-bottom: 15px;
-  text-align: center;  /* Centra el título */
+.pedido-card .card-body {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
 }
 
-
-.ticket-info p {
-  margin: 5px 0;
+.pedido-card .card-body h5 {
+    font-size: 1.25rem;
+    font-weight: 600;
 }
 
-.btn-realizado {
+/* === CAMBIO 2: La lista de productos ahora crecerá libremente === */
+.productos-list {
+    flex-grow: 1; /* Esto empuja el botón "Marcar como elaborado" hacia abajo */
+    /* Se eliminan 'overflow-y: auto' y 'max-height' para que se muestre todo */
+}
+
+.pedido-card .btn-success {
   background-color: var(--color-botonP);
   color: white;
-  padding: 10px 20px;
   border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  width: 100%;
-  margin-top: 20px; /* Margen superior para separar el botón de los pedidos */
+  /* Margen para separarlo de la lista de productos */
+  margin-top: 1rem; 
 }
 
-.btn-realizado:hover {
+.pedido-card .btn-success:hover {
   background-color: var(--color-botonPH);
-}
-
-.main-content {
-  padding-top: 90px;
 }
