@@ -162,13 +162,13 @@ export class MeserosComponent implements OnInit, OnDestroy {
       });
 
       // Buscar pedidos de la mesa usando el mismo método que usa el carrito
-      this.pedidosService.getPedidosConProductosDetalles('mesero').subscribe({
+      this.pedidosService.getPedidosActivosConDetalles('mesero').subscribe({
         next: (data) => {
           console.log('Todos los pedidos obtenidos:', data);
 
           // Filtrar productos que pertenecen a la mesa seleccionada
           const productosDeMesa = data.filter(detalle =>
-            detalle.pedido_id?.no_mesa?.no_mesa === mesa.no_mesa
+            detalle.pedidoId?.no_mesa?.no_mesa === mesa.no_mesa
           );
 
           console.log(`Productos encontrados para mesa ${mesa.no_mesa}:`, productosDeMesa);

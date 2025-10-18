@@ -9,29 +9,29 @@
 .navbar {
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
   z-index: 1030;
-  
+
   .logo {
     display: flex;
     flex-direction: column;
     line-height: 1;
-    
+
     .logo-digit {
       color: #ff8800;
       font-weight: bold;
       font-size: 1.2rem;
     }
-    
+
     .logo-menu {
       color: #333;
       font-weight: bold;
       font-size: 1.2rem;
     }
   }
-  
+
   .navbar-icons {
     display: flex;
     gap: 15px;
-    
+
     .navbar-icon {
       display: flex;
       align-items: center;
@@ -41,15 +41,15 @@
       padding: 0;
       border-radius: 50%;
       position: relative;
-      
+
       &:hover {
         background-color: rgba(0, 0, 0, 0.05);
       }
-      
+
       i {
         font-size: 1.4rem;
       }
-      
+
       &.notification-btn {
         .notification-badge {
           position: absolute;
@@ -87,60 +87,83 @@
   overflow-y: auto;
 }
 
-/* Sidebar styling - shared properties */
 .sidebar {
-  position: absolute;
+  position: fixed;
+  top: 60px;
+  bottom: 0;
   width: 300px;
-  height: 100%;
   background-color: #fff;
   box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
-  transition: transform 0.3s ease-in-out;
   z-index: 1020;
   overflow-y: auto;
-  
-  .sidebar-header {
-    background-color: #f8f9fa;
-    border-bottom: 1px solid #e9ecef;
-  }
-  
-  &.open {
-    transform: translateX(0);
+  transition: left 0.3s ease-in-out; /* Animate the 'left' property */
+  left: -300px;
+}
+
+/* Reglas específicas para cada barra lateral cuando está abierta */
+.sidebar.open {
+  /* Cuando cualquier sidebar tiene la clase .open, se posiciona en la pantalla */
+  left: 0;
+}
+
+.sidebar.notifications-sidebar {
+  /* La barra de notificaciones se maneja desde la derecha */
+  right:auto;
+  left: -300px; /* Oculta a la derecha por defecto */
+  transition: right 0.3s ease-in-out; /* Animamos 'right' */
+}
+
+.sidebar.notifications-sidebar.open {
+  left: 0; //Traemos la vista desde la derecha
+  right: auto; /* Nos aseguramos de que no interfiera */
+}
+
+/* El estilo para .main-content y .main-content.shifted se mantiene igual,
+   ya que es correcto y responde al estado de la barra lateral. */
+.main-content {
+  flex: 1;
+  padding: 1rem;
+  transition: margin-left 0.3s ease-in-out;
+  width: 100%;
+
+  &.shifted {
+    margin-left: 300px;
   }
 }
 
 /* Navigation sidebar specific */
 .nav-sidebar {
   transform: translateX(-100%);
-  
+
   .nav-items-container {
     padding: 0.5rem 0;
-    
+
     .nav-item {
       display: flex;
       align-items: center;
       padding: 0.75rem 1.5rem;
       cursor: pointer;
       transition: background-color 0.2s ease;
-      
+
       &:hover {
         background-color: #f8f9fa;
       }
-      
+
       i {
         margin-right: 12px;
         font-size: 1.2rem;
         color: #555;
       }
-      
+
       span {
         font-size: 1rem;
         color: #333;
       }
-      
+
       &:last-child {
         margin-top: 1rem;
         border-top: 1px solid #e9ecef;
-        
+
         i {
           color: #dc3545;
         }
@@ -152,7 +175,7 @@
 /* Orders sidebar specific */
 .orders-sidebar {
   transform: translateX(-100%);
-  
+
   .orders-container {
     padding: 1rem 0;
   }
@@ -161,11 +184,11 @@
 /* Notifications sidebar specific */
 .notifications-sidebar {
   transform: translateX(-100%);
-  
+
   .notifications-container {
     padding: 0.5rem;
   }
-  
+
   .notification-item {
     margin-bottom: 0.5rem;
     padding: 0.75rem;
@@ -173,29 +196,29 @@
     background-color: #f8f9fa;
     cursor: pointer;
     transition: background-color 0.2s ease;
-    
+
     &:hover {
       background-color: #e9ecef;
     }
-    
+
     &.unread {
       background-color: #e3f2fd;
       border-left: 3px solid #3498db;
-      
+
       &:hover {
         background-color: #d0e8fb;
       }
     }
-    
+
     .notification-header {
       margin-bottom: 0.3rem;
-      
+
       .notification-time {
         font-size: 0.75rem;
         color: #6c757d;
       }
     }
-    
+
     .notification-message {
       font-size: 0.9rem;
     }
@@ -206,12 +229,12 @@
 .order-accordion {
   margin-bottom: 10px;
   border-bottom: 1px solid #eee;
-  
+
   .order-header {
     background-color: #6bb5e3;
     color: white;
     cursor: pointer;
-    
+
     &:hover {
       background-color: #5aa4d2;
     }
@@ -223,29 +246,29 @@
   .order-item {
     padding: 8px 0;
     border-bottom: 1px solid #eee;
-    
+
     &:last-child {
       border-bottom: none;
     }
-    
+
     .item-name {
       font-weight: 500;
     }
-    
+
     .status-text {
       font-size: 0.8rem;
       font-style: italic;
     }
-    
+
     .status-controls {
       display: flex;
       align-items: center;
-      
+
       .form-check-input {
         width: 20px;
         height: 20px;
         cursor: pointer;
-        
+
         &:checked {
           background-color: #28a745;
           border-color: #28a745;
@@ -261,7 +284,7 @@
   padding: 1rem;
   transition: margin-left 0.3s ease-in-out;
   width: 100%;
-  
+
   &.shifted {
     margin-left: 300px;
   }
@@ -286,7 +309,7 @@
     width: 80%;
     max-width: 300px;
   }
-  
+
   .main-content.shifted {
     margin-left: 0;
   }
@@ -304,4 +327,17 @@
 .order-item:hover {
   background-color: #e9ecef;
   border-color: #dee2e6;
+}
+
+.main-content {
+
+  margin-left: 0;
+  padding: 20px;
+  width: 100%;
+  transition: margin-left 0.3s ease-in-out;
+}
+
+.main-content.shifted {
+  margin-left: 300px;
+  width: calc(100% - 300px);
 }

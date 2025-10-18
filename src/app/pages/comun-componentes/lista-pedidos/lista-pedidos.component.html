@@ -1,136 +1,80 @@
-<!-- lista-pedidos.component.html -->
 <div class="order-system-container">
-  <!-- Navbar -->
   <nav class="navbar navbar-expand-lg navbar-light bg-light">
     <div class="container-fluid d-flex justify-content-between">
-      <!-- Logo (20% width) -->
       <div class="navbar-icons-head">
         <a class="navbar-brand" href="#">
-          <span class="logo">
-            <span class="logo-digit">DIGIT</span>
-            <span class="logo-menu">MENU</span>
-          </span>
+          <span class="logo"
+            ><span class="logo-digit">DIGIT</span
+            ><span class="logo-menu">MENU</span></span
+          >
         </a>
-        
-          <!-- Order list icon -->
-          <button class="btn navbar-icon" (click)="toggleSidebar()">
-            <span class="material-symbols-outlined" style="color: #ff8800; font-size: 24px;">chef_hat</span>
-          </button>
-          
-          <!-- Notifications icon -->
-          <button class="btn navbar-icon notification-btn" (click)="toggleNotifications()">
-            <i class="bi bi-bell" style="color: #3498db; font-size: 24px;"></i>
-            <span *ngIf="unreadNotifications > 0" class="notification-badge">{{unreadNotifications}}</span>
-          </button>
-          
-          <!-- Main hamburger menu (always visible) -->
-          <button class="btn navbar-icon" (click)="toggleNavigation()">
-            <span class="material-symbols-outlined">menu</span>
-          </button>
-        
+        <button class="btn navbar-icon" (click)="toggleSidebar()">
+          <span
+            class="material-symbols-outlined"
+            style="color: #ff8800; font-size: 24px"
+            >chef_hat</span
+          >
+        </button>
+        <button
+          class="btn navbar-icon notification-btn"
+          (click)="toggleNotifications()"
+        >
+          <i class="bi bi-bell" style="color: #3498db; font-size: 24px"></i
+          ><span *ngIf="unreadNotifications > 0" class="notification-badge">{{
+            unreadNotifications
+          }}</span>
+        </button>
+        <button class="btn navbar-icon" (click)="toggleNavigation()">
+          <span class="material-symbols-outlined">menu</span>
+        </button>
       </div>
-
     </div>
   </nav>
 
   <div class="content-container">
-    <!-- Navigation Sidebar -->
     <div class="sidebar nav-sidebar" [class.open]="navOpen">
-      <div class="sidebar-header">
-        <h4 class="m-3">Menú</h4>
-      </div>
-      <div class="nav-items-container">
-        <div class="nav-item" *ngFor="let item of navItems" (click)="navigate(item.route)">
-          <i class="bi {{ item.icon }}"></i>
-          <span>{{ item.name }}</span>
         </div>
-      </div>
-    </div>
-    
-    <!-- Orders Sidebar -->
-    <div class="sidebar orders-sidebar" [class.open]="sidebarOpen">
-      <div class="sidebar-header">
-        <h4 class="m-3">Pedidos Activos</h4>
-      </div>
-      <div class="orders-container">
-        <div class="order-accordion" *ngFor="let order of orders" id="order-{{order.id}}">
-          <div class="order-header" (click)="toggleOrderExpanded(order)">
-            <div class="d-flex justify-content-between align-items-center w-100 px-3 py-2">
-              <h5 class="mb-0">PEDIDO {{ order.id }}</h5>
-              <i class="bi" [ngClass]="{'bi-chevron-up': order.expanded, 'bi-chevron-down': !order.expanded}" style="font-size: 18px;"></i>
-            </div>
-          </div>
-          
-          <div class="order-content" [ngClass]="{'show': order.expanded}">
-            <div class="p-3">
-              <div class="table-info mb-3 d-flex justify-content-between align-items-center">
-                <span class="fw-bold">No de mesa: {{ order.tableNumber }}</span>
-                <div class="mark-delivered-btn">
-                  <button class="btn btn-sm btn-outline-success" (click)="markAllAsDelivered(order)">
-                    Marcar todo como entregado
-                  </button>
-                </div>
-              </div>
-              
-              <div class="order-items">
-                <div class="order-item d-flex justify-content-between align-items-center mb-2 position-relative" 
-                    *ngFor="let item of order.items">
-                  
-                  <!-- Información del producto -->
-                  <div class="item-details flex-grow-1">
-                    <span class="item-name d-block">{{ item.name }}</span>
-                    <small class="text-muted d-block">{{ item.opcion }}</small>
-                    
-                    <!-- Mostrar extras si los hay -->
-                    <small class="text-info d-block" *ngIf="item.extras && item.extras.length > 0">
-                      Extras: {{ obtenerNombresExtras(item.extras) }}
-                    </small>
-                    
-                    <!-- Mostrar ingredientes si los hay -->
-                    <small class="text-secondary d-block" *ngIf="item.ingredientes && item.ingredientes.length > 0">
-                      Ingredientes: {{ obtenerNombresIngredientes(item.ingredientes) }}
-                    </small>
-                    
-                    <!-- Precio total del producto -->
-                    <small class="fw-bold text-success d-block">
-                      ${{ calcularTotalProducto(item) }}
-                    </small>
-                    
-                    <!-- Estado del producto -->
-                    <small [ngClass]="getStatusClass(item.status)" class="d-block status-text">
-                      {{ getStatusText(item.status) }}
-                    </small>
-                  </div>
 
-                  <!-- Controles del lado derecho -->
-                  <div class="item-controls d-flex align-items-center">
-                    
-                    <!-- Botón de eliminar producto (solo si se puede eliminar) -->
-                    <button 
-                      *ngIf="puedeEliminarProducto(item)"
-                      class="btn btn-sm btn-outline-danger me-2 delete-product-btn"
-                      (click)="eliminarProducto(order, item)"
-                      title="Eliminar producto"
-                      style="padding: 4px 8px;">
-                      <i class="bi bi-trash" style="font-size: 12px;"></i>
-                    </button>
-                    
-                    <!-- Texto informativo si no se puede eliminar -->
-                    <span *ngIf="!puedeEliminarProducto(item)" 
-                          class="text-muted me-2" 
-                          style="font-size: 10px;">
-                      No eliminable
-                    </span>
-                    
-                    <!-- Checkbox para marcar como entregado -->
-                    <div class="form-check">
-                      <input 
-                        type="checkbox" 
-                        class="form-check-input" 
-                        [checked]="item.status === 'Entregado'"
-                        (change)="toggleItemStatus(order, item)"
-                        id="item-{{order.id}}-{{item.name}}-{{item.pedido_prod_id}}"
-                        [disabled]="item.status === 'Pagado'">
+    <div class="sidebar order-sidebar" [class.open]="sidebarOpen">
+      <div class="sidebar-header"><h4 class="m-3">Pedidos Activos</h4></div>
+      <div class="orders-container">
+        <div *ngIf="isLoading" class="text-center p-3">Cargando...</div>
+        <div *ngIf="!isLoading && pedidosAgrupados.length === 0" class="text-center p-3">
+          <p>No hay pedidos pendientes.</p>
+        </div>
+        <div class="accordion" id="ordersAccordion">
+          <div class="accordion-item" *ngFor="let pedido of pedidosAgrupados; let i = index">
+            <h2 class="accordion-header" [id]="'heading' + i">
+              <button class="accordion-button" type="button" (click)="pedido.expandido = !pedido.expandido" [class.collapsed]="!pedido.expandido">
+                Mesa {{ pedido.pedidoId.no_mesa.no_mesa }}
+                <span class="badge ms-2" [ngClass]="{'bg-warning text-dark': pedido.tieneProductosPendientes, 'bg-success': !pedido.tieneProductosPendientes}">
+                  {{ pedido.tieneProductosPendientes ? 'Pendiente' : 'OK' }}
+                </span>
+              </button>
+            </h2>
+            <div class="accordion-collapse collapse" [class.show]="pedido.expandido">
+              <div class="accordion-body">
+                <div class="order-actions mb-2">
+                  <div class="form-check">
+                    <input class="form-check-input" type="checkbox" [id]="'selectAll' + i" (change)="marcarPedidoCompleto(pedido)">
+                    <label class="form-check-label" [for]="'selectAll' + i">Marcar todo como preparado</label>
+                  </div>
+                </div>
+                <div class="order-items-list">
+                  <div class="order-item" *ngFor="let producto of pedido.productos">
+                    <div class="item-info">
+                      <span class="item-name cocogoose-font">{{ producto.producto_id.nombre_prod }}</span>
+                      <small class="text-muted d-block cocogoose-font">{{ producto.opcion_id.nombre_opcion }}</small>
+                      <span class="status-text" [ngClass]="{'text-warning': producto.estado === 'Sin preparar', 'text-success': producto.estado === 'Preparado'}">{{ producto.estado }}</span>
+                    </div>
+                    <div class="status-controls">
+                      <span class="material-symbols-outlined delete-icon" *ngIf="puedeEliminarProducto(producto)" (click)="eliminarProductoDelPedido(producto, pedido)">delete</span>
+                      <input
+                        class="form-check-input"
+                        type="checkbox"
+                        [checked]="producto.estado === 'Preparado'"
+                        (change)="cambiarEstadoProducto(producto, pedido)"
+                      />
                     </div>
                   </div>
                 </div>
@@ -141,38 +85,14 @@
       </div>
     </div>
 
-    <!-- Notifications Sidebar -->
     <div class="sidebar notifications-sidebar" [class.open]="notificationsOpen">
-      <div class="sidebar-header">
-        <h4 class="m-3">Notificaciones</h4>
-      </div>
-      <div class="notifications-container">
-        <div *ngIf="notifications.length === 0" class="text-center p-3">
-          <p>No hay notificaciones</p>
         </div>
-        
-        <div class="notification-item" *ngFor="let notification of notifications" 
-             [class.unread]="!notification.read"
-             (click)="goToOrder(notification.tableNumber)">
-          <div class="notification-content">
-            <div class="notification-header d-flex justify-content-between">
-              <span class="notification-table fw-bold">Mesa {{ notification.tableNumber }}</span>
-              <span class="notification-time">{{ formatTime(notification.time) }}</span>
-            </div>
-            <div class="notification-message">
-              {{ notification.message }}
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
 
-    <!-- Main content -->
     <div class="main-content" [class.shifted]="sidebarOpen || notificationsOpen || navOpen">
       <div class="tables-container">
-        <!-- Add ng-content here to project content from parent component -->
         <ng-content></ng-content>
       </div>
     </div>
+
   </div>
 </div>

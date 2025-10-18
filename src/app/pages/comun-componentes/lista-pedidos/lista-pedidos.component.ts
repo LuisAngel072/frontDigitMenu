@@ -1,8 +1,9 @@
 // lista-pedidos.component.ts
-import { Component, OnInit } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
 import { PedidosService } from '../../../services/pedidos.service';
 import {
   EstadoPedidoHasProductos,
+  PedidoAgrupado,
   Producto_extras_ingrSel,
 } from '../../../interfaces/types';
 import Swal from 'sweetalert2';
@@ -43,11 +44,11 @@ interface NavItem {
 }
 
 @Component({
-    selector: 'app-lista-pedidos',
-    templateUrl: './lista-pedidos.component.html',
-    styleUrls: ['./lista-pedidos.component.scss'],
-    standalone: true,
-    imports: [CommonModule]
+  selector: 'app-lista-pedidos',
+  templateUrl: './lista-pedidos.component.html',
+  styleUrls: ['./lista-pedidos.component.scss'],
+  standalone: true,
+  imports: [CommonModule],
 })
 export class ListaPedidosComponent implements OnInit {
   orders: Order[] = [];
@@ -57,11 +58,21 @@ export class ListaPedidosComponent implements OnInit {
   navOpen = false;
   unreadNotifications = 0;
   navItems: NavItem[] = [];
-
+  estadosProductos: EstadoPedidoHasProductos[] = [
+    EstadoPedidoHasProductos.sin_preparar,
+    EstadoPedidoHasProductos.preparado,
+    EstadoPedidoHasProductos.entregado,
+    EstadoPedidoHasProductos.pagado,
+  ];
   // Nuevas propiedades para el filtrado por mesa
   mesaSeleccionada: number | null = null;
-  productosDelPedido: Producto_extras_ingrSel[] = [];
+  productosDelPedido: PedidoAgrupado[] = [];
   mostrandoSoloMesa: boolean = false;
+
+  @Input() rol: string = 'mesero'; // Rol por defecto es mesero
+
+  public pedidosAgrupados: PedidoAgrupado[] = [];
+  public isLoading = true;
 
   constructor(private pedidosService: PedidosService) {}
 
@@ -95,84 +106,31 @@ export class ListaPedidosComponent implements OnInit {
   }
 
   loadOrders(): void {
-    this.pedidosService.getPedidosConProductosDetalles('mesero').subscribe({
-      next: (data: Producto_extras_ingrSel[]) => {
-        // 1) Normalizar datos
-        const normalizado = data.map(p => ({
-          ...p,
-          extras: p.extras ?? [],
-          ingredientes: p.ingredientes ?? [],
-        }));
-
-        // 2) Filtrar por mesa si hay una seleccionada
-        let datosFiltrados = normalizado;
-        if (this.mostrandoSoloMesa && this.mesaSeleccionada) {
-          datosFiltrados = normalizado.filter(detalle =>
-            detalle.pedido_id?.no_mesa?.no_mesa === this.mesaSeleccionada
-          );
-        }
-
-        // 3) Agrupar por pedido
-        const agrupados: { [id: number]: Producto_extras_ingrSel[] } = {};
-        datosFiltrados.forEach(detalle => {
-          const id = detalle.pedido_id.id_pedido;
-          if (!agrupados[id]) agrupados[id] = [];
-          agrupados[id].push(detalle);
-        });
-
-        // 4) Convertir a la estructura Order
-        let orders: Order[] = Object.entries(agrupados).map(([_, productos]) => {
-          const first = productos[0];
-          return {
-            id: first.pedido_id.id_pedido,
-            tableNumber: first.pedido_id.no_mesa.no_mesa,
-            // estado: first.pedido_id.estado || "Sin preparar", // Usar el estado real del pedido
-            estado: "Sin preparar",
-            fecha_pedido: new Date(first.pedido_id.fecha_pedido),
-            expanded: false,
-            items: productos.map(p => ({
-              pedido_prod_id: p.pedido_prod_id,
-              name: p.producto_id.nombre_prod,
-              opcion: p.opcion_id?.nombre_opcion || 'Sin opción',
-              precio: p.precio,
-              status: p.estado as 'Sin preparar'|'Preparado'|'Entregado'|'Pagado',
-              extras: p.extras,
-              ingredientes: p.ingredientes,
-            })),
-          };
-        });
-
-        // 5) Filtrar OUT los pedidos cuyo *todos* items están ya en 'Entregado' o 'Pagado'
-        orders = orders.filter(o =>
-          !o.items.every(i => i.status === 'Entregado' || i.status === 'Pagado')
+    this.isLoading = true;
+    this.pedidosService.getPedidosActivosConDetalles(this.rol).subscribe({
+      next: (pedidos) => {
+        // La API ya devuelve los datos en el formato que necesitamos.
+        // Simplemente asignamos la respuesta.
+        this.pedidosAgrupados = pedidos;
+        console.log(
+          'Pedidos cargados y agrupados desde el backend:',
+          this.pedidosAgrupados
         );
-
-        // 6) Ordenar por fecha más reciente
-        orders.sort((a, b) => b.fecha_pedido.getTime() - a.fecha_pedido.getTime());
-
-        // 7) Asignar al componente
-        this.orders = orders;
-
-        console.log('Pedidos cargados:', this.orders);
-        if (this.mostrandoSoloMesa) {
-          console.log(`Mostrando solo pedidos de mesa ${this.mesaSeleccionada}:`, this.orders);
-        }
+        this.isLoading = false;
       },
-      error: err => {
-        console.error('Error cargando pedidos:', err);
-        Swal.fire({
-          title: 'Error',
-          text: 'No se pudieron cargar los pedidos',
-          icon: 'error',
-          timer: 3000,
-          showConfirmButton: false,
-        });
-      }
+      error: (err) => {
+        console.error('Error al cargar los pedidos:', err);
+        Swal.fire('Error', 'No se pudieron cargar los pedidos.', 'error');
+        this.isLoading = false;
+      },
     });
   }
 
   // MÉTODO REQUERIDO POR EL COMPONENTE MESEROS
-  cargarPedidosMesa(mesaNumber: number, productosYaFiltrados?: Producto_extras_ingrSel[]): void {
+  cargarPedidosMesa(
+    mesaNumber: number,
+    productosYaFiltrados?: PedidoAgrupado[]
+  ): void {
     console.log(`Cargando pedidos para mesa ${mesaNumber}`);
     this.mesaSeleccionada = mesaNumber;
     this.mostrandoSoloMesa = true;
@@ -180,7 +138,7 @@ export class ListaPedidosComponent implements OnInit {
     if (productosYaFiltrados && productosYaFiltrados.length > 0) {
       // Si ya tenemos los productos filtrados, los procesamos directamente
       this.productosDelPedido = productosYaFiltrados;
-      this.procesarProductosDelPedido(productosYaFiltrados);
+
       console.log(`Pedidos cargados para mesa ${mesaNumber}:`, this.orders);
 
       // Abrir el sidebar y expandir el pedido
@@ -188,7 +146,9 @@ export class ListaPedidosComponent implements OnInit {
       if (this.orders.length > 0) {
         this.orders[0].expanded = true;
         setTimeout(() => {
-          const orderElement = document.getElementById(`order-${this.orders[0].id}`);
+          const orderElement = document.getElementById(
+            `order-${this.orders[0].id}`
+          );
           if (orderElement) {
             orderElement.scrollIntoView({ behavior: 'smooth' });
           }
@@ -202,7 +162,9 @@ export class ListaPedidosComponent implements OnInit {
   }
 
   // MÉTODO AUXILIAR PARA PROCESAR PRODUCTOS DEL PEDIDO
-  private procesarProductosDelPedido(productos: Producto_extras_ingrSel[]): void {
+  private procesarProductosDelPedido(
+    productos: Producto_extras_ingrSel[]
+  ): void {
     if (!productos || productos.length === 0) {
       console.log('No hay productos para procesar');
       this.orders = [];
@@ -210,7 +172,7 @@ export class ListaPedidosComponent implements OnInit {
     }
 
     // Normalizar datos
-    const normalizado = productos.map(p => ({
+    const normalizado = productos.map((p) => ({
       ...p,
       extras: p.extras ?? [],
       ingredientes: p.ingredientes ?? [],
@@ -218,33 +180,39 @@ export class ListaPedidosComponent implements OnInit {
 
     // Agrupar por pedido
     const agrupados: { [id: number]: Producto_extras_ingrSel[] } = {};
-    normalizado.forEach(detalle => {
+    normalizado.forEach((detalle) => {
       const id = detalle.pedido_id.id_pedido;
       if (!agrupados[id]) agrupados[id] = [];
       agrupados[id].push(detalle);
     });
 
     // Convertir a la estructura Order
-    const orders: Order[] = Object.entries(agrupados).map(([_, productosGrupo]) => {
-      const first = productosGrupo[0];
-      return {
-        id: first.pedido_id.id_pedido,
-        tableNumber: first.pedido_id.no_mesa.no_mesa,
-        // estado: first.pedido_id.estado || "Sin preparar",
-        estado: "Sin preparar",
-        fecha_pedido: new Date(first.pedido_id.fecha_pedido),
-        expanded: false,
-        items: productosGrupo.map(p => ({
-          pedido_prod_id: p.pedido_prod_id,
-          name: p.producto_id.nombre_prod,
-          opcion: p.opcion_id?.nombre_opcion || 'Sin opción',
-          precio: p.precio,
-          status: p.estado as 'Sin preparar'|'Preparado'|'Entregado'|'Pagado',
-          extras: p.extras,
-          ingredientes: p.ingredientes,
-        })),
-      };
-    });
+    const orders: Order[] = Object.entries(agrupados).map(
+      ([_, productosGrupo]) => {
+        const first = productosGrupo[0];
+        return {
+          id: first.pedido_id.id_pedido,
+          tableNumber: first.pedido_id.no_mesa.no_mesa,
+          // estado: first.pedido_id.estado || "Sin preparar",
+          estado: 'Sin preparar',
+          fecha_pedido: new Date(first.pedido_id.fecha_pedido),
+          expanded: false,
+          items: productosGrupo.map((p) => ({
+            pedido_prod_id: p.pedido_prod_id,
+            name: p.producto_id.nombre_prod,
+            opcion: p.opcion_id?.nombre_opcion || 'Sin opción',
+            precio: p.precio,
+            status: p.estado as
+              | 'Sin preparar'
+              | 'Preparado'
+              | 'Entregado'
+              | 'Pagado',
+            extras: p.extras,
+            ingredientes: p.ingredientes,
+          })),
+        };
+      }
+    );
 
     // Ordenar por fecha más reciente
     orders.sort((a, b) => b.fecha_pedido.getTime() - a.fecha_pedido.getTime());
@@ -266,7 +234,7 @@ export class ListaPedidosComponent implements OnInit {
   }
 
   // MÉTODO PARA OBTENER PRODUCTOS DE LA MESA SELECCIONADA
-  obtenerProductosMesaSeleccionada(): Producto_extras_ingrSel[] {
+  obtenerProductosMesaSeleccionada(): PedidoAgrupado[] {
     return this.productosDelPedido;
   }
 
@@ -637,7 +605,7 @@ export class ListaPedidosComponent implements OnInit {
       // Sumar extras si los hay
       if (item.extras && item.extras.length > 0) {
         const extrasTotal = item.extras.reduce((sum, extra: any) => {
-          return sum + (+(extra.precio || 0));
+          return sum + +(extra.precio || 0);
         }, 0);
         precio += extrasTotal;
       }
@@ -645,7 +613,7 @@ export class ListaPedidosComponent implements OnInit {
       // Sumar ingredientes adicionales si los hay
       if (item.ingredientes && item.ingredientes.length > 0) {
         const ingredientesTotal = item.ingredientes.reduce((sum, ing: any) => {
-          return sum + (+(ing.precio || 0));
+          return sum + +(ing.precio || 0);
         }, 0);
         precio += ingredientesTotal;
       }
@@ -664,10 +632,12 @@ export class ListaPedidosComponent implements OnInit {
       return '';
     }
 
-    return extras.map((extra: any) => {
-      // Manejo más robusto del nombre del extra
-      return extra.nombre_extra || extra.nombre || extra.name || 'Extra';
-    }).join(', ');
+    return extras
+      .map((extra: any) => {
+        // Manejo más robusto del nombre del extra
+        return extra.nombre_extra || extra.nombre || extra.name || 'Extra';
+      })
+      .join(', ');
   }
 
   // Método para obtener nombres de ingredientes
@@ -676,16 +646,20 @@ export class ListaPedidosComponent implements OnInit {
       return '';
     }
 
-    return ingredientes.map((ing: any) => {
-      return ing.nombre_ingrediente || ing.nombre || ing.name || 'Ingrediente';
-    }).join(', ');
+    return ingredientes
+      .map((ing: any) => {
+        return (
+          ing.nombre_ingrediente || ing.nombre || ing.name || 'Ingrediente'
+        );
+      })
+      .join(', ');
   }
 
   /**
    * Elimina un producto específico del pedido
    * @param order - Pedido que contiene el producto
    * @param item - Producto a eliminar
-  */
+   */
   async eliminarProducto(order: Order, item: OrderItem): Promise<void> {
     // Verificar que el producto se puede eliminar
     if (item.status !== 'Sin preparar') {
@@ -714,7 +688,7 @@ export class ListaPedidosComponent implements OnInit {
       confirmButtonColor: '#d33',
       cancelButtonColor: '#3085d6',
       confirmButtonText: 'Sí, eliminar',
-      cancelButtonText: 'Cancelar'
+      cancelButtonText: 'Cancelar',
     });
 
     if (!isConfirmed) {
@@ -733,7 +707,9 @@ export class ListaPedidosComponent implements OnInit {
       });
 
       // Eliminar el producto del servidor
-      await this.pedidosService.eliminarProductoDelPedido(item.pedido_prod_id).toPromise();
+      await this.pedidosService
+        .eliminarProductoDelPedido(item.pedido_prod_id)
+        .toPromise();
 
       // Remover el producto de la lista local
       const itemIndex = order.items.indexOf(item);
@@ -769,7 +745,8 @@ export class ListaPedidosComponent implements OnInit {
       if (error && typeof error === 'object') {
         const err = error as any;
         if (err.status === 400) {
-          errorMessage = 'No se puede eliminar el producto porque ya está en preparación';
+          errorMessage =
+            'No se puede eliminar el producto porque ya está en preparación';
         } else if (err.status === 404) {
           errorMessage = 'El producto no existe o ya fue eliminado';
         } else if (err.status === 403) {
@@ -788,12 +765,124 @@ export class ListaPedidosComponent implements OnInit {
   }
 
   /**
+   * CÓDIGO REFACTORIZADO
+   */
+
+  /**
    * Verifica si un producto puede ser eliminado
    * Solo se pueden eliminar productos en estado "Sin preparar"
-   * @param item - Producto a verificar
+   * @param producto - Producto a verificar
    * @returns true si el producto puede ser eliminado
    */
-  puedeEliminarProducto(item: OrderItem): boolean {
-    return item.status === 'Sin preparar';
+  puedeEliminarProducto(producto: Producto_extras_ingrSel): boolean {
+    return producto.estado === EstadoPedidoHasProductos.sin_preparar;
+  }
+
+  /**
+   * Elimina un producto de un pedido.
+   * Acepta la nueva interfaz 'Producto_extras_ingrSel'.
+   */
+  async eliminarProductoDelPedido(producto: Producto_extras_ingrSel, pedido: PedidoAgrupado): Promise<void> {
+    if (!this.puedeEliminarProducto(producto)) return;
+
+    Swal.fire({
+      title: '¿Cancelar producto?',
+      text: `Se eliminará "${producto.producto_id.nombre_prod}" del pedido. Esta acción no se puede deshacer.`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Sí, cancelar',
+      cancelButtonText: 'No',
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        try {
+          await this.pedidosService.eliminarProductoDelPedido(producto.pedido_prod_id);
+
+          // Actualización visual instantánea: elimina el producto de la lista
+          pedido.productos = pedido.productos.filter(p => p.pedido_prod_id !== producto.pedido_prod_id);
+
+          Swal.fire('Cancelado', 'El producto ha sido eliminado del pedido.', 'success');
+        } catch (error) {
+          console.error('Error al eliminar el producto:', error);
+          Swal.fire('Error', 'No se pudo eliminar el producto.', 'error');
+        }
+      }
+    });
+  }
+
+  /**
+   * REFACTORIZADO: Cambia el estado de un solo producto.
+   * Acepta la nueva interfaz 'Producto_extras_ingrSel'.
+   */
+  async cambiarEstadoProducto(
+    producto: Producto_extras_ingrSel,
+    pedido: PedidoAgrupado
+  ): Promise<void> {
+    try {
+      // Llama a la API para cambiar el estado a 'Entregado'
+      await this.pedidosService.cambiarEstadoDeProducto(
+        producto.pedido_prod_id,
+        EstadoPedidoHasProductos.entregado
+      );
+
+      // Actualización visual instantánea: elimina el producto de la lista local
+      pedido.productos = pedido.productos.filter(
+        (p) => p.pedido_prod_id !== producto.pedido_prod_id
+      );
+
+      // Si el pedido ya no tiene productos visibles, se elimina el pedido completo de la vista
+      if (pedido.productos.length === 0) {
+        this.pedidosAgrupados = this.pedidosAgrupados.filter(
+          (p) => p.pedidoId.id_pedido !== pedido.pedidoId.id_pedido
+        );
+      }
+    } catch (error) {
+      console.error('Error al cambiar el estado del producto:', error);
+      Swal.fire(
+        'Error',
+        'No se pudo actualizar el estado del producto.',
+        'error'
+      );
+    }
+  }
+
+  /**
+   * REFACTORIZADO: Marca todos los productos de un pedido como preparados.
+   * Acepta la nueva interfaz 'PedidoAgrupado'.
+   */
+  marcarPedidoCompleto(pedido: PedidoAgrupado): void {
+    Swal.fire({
+      title: '¿Confirmar entrega?',
+      text: `Se marcarán todos los productos de la mesa ${pedido.pedidoId.no_mesa.no_mesa} como entregados.`,
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonText: 'Sí, entregar todo',
+      cancelButtonText: 'Cancelar',
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        try {
+          // Crea una promesa para cada actualización de producto
+          const promesasDeActualizacion = pedido.productos.map((producto) =>
+            this.pedidosService.cambiarEstadoDeProducto(
+              producto.pedido_prod_id,
+              EstadoPedidoHasProductos.entregado
+            )
+          );
+          // Espera a que todas las promesas se completen
+          await Promise.all(promesasDeActualizacion);
+
+          // Actualización visual instantánea: elimina el pedido completo de la lista
+          this.pedidosAgrupados = this.pedidosAgrupados.filter(
+            (p) => p.pedidoId.id_pedido !== pedido.pedidoId.id_pedido
+          );
+        } catch (error) {
+          console.error('Error al marcar el pedido como completado:', error);
+          Swal.fire(
+            'Error',
+            'No se pudieron actualizar todos los productos.',
+            'error'
+          );
+        }
+      }
+    });
   }
 }
