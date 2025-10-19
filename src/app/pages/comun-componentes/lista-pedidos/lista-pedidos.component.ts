@@ -9,6 +9,7 @@ import {
 import Swal from 'sweetalert2';
 import { CommonModule } from '@angular/common';
 
+
 interface Order {
   id: number;
   tableNumber: number;
@@ -282,7 +283,21 @@ export class ListaPedidosComponent implements OnInit {
     if (this.navOpen) {
       this.navOpen = false;
     }
+
+    // Si vamos a CERRAR el sidebar
+    if (this.sidebarOpen) {
+      // Resetear el filtro
+      this.mesaSeleccionada = null;
+      this.mostrandoSoloMesa = false;
+      this.productosDelPedido = [];
+    }
+
     this.sidebarOpen = !this.sidebarOpen;
+
+    // Si vamos a ABRIR el sidebar
+    if (this.sidebarOpen) {
+      this.loadOrders();
+    }
   }
 
   toggleNotifications(): void {
@@ -314,6 +329,16 @@ export class ListaPedidosComponent implements OnInit {
 
   toggleOrderExpanded(order: Order): void {
     order.expanded = !order.expanded;
+  }
+
+  closeSidebar(): void {
+    if (this.sidebarOpen) {
+      // Resetear el filtro de mesa antes de cerrar
+      this.mesaSeleccionada = null;
+      this.mostrandoSoloMesa = false;
+      this.productosDelPedido = [];
+      this.sidebarOpen = false;
+    }
   }
 
   async toggleItemStatus(order: Order, item: OrderItem): Promise<void> {
@@ -481,25 +506,6 @@ export class ListaPedidosComponent implements OnInit {
     this.updateUnreadCount();
   }
 
-  formatTime(date: Date): string {
-    const now = new Date();
-    const diffMinutes = Math.round(
-      (now.getTime() - date.getTime()) / (1000 * 60)
-    );
-
-    if (diffMinutes < 1) {
-      return 'Ahora mismo';
-    } else if (diffMinutes < 60) {
-      return `Hace ${diffMinutes} min`;
-    } else if (diffMinutes < 24 * 60) {
-      const hours = Math.floor(diffMinutes / 60);
-      return `Hace ${hours} ${hours === 1 ? 'hora' : 'horas'}`;
-    } else {
-      const days = Math.floor(diffMinutes / (24 * 60));
-      return `Hace ${days} ${days === 1 ? 'día' : 'días'}`;
-    }
-  }
-
   getStatusClass(status: string): string {
     switch (status) {
       case 'Sin preparar':
@@ -586,17 +592,6 @@ export class ListaPedidosComponent implements OnInit {
     this.loadOrders();
   }
 
-  // Formatear fecha para mostrar
-  formatOrderDate(date: Date): string {
-    return new Intl.DateTimeFormat('es-ES', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    }).format(date);
-  }
-
   // Calcular total del pedido
   getOrderTotal(order: Order): number {
     return order.items.reduce((total, item) => {
@@ -626,7 +621,6 @@ export class ListaPedidosComponent implements OnInit {
     return parseFloat(item.precio.toString());
   }
 
-  // Método para obtener nombres de extras (soluciona el error de tipado)
   obtenerNombresExtras(extras: any[]): string {
     if (!extras || extras.length === 0) {
       return '';
@@ -640,7 +634,6 @@ export class ListaPedidosComponent implements OnInit {
       .join(', ');
   }
 
-  // Método para obtener nombres de ingredientes
   obtenerNombresIngredientes(ingredientes: any[]): string {
     if (!ingredientes || ingredientes.length === 0) {
       return '';

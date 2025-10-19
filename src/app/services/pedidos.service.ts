@@ -163,14 +163,19 @@ export class PedidosService {
   buscarPedidoActivoPorMesa(numeroMesa: number): Observable<any | null> {
     return this.obtenerTodosPedidos().pipe(
       map((pedidos) => {
-        const pedidoExistente = pedidos.find(
-          (p) => p.no_mesa?.no_mesa === numeroMesa && p.estado === 'Iniciado'
-        );
-        return pedidoExistente || null;
+        const pedidosActivos = pedidos.filter((p) => {
+          const mesaMatch = p.no_mesa?.no_mesa === numeroMesa;
+          const estadoActivo = !p.estado || p.estado === 'Iniciado';
+          return mesaMatch && estadoActivo;
+        });
+
+        if (pedidosActivos.length > 0) {
+          return pedidosActivos.sort((a, b) => b.id_pedido - a.id_pedido)[0];
+        }
+        return null;
       })
     );
   }
-
   /**
    * Obtiene el pedido iniciado del momento según el número de mesa
    * que se esté buscando. Esta función será utilizada para determinar
@@ -199,12 +204,12 @@ export class PedidosService {
 
   /**
    * Obtiene o crea un pedido para una mesa
+   * Si existe un pedido activo lo retorna, si no, crea uno nuevo
    * @param numeroMesa - Número de la mesa
    * @returns Observable con el ID del pedido
    */
   obtenerOCrearPedidoPorMesa(numeroMesa: number): Observable<number> {
-    // Convertimos la función async a Observable usando from()
-    return from(this.getPedidoIniciadoByNoMesa(numeroMesa)).pipe(
+    return this.buscarPedidoActivoPorMesa(numeroMesa).pipe(
       switchMap((pedidoExistente) => {
         if (pedidoExistente && pedidoExistente.id_pedido) {
           console.log(
@@ -212,36 +217,17 @@ export class PedidosService {
             pedidoExistente.id_pedido
           );
           // Retorna el ID del pedido existente
-          return of(pedidoExistente.id_pedido);
+          return new Observable<number>((observer) => {
+            observer.next(pedidoExistente.id_pedido);
+            observer.complete();
+          });
         } else {
-          console.log(
-            'No existe pedido, creando uno nuevo para mesa:',
-            numeroMesa
-          );
           // Crea nuevo pedido y retorna su ID
           return this.crearNuevoPedido(numeroMesa).pipe(
-            switchMap(() => {
-              // Después de crear, obtenemos el pedido recién creado
-              return from(this.getPedidoIniciadoByNoMesa(numeroMesa)).pipe(
-                map((nuevoPedido) => {
-                  if (nuevoPedido && nuevoPedido.id_pedido) {
-                    console.log(
-                      'Nuevo pedido creado con ID:',
-                      nuevoPedido.id_pedido
-                    );
-                    return nuevoPedido.id_pedido;
-                  } else {
-                    throw new Error('Error al crear el pedido');
-                  }
-                })
-              );
-            })
+            switchMap(() => this.obtenerUltimoPedidoPorMesa(numeroMesa)),
+            map((ultimoPedido) => ultimoPedido.id_pedido)
           );
         }
-      }),
-      catchError((error) => {
-        console.error('Error en obtenerOCrearPedidoPorMesa:', error);
-        return throwError(() => error);
       })
     );
   }
