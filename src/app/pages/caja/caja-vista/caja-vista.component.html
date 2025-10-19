@@ -1,0 +1,43 @@
+<main class="caja-container">
+  <h1 class="mb-4">Caja</h1>
+
+  <table class="table table-striped">
+    <thead>
+      <tr>
+        <th>Pedido</th>
+        <th>No. de mesa</th>
+        <th>Total</th>
+        <th>Acciones</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let pedido of pedidos">
+        <td>{{ pedido.id }}</td>
+        <td>{{ pedido.mesa }}</td>
+        <td>${{ pedido.total }}</td>
+        <td>
+          <button (click)="abrirModal(pedido)" class="btn-ver">
+            <span class="material-symbols-outlined">visibility</span>
+          </button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</main>
+
+
+<div *ngIf="modalAbierto" class="modal-flotante">
+  <h2>Pedido #{{ pedidoSeleccionado?.id }}</h2>
+  <p><strong>Mesa:</strong> {{ pedidoSeleccionado?.mesa }}</p>
+  <p><strong>Total:</strong> ${{ pedidoSeleccionado?.total }}</p>
+  <ul>
+    <li *ngFor="let producto of pedidoSeleccionado?.productos">
+      {{ producto.cantidad }} × {{ producto.nombre }} — ${{ producto.precio }}
+    </li>
+  </ul>
+  <div class="botones-modal">
+    <button (click)="cobrar()" class="btn-cobrar">Cobrar</button>
+    <button (click)="cerrarModal()" class="btn-cerrar">Cerrar</button>
+  </div>
+</div>
+
