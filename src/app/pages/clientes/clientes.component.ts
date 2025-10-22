@@ -54,7 +54,6 @@ export class ClientesComponent implements OnInit {
         // No existe pedido iniciado, lo creamos
         console.log('🆕 No existe pedido, creando uno nuevo...');
         
-        // 🔧 CORREGIDO: Convertimos Observable a Promise
         await firstValueFrom(this.pedidosService.crearNuevoPedido(no_mesa));
         console.log('✅ Pedido creado exitosamente');
       } else {
