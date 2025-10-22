@@ -21,7 +21,6 @@ export class ClientesComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    // 🔧 CORREGIDO: Removemos async y usamos subscribe correctamente
     this.route.queryParams.subscribe(async (params) => {
       this.mesaId = params['mesa'];
       

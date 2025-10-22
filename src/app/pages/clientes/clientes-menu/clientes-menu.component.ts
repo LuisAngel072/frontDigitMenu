@@ -65,8 +65,6 @@ export class ClientesMenuComponent implements OnInit {
   
   cargarPedidoMesa(): void {
     if (!this.mesaId) return;
-
-    // 🔧 CORREGIDO: Pasamos 'cliente' como rol en lugar de string vacío
     this.pedidosService.getPedidosConProductosDetalles('cliente').subscribe({
       next: (data) => {
         console.log('📦 Datos recibidos de pedidos:', data);
@@ -119,7 +117,7 @@ export class ClientesMenuComponent implements OnInit {
         document.getElementById('carritoModal')
       );
       modal.show();
-    }, 300);
+    });
   }
 
   async eliminarProducto(producto: Producto_extras_ingrSel): Promise<void> {
