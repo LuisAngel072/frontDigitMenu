@@ -66,8 +66,8 @@ export class ClientesMenuComponent implements OnInit {
   cargarPedidoMesa(): void {
     if (!this.mesaId) return;
 
-    // 🔧 CORREGIDO: Pasamos string vacío como rol para clientes
-    this.pedidosService.getPedidosConProductosDetalles('').subscribe({
+    // 🔧 CORREGIDO: Pasamos 'cliente' como rol en lugar de string vacío
+    this.pedidosService.getPedidosConProductosDetalles('cliente').subscribe({
       next: (data) => {
         console.log('📦 Datos recibidos de pedidos:', data);
         
@@ -77,15 +77,10 @@ export class ClientesMenuComponent implements OnInit {
           ingredientes: p.ingredientes ?? []
         }));
 
-        // 🔧 CORREGIDO: Manejo seguro de propiedades anidadas
-        const productosDeMiMesa = normalizado.filter(detalle => {
-          const numeroMesa = detalle.pedido_id?.no_mesa?.no_mesa;
-          const mesaIdNum = parseInt(this.mesaId!);
-          
-          console.log(`Comparando: producto mesa=${numeroMesa}, buscada=${mesaIdNum}`);
-          
-          return numeroMesa === mesaIdNum;
-        });
+        const mesaIdNum = parseInt(this.mesaId!);
+        const productosDeMiMesa = normalizado.filter(detalle => 
+          detalle.pedido_id?.no_mesa?.no_mesa === mesaIdNum
+        );
 
         console.log('🎯 Productos de mi mesa:', productosDeMiMesa);
 
@@ -103,7 +98,6 @@ export class ClientesMenuComponent implements OnInit {
       },
       error: (error) => {
         console.error('❌ Error al cargar pedido:', error);
-        // No mostramos error si simplemente no hay productos aún
         this.productosEnPedido = [];
         this.totalCarrito = 0;
       }
@@ -225,12 +219,18 @@ export class ClientesMenuComponent implements OnInit {
       ).toPromise();
 
       Swal.close();
-      Swal.fire('¡Agregado!', 'Producto agregado al pedido', 'success');
+      Swal.fire({
+        title: '¡Agregado!',
+        text: 'Producto agregado al pedido',
+        icon: 'success',
+        timer: 2000,
+        showConfirmButton: false
+      });
 
-      // Esperar un poco antes de recargar para dar tiempo al backend
+      // 🔧 OPTIMIZADO: Tiempo ajustado para mejor sincronización
       setTimeout(() => {
         this.cargarPedidoMesa();
-      }, 500);
+      }, 600);
 
       const modalEl = document.getElementById('productModal');
       const modal = (window as any).bootstrap.Modal.getInstance(modalEl);
