@@ -45,7 +45,7 @@
         <div class="accordion" id="ordersAccordion">
           <div class="accordion-item" *ngFor="let pedido of pedidosAgrupados; let i = index">
             <h2 class="accordion-header" [id]="'heading' + i">
-              <button class="accordion-button" type="button" (click)="pedido.expandido = !pedido.expandido" [class.collapsed]="!pedido.expandido">
+              <button class="accordion-button cocogoose-font" type="button" (click)="pedido.expandido = !pedido.expandido" [class.collapsed]="!pedido.expandido">
                 Mesa {{ pedido.pedidoId.no_mesa.no_mesa }}
                 <span class="badge ms-2" [ngClass]="{'bg-warning text-dark': pedido.tieneProductosPendientes, 'bg-success': !pedido.tieneProductosPendientes}">
                   {{ pedido.tieneProductosPendientes ? 'Pendiente' : 'OK' }}

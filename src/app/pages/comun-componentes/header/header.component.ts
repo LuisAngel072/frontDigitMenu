@@ -42,6 +42,7 @@ export class HeaderComponent {
         this.profileImageUrl = newProfileImg;
       }
     });
+    console.log('Nueva imagen de perfil:', this.profileImageUrl)
     this.subscriptions.add(profileImgSubscription);
   }
 
