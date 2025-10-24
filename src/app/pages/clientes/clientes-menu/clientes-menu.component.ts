@@ -65,31 +65,40 @@ export class ClientesMenuComponent implements OnInit {
 
   cargarPedidoMesa(): void {
     if (!this.mesaId) return;
-
-    // Utilizamos el mismo servicio que utiliza el componente de cocina
-    this.pedidosService.getPedidosConProductosDetalles('').subscribe({
+    this.pedidosService.getPedidosConProductosDetalles('cliente').subscribe({
       next: (data) => {
+        console.log('📦 Datos recibidos de pedidos:', data);
+
         const normalizado = data.map(p => ({
           ...p,
           extras: p.extras ?? [],
           ingredientes: p.ingredientes ?? []
         }));
 
+        const mesaIdNum = parseInt(this.mesaId!);
         const productosDeMiMesa = normalizado.filter(detalle =>
-          detalle.pedido_id?.no_mesa?.no_mesa === parseInt(this.mesaId!)
+          detalle.pedido_id?.no_mesa?.no_mesa === mesaIdNum
         );
+
+        console.log('🎯 Productos de mi mesa:', productosDeMiMesa);
 
         if (productosDeMiMesa.length > 0) {
           this.pedidoActual = productosDeMiMesa[0].pedido_id;
           this.productosEnPedido = productosDeMiMesa;
           this.calcularTotalCarrito();
+          console.log('✅ Pedido cargado. Total productos:', this.productosEnPedido.length);
         } else {
+          console.log('ℹ️ No hay productos en el pedido actual');
           this.pedidoActual = null;
           this.productosEnPedido = [];
           this.totalCarrito = 0;
         }
       },
-      error: (error) => console.error('Error al cargar pedido:', error)
+      error: (error) => {
+        console.error('❌ Error al cargar pedido:', error);
+        this.productosEnPedido = [];
+        this.totalCarrito = 0;
+      }
     });
   }
 
@@ -98,6 +107,7 @@ export class ClientesMenuComponent implements OnInit {
       total + (parseFloat(producto.precio.toString()) || 0), 0
     );
     this.totalCarrito = Math.round(this.totalCarrito * 100) / 100;
+    console.log('💰 Total del carrito:', this.totalCarrito);
   }
 
   mostrarCarrito(): void {
@@ -160,7 +170,7 @@ export class ClientesMenuComponent implements OnInit {
           document.getElementById('productModal')
         );
         modal.show();
-      });
+      }, 100);
     } catch (error) {
       console.error('Error al cargar producto:', error);
       this.ingredientes = [];
@@ -207,9 +217,18 @@ export class ClientesMenuComponent implements OnInit {
       ).toPromise();
 
       Swal.close();
-      Swal.fire('¡Agregado!', 'Producto agregado al pedido', 'success');
+      Swal.fire({
+        title: '¡Agregado!',
+        text: 'Producto agregado al pedido',
+        icon: 'success',
+        timer: 2000,
+        showConfirmButton: false
+      });
 
-      this.cargarPedidoMesa();
+      // 🔧 OPTIMIZADO: Tiempo ajustado para mejor sincronización
+      setTimeout(() => {
+        this.cargarPedidoMesa();
+      }, 600);
 
       const modalEl = document.getElementById('productModal');
       const modal = (window as any).bootstrap.Modal.getInstance(modalEl);
@@ -282,7 +301,6 @@ export class ClientesMenuComponent implements OnInit {
   expandirCoincidencias(): void {
     this.categorias.forEach((cat, i) => {
       this.expandirElemento(`collapse${i}`);
-
       cat.subcategorias.forEach((sub: any) => {
         this.expandirElemento(`subcat-${sub.id_subcat}`);
       });

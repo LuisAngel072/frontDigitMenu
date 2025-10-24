@@ -31,54 +31,48 @@ export class PedidosService {
   ) {}
 
   getPedidosActivosConDetalles(rol: string | null): Observable<PedidoAgrupado[]> {
-  console.log('Iniciando getPedidosActivosConDetalles (Optimizado)...');
+    console.log('Iniciando getPedidosActivosConDetalles (Optimizado)...');
 
-  return this.http.get<PedidoAgrupado[]>(`${this.baseUrl}/activos/${rol}`).pipe(
-    tap(resultado => console.log('Respuesta completa del backend:', resultado)),
-    catchError(err => {
-      console.error('Error al obtener los pedidos activos con detalles', err);
-      return throwError(() => err);
-    })
-  );
-}
-  // Función existente
+    return this.http.get<PedidoAgrupado[]>(`${this.baseUrl}/activos/${rol}`).pipe(
+      tap(resultado => console.log('Respuesta completa del backend:', resultado)),
+      catchError(err => {
+        console.error('Error al obtener los pedidos activos con detalles', err);
+        return throwError(() => err);
+      })
+    );
+  }
+
   getPedidosConProductosDetalles(
     rol: string | null
   ): Observable<Producto_extras_ingrSel[]> {
     console.log('Iniciando getPedidosConProductosDetalles...');
 
     return this.http.get<Pedidos[]>(`${this.baseUrl}`).pipe(
-      // Toca aquí para ver los pedidos iniciales que llegan de la API
       tap((pedidos) => console.log('1. Pedidos recibidos:', pedidos)),
 
       switchMap((pedidos) => {
-        // Si no hay pedidos, retornamos un array vacío inmediatamente
         if (!pedidos || pedidos.length === 0) {
           return of([]);
         }
 
-        // Creamos un array de observables, uno por cada pedido, para obtener sus productos
         const observablesDeProductos = pedidos.map((pedido) =>
+          // 🔧 CORREGIDO: Removida la barra final
           this.http.get<Pedidos_has_productos[]>(
-            `${this.baseUrl}/productos/${pedido.id_pedido}/${rol}`
+            `${this.baseUrl}/productos/${pedido.id_pedido}${rol ? '/' + rol : ''}`
           )
         );
 
-        // Ejecutamos todas las peticiones de productos en paralelo
         return forkJoin(observablesDeProductos);
       }),
 
-      // Toca aquí para ver los productos (llegarán como un array de arrays)
       tap((productosAgrupados) =>
         console.log('2. Productos agrupados por pedido:', productosAgrupados)
       ),
 
-      // Aplanamos el array de arrays en un solo array de productos
       map((productosAgrupados: Pedidos_has_productos[][]) =>
         productosAgrupados.flat()
       ),
 
-      // Toca aquí para ver la lista de todos los productos juntos
       tap((todosLosProductos) =>
         console.log(
           '3. Todos los productos en una sola lista:',
@@ -87,23 +81,19 @@ export class PedidosService {
       ),
 
       switchMap((todosLosProductos) => {
-        // Si no hay productos en total, retornamos un array vacío
         if (!todosLosProductos || todosLosProductos.length === 0) {
           return of([]);
         }
 
-        // Creamos un array de observables, uno por cada producto, para obtener sus detalles
         const observablesDeDetalles = todosLosProductos.map((prod) =>
           this.http.get<Producto_extras_ingrSel>(
             `${this.baseUrl}/productos/extrasIngrs/${prod.pedido_prod_id}`
           )
         );
 
-        // Ejecutamos todas las peticiones de detalles en paralelo
         return forkJoin(observablesDeDetalles);
       }),
 
-      // Toca aquí para ver el resultado final antes de que se entregue al componente
       tap((resultadoFinal) =>
         console.log(
           '4. Resultado final con todos los detalles:',
@@ -113,16 +103,6 @@ export class PedidosService {
     );
   }
 
-  // Función existente
-  /**
-   * Hace la llamada a la api cambiarEstado, la cual, modifica el estado de un registro
-   * de la tabla pedidos_has_productos.
-   * Se cambió de forma async (asíncrona) por practicidad del caso
-   * @param pedido_prod_id Llave primaria del registro en la tabla pedidos_has_productos
-   * para cambiar el estado del producto a 'Preparado' 'Entregado' o 'Pagado'
-   * @param estado El estado a cambiar, debe corresponder al enum establecido
-   * @returns UpdateResult, estado de pedido cambiado
-   */
   async cambiarEstadoDeProducto(
     pedido_prod_id: number,
     estado: EstadoPedidoHasProductos
@@ -146,32 +126,41 @@ export class PedidosService {
     }
   }
 
-  // ============ NUEVAS FUNCIONES ============
+  // ============ FUNCIONES CORREGIDAS ============
 
-  /**
-   * Obtiene todos los pedidos
-   */
   obtenerTodosPedidos(): Observable<any[]> {
     return this.http.get<any[]>(`${this.baseUrl}`);
   }
 
   /**
-   * Busca un pedido activo para una mesa específica
-   * @param numeroMesa - Número de la mesa
-   * @returns Observable con el pedido encontrado o null
+   * 🔧 CORREGIDO: Acepta estados: null, undefined, 'Iniciado', 'No pagado'
    */
   buscarPedidoActivoPorMesa(numeroMesa: number): Observable<any | null> {
     return this.obtenerTodosPedidos().pipe(
       map((pedidos) => {
+        console.log(`🔍 Buscando pedido activo para mesa ${numeroMesa}...`);
+        console.log('Pedidos disponibles:', pedidos);
+
         const pedidosActivos = pedidos.filter((p) => {
           const mesaMatch = p.no_mesa?.no_mesa === numeroMesa;
-          const estadoActivo = !p.estado || p.estado === 'Iniciado';
+
+          // ✅ CORREGIDO: Acepta estados que indican que el pedido está activo
+          const estadosActivos = [null, undefined, 'Iniciado', 'No pagado'];
+          const estadoActivo = estadosActivos.includes(p.estado);
+
+          console.log(`Pedido ${p.id_pedido}: mesa=${p.no_mesa?.no_mesa}, estado=${p.estado}, mesaMatch=${mesaMatch}, estadoActivo=${estadoActivo}`);
+
           return mesaMatch && estadoActivo;
         });
 
         if (pedidosActivos.length > 0) {
-          return pedidosActivos.sort((a, b) => b.id_pedido - a.id_pedido)[0];
+          // Retornamos el más reciente (mayor id_pedido)
+          const pedidoMasReciente = pedidosActivos.sort((a, b) => b.id_pedido - a.id_pedido)[0];
+          console.log('✅ Pedido activo encontrado:', pedidoMasReciente);
+          return pedidoMasReciente;
         }
+
+        console.log('❌ No se encontró pedido activo para esta mesa');
         return null;
       })
     );
@@ -198,54 +187,68 @@ export class PedidosService {
         `Ocurrió un error al intentar obtener el pedido iniciado según el no.mesa ${no_mesa}`,
         error
       );
-      throw error;
+      // 🔧 CORREGIDO: Retornamos null en lugar de lanzar error
+      return null;
     }
   }
 
-  /**
-   * Obtiene o crea un pedido para una mesa
-   * Si existe un pedido activo lo retorna, si no, crea uno nuevo
-   * @param numeroMesa - Número de la mesa
-   * @returns Observable con el ID del pedido
-   */
+
   obtenerOCrearPedidoPorMesa(numeroMesa: number): Observable<number> {
+    console.log(`📋 obtenerOCrearPedidoPorMesa para mesa: ${numeroMesa}`);
+
     return this.buscarPedidoActivoPorMesa(numeroMesa).pipe(
       switchMap((pedidoExistente) => {
         if (pedidoExistente && pedidoExistente.id_pedido) {
-          console.log(
-            'Pedido existente encontrado:',
-            pedidoExistente.id_pedido
-          );
-          // Retorna el ID del pedido existente
-          return new Observable<number>((observer) => {
-            observer.next(pedidoExistente.id_pedido);
-            observer.complete();
-          });
+          console.log('✅ Pedido existente encontrado, ID:', pedidoExistente.id_pedido);
+          return of(pedidoExistente.id_pedido);
         } else {
-          // Crea nuevo pedido y retorna su ID
+          console.log('🆕 No existe pedido, creando uno nuevo para mesa:', numeroMesa);
           return this.crearNuevoPedido(numeroMesa).pipe(
-            switchMap(() => this.obtenerUltimoPedidoPorMesa(numeroMesa)),
-            map((ultimoPedido) => ultimoPedido.id_pedido)
+            tap((response) => console.log('✅ Respuesta de creación:', response)),
+            // 🔧 CORREGIDO: Usar el ID del pedido de la respuesta directamente
+            map((response: any) => {
+              // El backend puede retornar el objeto completo o solo el ID
+              if (response.id_pedido) {
+                console.log('✅ Pedido creado con ID:', response.id_pedido);
+                return response.id_pedido;
+              } else if (response.identifiers && response.identifiers[0]) {
+                const nuevoId = response.identifiers[0].id_pedido;
+                console.log('✅ Pedido creado con ID (identifiers):', nuevoId);
+                return nuevoId;
+              } else {
+                throw new Error('El backend no retornó un ID válido');
+              }
+            }),
+            catchError((error) => {
+              console.error('❌ Error al crear pedido:', error);
+              // Como fallback, intentamos buscar el pedido recién creado
+              return this.buscarPedidoActivoPorMesa(numeroMesa).pipe(
+                map(pedido => {
+                  if (pedido && pedido.id_pedido) {
+                    console.log('✅ Pedido recuperado después de error:', pedido.id_pedido);
+                    return pedido.id_pedido;
+                  }
+                  throw new Error('No se pudo crear ni encontrar el pedido');
+                })
+              );
+            })
           );
         }
+      }),
+      catchError((error) => {
+        console.error('❌ Error en obtenerOCrearPedidoPorMesa:', error);
+        return throwError(() => error);
       })
     );
   }
 
-  /**
-   * Crea un nuevo pedido para una mesa
-   * @param numeroMesa - Número de la mesa
-   */
   crearNuevoPedido(numeroMesa: number): Observable<any> {
+    console.log('🆕 Creando nuevo pedido para mesa:', numeroMesa);
     return this.http.post<any>(`${this.baseUrl}/registrar`, {
       no_mesa: numeroMesa,
     });
   }
 
-  /**
-   * Obtiene el último pedido de una mesa (el más reciente)
-   * @param numeroMesa - Número de la mesa
-   */
   obtenerUltimoPedidoPorMesa(numeroMesa: number): Observable<any> {
     return this.obtenerTodosPedidos().pipe(
       map((pedidos) => {
@@ -257,10 +260,6 @@ export class PedidosService {
     );
   }
 
-  /**
-   * Registra un producto a un pedido
-   * @param payloadProducto - Datos del producto a agregar
-   */
   registrarProductoAlPedido(payloadProducto: {
     pedido_id: number;
     producto_id: number;
@@ -269,22 +268,13 @@ export class PedidosService {
     extras: number[];
     ingr: number[];
   }): Observable<any> {
+    console.log('➕ Registrando producto al pedido:', payloadProducto);
     return this.http.post(
       `${this.baseUrl}/registrar/productos`,
       payloadProducto
     );
   }
 
-  /**
-   * Función helper que maneja todo el flujo de agregar un producto al pedido
-   * Obtiene/crea el pedido y luego agrega el producto
-   * @param numeroMesa - Número de la mesa
-   * @param productoData - Datos del producto
-   * @param opcionSeleccionada - Opción seleccionada (opcional)
-   * @param extrasSeleccionados - Extras seleccionados
-   * @param ingredientes - Lista de ingredientes
-   * @param precioTotal - Precio total calculado
-   */
   agregarProductoCompleto(
     numeroMesa: number,
     productoData: any,
@@ -293,8 +283,12 @@ export class PedidosService {
     ingredientes: any[],
     precioTotal: number
   ): Observable<any> {
+    console.log('🛒 Iniciando agregarProductoCompleto para mesa:', numeroMesa);
+
     return this.obtenerOCrearPedidoPorMesa(numeroMesa).pipe(
       switchMap((idPedido) => {
+        console.log('📦 Agregando producto al pedido ID:', idPedido);
+
         const payload = {
           pedido_id: idPedido,
           producto_id: productoData.id_prod,
@@ -303,35 +297,24 @@ export class PedidosService {
           extras: extrasSeleccionados.map((e) => e.extra_id.id_extra),
           ingr: ingredientes.map((i) => i.id_ingr),
         };
+
+        console.log('Payload del producto:', payload);
         return this.registrarProductoAlPedido(payload);
-      })
+      }),
+      tap(() => console.log('✅ Producto agregado exitosamente'))
     );
   }
 
-  /**
-   * Obtiene los productos de un pedido específico
-   * @param idPedido - ID del pedido
-   */
   obtenerProductosDePedido(idPedido: number): Observable<any[]> {
     return this.http.get<any[]>(`${this.baseUrl}/productos/${idPedido}`);
   }
 
-  /**
-   * Actualiza el estado de un pedido
-   * @param idPedido - ID del pedido
-   * @param estado - Nuevo estado
-   */
   actualizarEstadoPedido(idPedido: number, estado: string): Observable<any> {
     return this.http.patch<any>(`${this.baseUrl}/actualizar/${idPedido}`, {
       estado,
     });
   }
 
-  /**
-   * Elimina un producto específico de un pedido
-   * @param pedidoProdId - ID del registro en pedidos_has_productos
-   * @returns Observable con el resultado de la eliminación
-   */
   eliminarProductoDelPedido(pedidoProdId: number): Observable<any> {
     return this.http.delete<any>(`${this.baseUrl}/productos/${pedidoProdId}`, {
       headers: { Authorization: `Bearer ${this.authService.getToken()}` },
