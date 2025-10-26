@@ -31,6 +31,13 @@
     <div class="sidebar nav-sidebar" [class.open]="navOpen">
       <div class="sidebar-header">
         <h4 class="m-3">Navegación</h4>
+        <button 
+          class="btn btn-close-sidebar" 
+          (click)="toggleNavigation()"
+          aria-label="Cerrar"
+        >
+          <i class="bi bi-x-lg"></i>
+        </button>
       </div>
       <div class="nav-items">
         <div *ngFor="let item of navItems" class="nav-item" (click)="navigate(item.route)">
@@ -43,15 +50,36 @@
     <!-- ORDER SIDEBAR -->
     <div class="sidebar order-sidebar" [class.open]="sidebarOpen">
       <div class="sidebar-header">
-        <h4 class="m-3">Pedidos Activos</h4>
+        <div class="d-flex justify-content-between align-items-center w-100">
+          <h4 class="m-3">
+            Pedidos Activos
+            <span *ngIf="mostrandoSoloMesa && mesaSeleccionada" class="badge bg-primary ms-2">
+              Mesa {{ mesaSeleccionada }}
+            </span>
+          </h4>
+          <button 
+            class="btn btn-close-sidebar me-3" 
+            (click)="toggleSidebar()"
+            aria-label="Cerrar"
+          >
+            <i class="bi bi-x-lg"></i>
+          </button>
+        </div>
+        <button 
+          *ngIf="mostrandoSoloMesa" 
+          class="btn btn-sm btn-outline-secondary mx-3 mb-2"
+          (click)="mostrarTodosLosPedidos()"
+        >
+          <i class="bi bi-arrow-left"></i> Ver todos los pedidos
+        </button>
       </div>
       <div class="orders-container">
         <div *ngIf="isLoading" class="text-center p-3">Cargando...</div>
-        <div *ngIf="!isLoading && pedidosAgrupados.length === 0" class="text-center p-3">
+        <div *ngIf="!isLoading && obtenerProductosMesaSeleccionada().length === 0" class="text-center p-3">
           <p>No hay pedidos pendientes.</p>
         </div>
         <div class="accordion" id="ordersAccordion">
-          <div class="accordion-item" *ngFor="let pedido of pedidosAgrupados; let i = index">
+          <div class="accordion-item" *ngFor="let pedido of obtenerProductosMesaSeleccionada(); let i = index">
             <h2 class="accordion-header" [id]="'heading' + i">
               <button 
                 class="accordion-button" 
@@ -132,7 +160,16 @@
     <!-- NOTIFICATIONS SIDEBAR -->
     <div class="sidebar notifications-sidebar" [class.open]="notificationsOpen">
       <div class="sidebar-header">
-        <h4 class="m-3">Notificaciones</h4>
+        <div class="d-flex justify-content-between align-items-center w-100">
+          <h4 class="m-3">Notificaciones</h4>
+          <button 
+            class="btn btn-close-sidebar me-3" 
+            (click)="toggleNotifications()"
+            aria-label="Cerrar"
+          >
+            <i class="bi bi-x-lg"></i>
+          </button>
+        </div>
       </div>
       <div class="notifications-container">
         <div *ngIf="allNotifications.length === 0" class="text-center p-3">
@@ -158,12 +195,12 @@
             >
               <i class="bi bi-check-circle"></i> Atender
             </button>
-            <button 
+            <!-- <button 
               class="btn btn-sm btn-outline-secondary" 
               (click)="goToOrder(notif.no_mesa!)"
             >
               <i class="bi bi-eye"></i> Ver pedido
-            </button>
+            </button> -->
           </div>
         </div>
       </div>
