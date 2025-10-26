@@ -1,6 +1,8 @@
 // lista-pedidos.component.ts
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input, OnInit, OnDestroy } from '@angular/core';
 import { PedidosService } from '../../../services/pedidos.service';
+import { NotificacionesService, Notificacion } from '../../../services/notificaciones.service';
+import { MesasService, Mesa } from '../../../services/mesas.service';
 import {
   EstadoPedidoHasProductos,
   PedidoAgrupado,
@@ -29,18 +31,15 @@ interface OrderItem {
   ingredientes: any[];
 }
 
-interface Notification {
-  id: number;
-  tableNumber: number;
-  message: string;
-  time: Date;
-  read: boolean;
-}
-
 interface NavItem {
   name: string;
   icon: string;
   route: string;
+}
+
+// Interface extendida para notificaciones con información de mesa
+interface NotificacionConMesa extends Notificacion {
+  no_mesa?: number;
 }
 
 @Component({
@@ -50,9 +49,10 @@ interface NavItem {
   standalone: true,
   imports: [CommonModule],
 })
-export class ListaPedidosComponent implements OnInit {
+export class ListaPedidosComponent implements OnInit, OnDestroy {
   orders: Order[] = [];
-  notifications: Notification[] = [];
+  notificaciones: Map<number, Notificacion[]> = new Map();
+  allNotifications: NotificacionConMesa[] = [];
   sidebarOpen = false;
   notificationsOpen = false;
   navOpen = false;
@@ -64,43 +64,79 @@ export class ListaPedidosComponent implements OnInit {
     EstadoPedidoHasProductos.entregado,
     EstadoPedidoHasProductos.pagado,
   ];
+  
   // Nuevas propiedades para el filtrado por mesa
   mesaSeleccionada: number | null = null;
   productosDelPedido: PedidoAgrupado[] = [];
   mostrandoSoloMesa: boolean = false;
 
-  @Input() rol: string = 'mesero'; // Rol por defecto es mesero
+  // Propiedad para el polling de notificaciones
+  private intervalId: any;
+  
+  // Lista de mesas para mapear notificaciones
+  mesas: Mesa[] = [];
+
+  @Input() rol: string = 'mesero';
 
   public pedidosAgrupados: PedidoAgrupado[] = [];
   public isLoading = true;
 
-  constructor(private pedidosService: PedidosService) {}
+  constructor(
+    private pedidosService: PedidosService,
+    private notificacionesService: NotificacionesService,
+    private mesasService: MesasService
+  ) {}
 
   ngOnInit(): void {
-    this.loadOrders();
-    this.loadNotifications();
+    this.cargarMesas();
     this.loadNavigation();
     this.loadIcons();
+    
+    // Polling cada 10 segundos para cargar notificaciones
+    this.intervalId = setInterval(() => {
+      this.cargarNotificaciones();
+    }, 10000);
+  }
+
+  ngOnDestroy(): void {
+    // Limpiar el intervalo cuando el componente se destruya
+    if (this.intervalId) {
+      clearInterval(this.intervalId);
+    }
+  }
+
+  /**
+   * Carga las mesas primero, luego carga pedidos y notificaciones
+   */
+  async cargarMesas(): Promise<void> {
+    try {
+      this.mesas = await this.mesasService.obtenerMesas();
+      console.log('Mesas cargadas:', this.mesas);
+      
+      // Una vez cargadas las mesas, cargar pedidos y notificaciones
+      this.loadOrders();
+      this.cargarNotificaciones();
+    } catch (error) {
+      console.error('Error al cargar mesas:', error);
+      // Intentar cargar pedidos de todas formas
+      this.loadOrders();
+    }
   }
 
   loadIcons(): void {
-    // Check if Bootstrap Icons are already loaded
     const iconLink = document.querySelector('link[href*="bootstrap-icons"]');
     if (!iconLink) {
       const link = document.createElement('link');
       link.rel = 'stylesheet';
-      link.href =
-        'https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css';
+      link.href = 'https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css';
       document.head.appendChild(link);
     }
 
-    // Add Bootstrap CSS if not present
     const bootstrapLink = document.querySelector('link[href*="bootstrap"]');
     if (!bootstrapLink) {
       const link = document.createElement('link');
       link.rel = 'stylesheet';
-      link.href =
-        'https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css';
+      link.href = 'https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css';
       document.head.appendChild(link);
     }
   }
@@ -109,13 +145,8 @@ export class ListaPedidosComponent implements OnInit {
     this.isLoading = true;
     this.pedidosService.getPedidosActivosConDetalles(this.rol).subscribe({
       next: (pedidos) => {
-        // La API ya devuelve los datos en el formato que necesitamos.
-        // Simplemente asignamos la respuesta.
         this.pedidosAgrupados = pedidos;
-        console.log(
-          'Pedidos cargados y agrupados desde el backend:',
-          this.pedidosAgrupados
-        );
+        console.log('Pedidos cargados y agrupados desde el backend:', this.pedidosAgrupados);
         this.isLoading = false;
       },
       error: (err) => {
@@ -126,29 +157,107 @@ export class ListaPedidosComponent implements OnInit {
     });
   }
 
-  // MÉTODO REQUERIDO POR EL COMPONENTE MESEROS
-  cargarPedidosMesa(
-    mesaNumber: number,
-    productosYaFiltrados?: PedidoAgrupado[]
-  ): void {
+  /**
+   * Carga todas las notificaciones pendientes de todas las mesas
+   * Usa el mismo patrón que meseros.component.ts
+   */
+  async cargarNotificaciones(): Promise<void> {
+    // Limpiar las notificaciones actuales
+    this.notificaciones.clear();
+    this.allNotifications = [];
+    
+    // Iterar sobre cada mesa para obtener sus notificaciones
+    for (const mesa of this.mesas) {
+      try {
+        const notificaciones = await this.notificacionesService.obtenerPorMesa(mesa.no_mesa);
+        console.log(`Notificaciones mesa ${mesa.no_mesa}:`, notificaciones);
+        
+        // Filtrar solo pendientes (comparación case-insensitive)
+        const pendientes = notificaciones.filter((n: Notificacion) =>
+          n.estado && n.estado.toLowerCase() === 'pendiente'
+        );
+        
+        // Guardar en el Map por mesa
+        this.notificaciones.set(mesa.no_mesa, pendientes);
+        
+        // Agregar a la lista global con información de mesa
+        const notificacionesConMesa = pendientes.map((n: Notificacion) => ({
+          ...n,
+          no_mesa: mesa.no_mesa
+        }));
+        
+        this.allNotifications.push(...notificacionesConMesa);
+      } catch (error) {
+        console.error(`Error notificaciones mesa ${mesa.no_mesa}:`, error);
+      }
+    }
+    
+    // Actualizar contador
+    this.updateUnreadCount();
+    
+    console.log('Total notificaciones pendientes:', this.allNotifications.length);
+  }
+
+  /**
+   * Obtiene notificaciones de una mesa específica
+   */
+  obtenerNotificacionesPorMesa(noMesa: number): Notificacion[] {
+    return this.notificaciones.get(noMesa) || [];
+  }
+
+  /**
+   * Verifica si una mesa tiene notificaciones pendientes
+   */
+  tieneNotificaciones(noMesa: number): boolean {
+    return this.obtenerNotificacionesPorMesa(noMesa).length > 0;
+  }
+
+  /**
+   * Atiende una notificación específica
+   */
+  async atenderNotificacion(notificacionId: number, mesaId: number): Promise<void> {
+    try {
+      await this.notificacionesService.atenderNotificacion(notificacionId);
+
+      // Actualizar localmente
+      const notifs = this.notificaciones.get(mesaId) || [];
+      const actualizadas = notifs.filter((n: Notificacion) => n.id_notf !== notificacionId);
+      this.notificaciones.set(mesaId, actualizadas);
+      
+      // Actualizar lista global
+      this.allNotifications = this.allNotifications.filter(
+        (n: NotificacionConMesa) => n.id_notf !== notificacionId
+      );
+      
+      // Actualizar contador
+      this.updateUnreadCount();
+
+      Swal.fire({
+        icon: 'success',
+        title: 'Atendida',
+        timer: 1500,
+        showConfirmButton: false
+      });
+    } catch (error) {
+      console.error('Error al atender notificación:', error);
+      Swal.fire('Error', 'No se pudo atender la notificación', 'error');
+    }
+  }
+
+  cargarPedidosMesa(mesaNumber: number, productosYaFiltrados?: PedidoAgrupado[]): void {
     console.log(`Cargando pedidos para mesa ${mesaNumber}`);
     this.mesaSeleccionada = mesaNumber;
     this.mostrandoSoloMesa = true;
 
     if (productosYaFiltrados && productosYaFiltrados.length > 0) {
-      // Si ya tenemos los productos filtrados, los procesamos directamente
       this.productosDelPedido = productosYaFiltrados;
-
       console.log(`Pedidos cargados para mesa ${mesaNumber}:`, this.orders);
 
-      // Abrir el sidebar y expandir el pedido
       this.sidebarOpen = true;
       if (this.orders.length > 0) {
         this.orders[0].expanded = true;
         setTimeout(() => {
-          const orderElement = document.getElementById(
-            `order-${this.orders[0].id}`
-          );
+          const orderElement = document.getElementById(`order-${this.orders[0].id}`);
           if (orderElement) {
             orderElement.scrollIntoView({ behavior: 'smooth' });
           }
@@ -157,28 +266,22 @@ export class ListaPedidosComponent implements OnInit {
       return;
     }
 
-    // Si no tenemos productos filtrados, los cargamos y filtramos
-    this.loadOrders(); // Esto ahora respetará el filtro por mesa
+    this.loadOrders();
   }
 
-  // MÉTODO AUXILIAR PARA PROCESAR PRODUCTOS DEL PEDIDO
-  private procesarProductosDelPedido(
-    productos: Producto_extras_ingrSel[]
-  ): void {
+  private procesarProductosDelPedido(productos: Producto_extras_ingrSel[]): void {
     if (!productos || productos.length === 0) {
       console.log('No hay productos para procesar');
       this.orders = [];
       return;
     }
 
-    // Normalizar datos
     const normalizado = productos.map((p) => ({
       ...p,
       extras: p.extras ?? [],
       ingredientes: p.ingredientes ?? [],
     }));
 
-    // Agrupar por pedido
     const agrupados: { [id: number]: Producto_extras_ingrSel[] } = {};
     normalizado.forEach((detalle) => {
       const id = detalle.pedido_id.id_pedido;
@@ -186,41 +289,30 @@ export class ListaPedidosComponent implements OnInit {
       agrupados[id].push(detalle);
     });
 
-    // Convertir a la estructura Order
-    const orders: Order[] = Object.entries(agrupados).map(
-      ([_, productosGrupo]) => {
-        const first = productosGrupo[0];
-        return {
-          id: first.pedido_id.id_pedido,
-          tableNumber: first.pedido_id.no_mesa.no_mesa,
-          // estado: first.pedido_id.estado || "Sin preparar",
-          estado: 'Sin preparar',
-          fecha_pedido: new Date(first.pedido_id.fecha_pedido),
-          expanded: false,
-          items: productosGrupo.map((p) => ({
-            pedido_prod_id: p.pedido_prod_id,
-            name: p.producto_id.nombre_prod,
-            opcion: p.opcion_id?.nombre_opcion || 'Sin opción',
-            precio: p.precio,
-            status: p.estado as
-              | 'Sin preparar'
-              | 'Preparado'
-              | 'Entregado'
-              | 'Pagado',
-            extras: p.extras,
-            ingredientes: p.ingredientes,
-          })),
-        };
-      }
-    );
+    const orders: Order[] = Object.entries(agrupados).map(([_, productosGrupo]) => {
+      const first = productosGrupo[0];
+      return {
+        id: first.pedido_id.id_pedido,
+        tableNumber: first.pedido_id.no_mesa.no_mesa,
+        estado: 'Sin preparar',
+        fecha_pedido: new Date(first.pedido_id.fecha_pedido),
+        expanded: false,
+        items: productosGrupo.map((p) => ({
+          pedido_prod_id: p.pedido_prod_id,
+          name: p.producto_id.nombre_prod,
+          opcion: p.opcion_id?.nombre_opcion || 'Sin opción',
+          precio: p.precio,
+          status: p.estado as 'Sin preparar' | 'Preparado' | 'Entregado' | 'Pagado',
+          extras: p.extras,
+          ingredientes: p.ingredientes,
+        })),
+      };
+    });
 
-    // Ordenar por fecha más reciente
     orders.sort((a, b) => b.fecha_pedido.getTime() - a.fecha_pedido.getTime());
-
     this.orders = orders;
   }
 
-  // MÉTODO PARA MOSTRAR TODOS LOS PEDIDOS (QUITAR FILTRO)
   mostrarTodosLosPedidos(): void {
     this.mesaSeleccionada = null;
     this.mostrandoSoloMesa = false;
@@ -228,36 +320,12 @@ export class ListaPedidosComponent implements OnInit {
     this.loadOrders();
   }
 
-  // MÉTODO PARA VERIFICAR SI HAY PEDIDOS DE LA MESA SELECCIONADA
   tienePedidosMesa(): boolean {
     return this.orders.length > 0;
   }
 
-  // MÉTODO PARA OBTENER PRODUCTOS DE LA MESA SELECCIONADA
   obtenerProductosMesaSeleccionada(): PedidoAgrupado[] {
     return this.productosDelPedido;
-  }
-
-  loadNotifications(): void {
-    // Por ahora mantenemos las notificaciones mock, pero podrías crear un servicio para esto
-    this.notifications = [
-      {
-        id: 1,
-        tableNumber: 6,
-        message: 'Nuevo pedido recibido',
-        time: new Date(Date.now() - 5 * 60000),
-        read: false,
-      },
-      {
-        id: 2,
-        tableNumber: 2,
-        message: 'Pedido listo para entregar',
-        time: new Date(Date.now() - 15 * 60000),
-        read: false,
-      },
-    ];
-
-    this.updateUnreadCount();
   }
 
   loadNavigation(): void {
@@ -272,7 +340,7 @@ export class ListaPedidosComponent implements OnInit {
   }
 
   updateUnreadCount(): void {
-    this.unreadNotifications = this.notifications.filter((n) => !n.read).length;
+    this.unreadNotifications = this.allNotifications.length;
   }
 
   toggleSidebar(): void {
@@ -293,13 +361,6 @@ export class ListaPedidosComponent implements OnInit {
       this.navOpen = false;
     }
     this.notificationsOpen = !this.notificationsOpen;
-
-    if (this.notificationsOpen) {
-      this.notifications.forEach((notification) => {
-        notification.read = true;
-      });
-      this.updateUnreadCount();
-    }
   }
 
   toggleNavigation(): void {
@@ -341,11 +402,9 @@ export class ListaPedidosComponent implements OnInit {
         showConfirmButton: false,
       });
 
-      // Actualizar el estado local del item
       item.previousStatus = item.status;
       item.status = EstadoPedidoHasProductos.entregado;
 
-      // Verificar si todo el pedido está completado
       this.checkAllDelivered(order);
     } catch (error) {
       Swal.close();
@@ -363,8 +422,8 @@ export class ListaPedidosComponent implements OnInit {
     const statusFlow = {
       'Sin preparar': 'Preparado',
       Preparado: 'Entregado',
-      Entregado: 'Entregado', // No hay siguiente estado
-      Pagado: 'Pagado', // Estado final
+      Entregado: 'Entregado',
+      Pagado: 'Pagado',
     };
 
     return statusFlow[currentStatus as keyof typeof statusFlow] || null;
@@ -395,6 +454,7 @@ export class ListaPedidosComponent implements OnInit {
       confirmButtonText: 'Sí, marcar todo',
       cancelButtonText: 'Cancelar',
     });
+    
     if (!isConfirmed) {
       return;
     }
@@ -409,7 +469,6 @@ export class ListaPedidosComponent implements OnInit {
         didOpen: () => Swal.showLoading(),
       });
 
-      // Lanza todas las promesas en paralelo
       await Promise.all(
         itemsToUpdate.map((item) =>
           this.pedidosService.cambiarEstadoDeProducto(
@@ -419,7 +478,6 @@ export class ListaPedidosComponent implements OnInit {
         )
       );
 
-      // Actualiza estado local
       itemsToUpdate.forEach((item) => {
         item.previousStatus = item.status;
         item.status = EstadoPedidoHasProductos.entregado;
@@ -434,7 +492,6 @@ export class ListaPedidosComponent implements OnInit {
         showConfirmButton: false,
       });
 
-      // Verificar si todo el pedido está completado
       this.checkAllDelivered(order);
     } catch (error) {
       Swal.close();
@@ -455,37 +512,31 @@ export class ListaPedidosComponent implements OnInit {
     );
 
     if (allDelivered) {
-      // Actualizar estado del pedido completo si es necesario
-      this.pedidosService
-        .actualizarEstadoPedido(order.id, 'Entregado')
-        .subscribe({
-          next: () => {
-            order.estado = 'Completado';
-            Swal.fire({
-              title: '¡Pedido completado!',
-              text: `El pedido #${order.id} ha sido entregado por completo`,
-              icon: 'success',
-              timer: 2000,
-              showConfirmButton: false,
-            });
-          },
-          error: (error) => {
-            console.error('Error al actualizar estado del pedido:', error);
-          },
-        });
+      this.pedidosService.actualizarEstadoPedido(order.id, 'Entregado').subscribe({
+        next: () => {
+          order.estado = 'Completado';
+          Swal.fire({
+            title: '¡Pedido completado!',
+            text: `El pedido #${order.id} ha sido entregado por completo`,
+            icon: 'success',
+            timer: 2000,
+            showConfirmButton: false,
+          });
+        },
+        error: (error) => {
+          console.error('Error al actualizar estado del pedido:', error);
+        },
+      });
     }
   }
 
-  markNotificationAsRead(notification: Notification): void {
-    notification.read = true;
-    this.updateUnreadCount();
-  }
-
-  formatTime(date: Date): string {
+  /**
+   * Formatea el tiempo de la notificación para mostrar "hace X minutos/horas"
+   */
+  formatTime(date: string | Date): string {
     const now = new Date();
-    const diffMinutes = Math.round(
-      (now.getTime() - date.getTime()) / (1000 * 60)
-    );
+    const notificationDate = new Date(date);
+    const diffMinutes = Math.round((now.getTime() - notificationDate.getTime()) / (1000 * 60));
 
     if (diffMinutes < 1) {
       return 'Ahora mismo';
@@ -550,7 +601,6 @@ export class ListaPedidosComponent implements OnInit {
   }
 
   goToOrder(tableNumber: number): void {
-    // Si no estamos mostrando solo una mesa, buscar el pedido por número de mesa
     if (!this.mostrandoSoloMesa) {
       const order = this.getOrderByTable(tableNumber);
       if (order) {
@@ -571,22 +621,18 @@ export class ListaPedidosComponent implements OnInit {
       }
     }
 
-    // Si ya estamos mostrando una mesa específica o no se encontró el pedido, cargar esa mesa
     this.cargarPedidosMesa(tableNumber);
   }
 
   navigate(route: string): void {
-    // Aquí implementarías la navegación real con Angular Router
     console.log(`Navegando a: ${route}`);
     this.navOpen = false;
   }
 
-  // Método para refrescar los datos
   refreshOrders(): void {
     this.loadOrders();
   }
 
-  // Formatear fecha para mostrar
   formatOrderDate(date: Date): string {
     return new Intl.DateTimeFormat('es-ES', {
       day: '2-digit',
@@ -597,12 +643,10 @@ export class ListaPedidosComponent implements OnInit {
     }).format(date);
   }
 
-  // Calcular total del pedido
   getOrderTotal(order: Order): number {
     return order.items.reduce((total, item) => {
       let precio = item.precio;
 
-      // Sumar extras si los hay
       if (item.extras && item.extras.length > 0) {
         const extrasTotal = item.extras.reduce((sum, extra: any) => {
           return sum + +(extra.precio || 0);
@@ -610,7 +654,6 @@ export class ListaPedidosComponent implements OnInit {
         precio += extrasTotal;
       }
 
-      // Sumar ingredientes adicionales si los hay
       if (item.ingredientes && item.ingredientes.length > 0) {
         const ingredientesTotal = item.ingredientes.reduce((sum, ing: any) => {
           return sum + +(ing.precio || 0);
@@ -626,7 +669,6 @@ export class ListaPedidosComponent implements OnInit {
     return parseFloat(item.precio.toString());
   }
 
-  // Método para obtener nombres de extras (soluciona el error de tipado)
   obtenerNombresExtras(extras: any[]): string {
     if (!extras || extras.length === 0) {
       return '';
@@ -634,13 +676,11 @@ export class ListaPedidosComponent implements OnInit {
 
     return extras
       .map((extra: any) => {
-        // Manejo más robusto del nombre del extra
         return extra.nombre_extra || extra.nombre || extra.name || 'Extra';
       })
       .join(', ');
   }
 
-  // Método para obtener nombres de ingredientes
   obtenerNombresIngredientes(ingredientes: any[]): string {
     if (!ingredientes || ingredientes.length === 0) {
       return '';
@@ -648,20 +688,12 @@ export class ListaPedidosComponent implements OnInit {
 
     return ingredientes
       .map((ing: any) => {
-        return (
-          ing.nombre_ingrediente || ing.nombre || ing.name || 'Ingrediente'
-        );
+        return ing.nombre_ingrediente || ing.nombre || ing.name || 'Ingrediente';
       })
       .join(', ');
   }
 
-  /**
-   * Elimina un producto específico del pedido
-   * @param order - Pedido que contiene el producto
-   * @param item - Producto a eliminar
-   */
   async eliminarProducto(order: Order, item: OrderItem): Promise<void> {
-    // Verificar que el producto se puede eliminar
     if (item.status !== 'Sin preparar') {
       Swal.fire({
         title: 'No se puede eliminar',
@@ -696,7 +728,6 @@ export class ListaPedidosComponent implements OnInit {
     }
 
     try {
-      // Mostrar loading
       Swal.fire({
         title: 'Eliminando producto...',
         html: 'Por favor, espere mientras se elimina el producto.',
@@ -706,18 +737,13 @@ export class ListaPedidosComponent implements OnInit {
         didOpen: () => Swal.showLoading(),
       });
 
-      // Eliminar el producto del servidor
-      await this.pedidosService
-        .eliminarProductoDelPedido(item.pedido_prod_id)
-        .toPromise();
+      await this.pedidosService.eliminarProductoDelPedido(item.pedido_prod_id).toPromise();
 
-      // Remover el producto de la lista local
       const itemIndex = order.items.indexOf(item);
       if (itemIndex > -1) {
         order.items.splice(itemIndex, 1);
       }
 
-      // Si el pedido se quedó sin productos, removerlo completamente
       if (order.items.length === 0) {
         const orderIndex = this.orders.indexOf(order);
         if (orderIndex > -1) {
@@ -741,12 +767,10 @@ export class ListaPedidosComponent implements OnInit {
 
       let errorMessage = 'Ocurrió un error al eliminar el producto';
 
-      // Manejo específico de errores
       if (error && typeof error === 'object') {
         const err = error as any;
         if (err.status === 400) {
-          errorMessage =
-            'No se puede eliminar el producto porque ya está en preparación';
+          errorMessage = 'No se puede eliminar el producto porque ya está en preparación';
         } else if (err.status === 404) {
           errorMessage = 'El producto no existe o ya fue eliminado';
         } else if (err.status === 403) {
@@ -764,24 +788,10 @@ export class ListaPedidosComponent implements OnInit {
     }
   }
 
-  /**
-   * CÓDIGO REFACTORIZADO
-   */
-
-  /**
-   * Verifica si un producto puede ser eliminado
-   * Solo se pueden eliminar productos en estado "Sin preparar"
-   * @param producto - Producto a verificar
-   * @returns true si el producto puede ser eliminado
-   */
   puedeEliminarProducto(producto: Producto_extras_ingrSel): boolean {
     return producto.estado === EstadoPedidoHasProductos.sin_preparar;
   }
 
-  /**
-   * Elimina un producto de un pedido.
-   * Acepta la nueva interfaz 'Producto_extras_ingrSel'.
-   */
   async eliminarProductoDelPedido(producto: Producto_extras_ingrSel, pedido: PedidoAgrupado): Promise<void> {
     if (!this.puedeEliminarProducto(producto)) return;
 
@@ -797,7 +807,6 @@ export class ListaPedidosComponent implements OnInit {
         try {
           await this.pedidosService.eliminarProductoDelPedido(producto.pedido_prod_id);
 
-          // Actualización visual instantánea: elimina el producto de la lista
           pedido.productos = pedido.productos.filter(p => p.pedido_prod_id !== producto.pedido_prod_id);
 
           Swal.fire('Cancelado', 'El producto ha sido eliminado del pedido.', 'success');
@@ -809,27 +818,17 @@ export class ListaPedidosComponent implements OnInit {
     });
   }
 
-  /**
-   * REFACTORIZADO: Cambia el estado de un solo producto.
-   * Acepta la nueva interfaz 'Producto_extras_ingrSel'.
-   */
-  async cambiarEstadoProducto(
-    producto: Producto_extras_ingrSel,
-    pedido: PedidoAgrupado
-  ): Promise<void> {
+  async cambiarEstadoProducto(producto: Producto_extras_ingrSel, pedido: PedidoAgrupado): Promise<void> {
     try {
-      // Llama a la API para cambiar el estado a 'Entregado'
       await this.pedidosService.cambiarEstadoDeProducto(
         producto.pedido_prod_id,
         EstadoPedidoHasProductos.entregado
       );
 
-      // Actualización visual instantánea: elimina el producto de la lista local
       pedido.productos = pedido.productos.filter(
         (p) => p.pedido_prod_id !== producto.pedido_prod_id
       );
 
-      // Si el pedido ya no tiene productos visibles, se elimina el pedido completo de la vista
       if (pedido.productos.length === 0) {
         this.pedidosAgrupados = this.pedidosAgrupados.filter(
           (p) => p.pedidoId.id_pedido !== pedido.pedidoId.id_pedido
@@ -837,18 +836,10 @@ export class ListaPedidosComponent implements OnInit {
       }
     } catch (error) {
       console.error('Error al cambiar el estado del producto:', error);
-      Swal.fire(
-        'Error',
-        'No se pudo actualizar el estado del producto.',
-        'error'
-      );
+      Swal.fire('Error', 'No se pudo actualizar el estado del producto.', 'error');
     }
   }
 
-  /**
-   * REFACTORIZADO: Marca todos los productos de un pedido como preparados.
-   * Acepta la nueva interfaz 'PedidoAgrupado'.
-   */
   marcarPedidoCompleto(pedido: PedidoAgrupado): void {
     Swal.fire({
       title: '¿Confirmar entrega?',
@@ -860,27 +851,21 @@ export class ListaPedidosComponent implements OnInit {
     }).then(async (result) => {
       if (result.isConfirmed) {
         try {
-          // Crea una promesa para cada actualización de producto
           const promesasDeActualizacion = pedido.productos.map((producto) =>
             this.pedidosService.cambiarEstadoDeProducto(
               producto.pedido_prod_id,
               EstadoPedidoHasProductos.entregado
             )
           );
-          // Espera a que todas las promesas se completen
+          
           await Promise.all(promesasDeActualizacion);
 
-          // Actualización visual instantánea: elimina el pedido completo de la lista
           this.pedidosAgrupados = this.pedidosAgrupados.filter(
             (p) => p.pedidoId.id_pedido !== pedido.pedidoId.id_pedido
           );
         } catch (error) {
           console.error('Error al marcar el pedido como completado:', error);
-          Swal.fire(
-            'Error',
-            'No se pudieron actualizar todos los productos.',
-            'error'
-          );
+          Swal.fire('Error', 'No se pudieron actualizar todos los productos.', 'error');
         }
       }
     });

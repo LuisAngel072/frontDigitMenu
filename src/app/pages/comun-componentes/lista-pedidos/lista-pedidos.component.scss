@@ -106,17 +106,6 @@
   left: 0;
 }
 
-.sidebar.notifications-sidebar {
-  /* La barra de notificaciones se maneja desde la derecha */
-  right:auto;
-  left: -300px; /* Oculta a la derecha por defecto */
-  transition: right 0.3s ease-in-out; /* Animamos 'right' */
-}
-
-.sidebar.notifications-sidebar.open {
-  left: 0; //Traemos la vista desde la derecha
-  right: auto; /* Nos aseguramos de que no interfiera */
-}
 
 /* El estilo para .main-content y .main-content.shifted se mantiene igual,
    ya que es correcto y responde al estado de la barra lateral. */
@@ -181,49 +170,6 @@
   }
 }
 
-/* Notifications sidebar specific */
-.notifications-sidebar {
-  transform: translateX(-100%);
-
-  .notifications-container {
-    padding: 0.5rem;
-  }
-
-  .notification-item {
-    margin-bottom: 0.5rem;
-    padding: 0.75rem;
-    border-radius: 8px;
-    background-color: #f8f9fa;
-    cursor: pointer;
-    transition: background-color 0.2s ease;
-
-    &:hover {
-      background-color: #e9ecef;
-    }
-
-    &.unread {
-      background-color: #e3f2fd;
-      border-left: 3px solid #3498db;
-
-      &:hover {
-        background-color: #d0e8fb;
-      }
-    }
-
-    .notification-header {
-      margin-bottom: 0.3rem;
-
-      .notification-time {
-        font-size: 0.75rem;
-        color: #6c757d;
-      }
-    }
-
-    .notification-message {
-      font-size: 0.9rem;
-    }
-  }
-}
 
 /* Order accordion styling */
 .order-accordion {
@@ -341,3 +287,4 @@
   margin-left: 300px;
   width: calc(100% - 300px);
 }
+
