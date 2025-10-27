@@ -10,8 +10,6 @@ import {
 } from '../../../interfaces/types';
 import Swal from 'sweetalert2';
 import { CommonModule } from '@angular/common';
-import { Subscription } from 'rxjs';
-import { CocinaSocketService } from '../../../gateways/pedidos-gateway.service';
 
 interface Order {
   id: number;
@@ -58,7 +56,7 @@ export class ListaPedidosComponent implements OnInit, OnDestroy {
   allNotifications: NotificacionConMesa[] = [];
   pedidosAgrupados: PedidoAgrupado[] = [];
   mesas: Mesa[] = [];
-
+  
   sidebarOpen = false;
   notificationsOpen = false;
   navOpen = false;
@@ -86,27 +84,23 @@ export class ListaPedidosComponent implements OnInit, OnDestroy {
 
   private intervalId: any;
 
-  private nuevoProductoSub: Subscription | undefined;
-  private estadoActualizadoSub: Subscription | undefined;
-
   constructor(
     private pedidosService: PedidosService,
-    private mesasService: MesasService,
-    private pedidosSocket: CocinaSocketService,
     private notificacionesService: NotificacionesService,
+    private mesasService: MesasService
   ) {}
 
   ngOnInit(): void {
     this.cargarMesas();
     this.loadIcons();
-    this.escucharActualizacionesEnVivo(); // Empieza a escuchar sockets
+    this.intervalId = setInterval(() => {
+      this.cargarNotificaciones();
+      this.recargarPedidosActuales();
+    }, 10000);
   }
 
   ngOnDestroy(): void {
-    this.nuevoProductoSub?.unsubscribe();
-    this.estadoActualizadoSub?.unsubscribe();
-    this.pedidosSocket.disconnect();
-    this.intervalId = setInterval(() => this.cargarNotificaciones(), 10000);
+    if (this.intervalId) clearInterval(this.intervalId);
   }
 
   async cargarMesas(): Promise<void> {
@@ -152,137 +146,51 @@ export class ListaPedidosComponent implements OnInit, OnDestroy {
       },
     });
   }
+
   /**
-   * Se suscribe a los eventos del socket para actualizaciones en tiempo real.
+   * Recarga los pedidos de forma silenciosa (sin spinner)
+   * Mantiene el estado de expansión y la mesa seleccionada
    */
-  escucharActualizacionesEnVivo(): void {
-    this.nuevoProductoSub = this.pedidosSocket
-      .onNuevoProducto()
-      .subscribe((nuevoProducto) => {
-        console.log('Socket (Mesero) recibió nuevoProducto:', nuevoProducto);
-        this.agregarOActualizarProductoEnVista(nuevoProducto);
-      });
-
-    this.estadoActualizadoSub = this.pedidosSocket
-      .onEstadoActualizado()
-      .subscribe((productoActualizado) => {
-        console.log(
-          'Socket (Mesero) recibió estadoActualizado:',
-          productoActualizado
-        );
-        this.agregarOActualizarProductoEnVista(productoActualizado);
-      });
-  }
-  /**
-   * Lógica centralizada para actualizar la vista del MESERO basada en datos del socket.
-   */
-  private agregarOActualizarProductoEnVista(
-    productoData: Producto_extras_ingrSel
-  ): void {
-    const pedidoIdRecibido = productoData.pedido_id.id_pedido;
-    const productoIdRecibido = productoData.pedido_prod_id;
-    const estadoRecibido = productoData.estado;
-
-    // Estados relevantes para el MESERO
-    const estadosVisiblesMesero = [
-      EstadoPedidoHasProductos.sin_preparar,
-      EstadoPedidoHasProductos.preparado,
-    ];
-
-    let pedidoExistente = this.pedidosAgrupados.find(
-      (p) => p.pedidoId.id_pedido === pedidoIdRecibido
-    );
-
-    // --- Si el producto está en un estado que el mesero debe ver ---
-    if (estadosVisiblesMesero.includes(estadoRecibido)) {
-      if (pedidoExistente) {
-        // Pedido existe, buscar producto
-        const productoIndex = pedidoExistente.productos.findIndex(
-          (p) => p.pedido_prod_id === productoIdRecibido
-        );
-        if (productoIndex !== -1) {
-          // Producto existe, actualizarlo (importante por si cambia de 'Sin preparar' a 'Preparado')
-          pedidoExistente.productos[productoIndex] = productoData;
-          console.log(
-            `Producto ${productoIdRecibido} actualizado en pedido ${pedidoIdRecibido}`
+  private recargarPedidosActuales(): void {
+    this.pedidosService.getPedidosActivosConDetalles(this.rol).subscribe({
+      next: (pedidos) => {
+        // Si estamos mostrando una mesa específica, filtrar por esa mesa
+        if (this.mostrandoSoloMesa && this.mesaSeleccionada !== null) {
+          this.productosDelPedido = pedidos.filter(
+            p => p.pedidoId.no_mesa.no_mesa === this.mesaSeleccionada
           );
+          console.log(`Pedidos actualizados para mesa ${this.mesaSeleccionada}:`, this.productosDelPedido);
         } else {
-          // Producto nuevo en pedido existente, añadirlo
-          pedidoExistente.productos.push(productoData);
-          console.log(
-            `Producto ${productoIdRecibido} añadido a pedido existente ${pedidoIdRecibido}`
-          );
+          // Si no, actualizar todos los pedidos
+          this.pedidosAgrupados = pedidos;
+          console.log('Pedidos actualizados:', this.pedidosAgrupados);
         }
-        // Recalcular estado pendiente
-        pedidoExistente.tieneProductosPendientes =
-          pedidoExistente.productos.some(
-            (p) => p.estado === EstadoPedidoHasProductos.sin_preparar
-          );
-      } else {
-        // Pedido es nuevo para la vista del mesero
-        const nuevoPedido: PedidoAgrupado = {
-          pedidoId: productoData.pedido_id,
-          productos: [productoData],
-          expandido: true, // Mostrar expandido por defecto al llegar nuevo
-          tieneProductosPendientes:
-            estadoRecibido === EstadoPedidoHasProductos.sin_preparar,
-        };
-        this.pedidosAgrupados.unshift(nuevoPedido); // Añadir al principio
-        console.log(`Nuevo pedido ${pedidoIdRecibido} añadido a la vista`);
-      }
-    }
-    // --- Si el producto está en un estado que el mesero NO debe ver (ej: 'Entregado') ---
-    else {
-      if (pedidoExistente) {
-        // Eliminar el producto de la lista del pedido
-        const productosOriginales = pedidoExistente.productos.length;
-        pedidoExistente.productos = pedidoExistente.productos.filter(
-          (p) => p.pedido_prod_id !== productoIdRecibido
-        );
-        console.log(
-          `Producto ${productoIdRecibido} eliminado de la vista del pedido ${pedidoIdRecibido} (estado: ${estadoRecibido})`
-        );
-
-        // Si el pedido queda sin productos visibles para el mesero, eliminar el pedido completo
-        if (pedidoExistente.productos.length === 0 && productosOriginales > 0) {
-          this.pedidosAgrupados = this.pedidosAgrupados.filter(
-            (p) => p.pedidoId.id_pedido !== pedidoIdRecibido
-          );
-          console.log(
-            `Pedido ${pedidoIdRecibido} eliminado de la vista (sin productos visibles para mesero)`
-          );
-        } else if (pedidoExistente.productos.length > 0) {
-          // Recalcular estado pendiente (si aún quedan productos 'Sin preparar')
-          pedidoExistente.tieneProductosPendientes =
-            pedidoExistente.productos.some(
-              (p) => p.estado === EstadoPedidoHasProductos.sin_preparar
-            );
-        }
-      }
-      // Si el pedido no existía localmente y el estado no es relevante, no hacemos nada.
-    }
+      },
+      error: (err) => {
+        console.error('Error al recargar pedidos:', err);
+      },
+    });
   }
 
   async cargarNotificaciones(): Promise<void> {
     // Cargar todas las notificaciones primero en estructuras temporales
     const nuevasNotificacionesPorMesa = new Map<number, Notificacion[]>();
     const nuevasNotificaciones: NotificacionConMesa[] = [];
-
+    
     for (const mesa of this.mesas) {
       try {
         const notificaciones = await this.notificacionesService.obtenerPorMesa(mesa.no_mesa);
         const pendientes = notificaciones.filter((n: Notificacion) =>
           n.estado?.toLowerCase() === 'pendiente'
         );
-
+        
         nuevasNotificacionesPorMesa.set(mesa.no_mesa, pendientes);
         nuevasNotificaciones.push(...pendientes.map(n => ({ ...n, no_mesa: mesa.no_mesa })));
       } catch (error) {
         console.error(`Error notificaciones mesa ${mesa.no_mesa}:`, error);
       }
     }
-
-    // Actualizar todo de una vez (evita parpadeo)
+    
     this.notificaciones = nuevasNotificacionesPorMesa;
     this.allNotifications = nuevasNotificaciones;
     this.updateUnreadCount();
@@ -382,11 +290,6 @@ export class ListaPedidosComponent implements OnInit, OnDestroy {
   toggleSidebar(): void {
     this.closeAllExcept('sidebar');
     this.sidebarOpen = !this.sidebarOpen;
-
-    // Si vamos a ABRIR el sidebar
-    if (this.sidebarOpen) {
-      this.loadOrders();
-    }
   }
 
   toggleNotifications(): void {
@@ -407,16 +310,6 @@ export class ListaPedidosComponent implements OnInit, OnDestroy {
 
   toggleOrderExpanded(order: Order): void {
     order.expanded = !order.expanded;
-  }
-
-  closeSidebar(): void {
-    if (this.sidebarOpen) {
-      // Resetear el filtro de mesa antes de cerrar
-      this.mesaSeleccionada = null;
-      this.mostrandoSoloMesa = false;
-      this.productosDelPedido = [];
-      this.sidebarOpen = false;
-    }
   }
 
   async toggleItemStatus(order: Order, item: OrderItem): Promise<void> {
@@ -477,7 +370,7 @@ export class ListaPedidosComponent implements OnInit, OnDestroy {
       confirmButtonText: 'Sí, marcar todo',
       cancelButtonText: 'Cancelar',
     });
-
+    
     if (!isConfirmed) return;
 
     try {
@@ -522,7 +415,7 @@ export class ListaPedidosComponent implements OnInit, OnDestroy {
 
   checkAllDelivered(order: Order): void {
     const allDelivered = order.items.every(
-      i => i.status === EstadoPedidoHasProductos.entregado ||
+      i => i.status === EstadoPedidoHasProductos.entregado || 
            i.status === EstadoPedidoHasProductos.pagado
     );
 
@@ -641,7 +534,7 @@ export class ListaPedidosComponent implements OnInit, OnDestroy {
   }
 
   obtenerNombresIngredientes(ingredientes: any[]): string {
-    return ingredientes?.length ?
+    return ingredientes?.length ? 
       ingredientes.map(i => i.nombre_ingrediente || i.nombre || i.name || 'Ingrediente').join(', ') : '';
   }
 
@@ -722,67 +615,28 @@ export class ListaPedidosComponent implements OnInit, OnDestroy {
     return producto.estado === EstadoPedidoHasProductos.sin_preparar;
   }
 
-  /**
-   * Elimina un producto de un pedido.
-   * Acepta la nueva interfaz 'Producto_extras_ingrSel'.
-   */
-  async eliminarProductoDelPedido(
-    producto: Producto_extras_ingrSel,
-    pedido: PedidoAgrupado
-  ): Promise<void> {
-    // 1. Verifica si se puede eliminar
-    if (!this.puedeEliminarProducto(producto)) {
-       Swal.fire('Acción no permitida', 'Solo se pueden cancelar productos que no han sido preparados.', 'warning');
-       return; // Sale temprano si no se puede eliminar
-    }
+  async eliminarProductoDelPedido(producto: Producto_extras_ingrSel, pedido: PedidoAgrupado): Promise<void> {
+    if (!this.puedeEliminarProducto(producto)) return;
 
-    // 2. Muestra la confirmación
-    Swal.fire({
+    const { isConfirmed } = await Swal.fire({
       title: '¿Cancelar producto?',
       text: `Se eliminará "${producto.producto_id.nombre_prod}" del pedido. Esta acción no se puede deshacer.`,
       icon: 'warning',
       showCancelButton: true,
       confirmButtonText: 'Sí, cancelar',
       cancelButtonText: 'No',
-    }).then(async (result) => {
-      // 3. Si el usuario confirma DENTRO del .then()...
-      if (result.isConfirmed) {
-        try {
-          // 4. Llama al servicio para eliminar en el backend
-          await this.pedidosService.eliminarProductoDelPedido(
-            producto.pedido_prod_id
-          );
-
-          // 5. Actualización visual instantánea: elimina el producto de la lista local
-          pedido.productos = pedido.productos.filter(
-            (p) => p.pedido_prod_id !== producto.pedido_prod_id
-          );
-
-          // Opcional: Recalcular si el pedido sigue teniendo pendientes
-          if (pedido.productos.length > 0) {
-             pedido.tieneProductosPendientes = pedido.productos.some(p => p.estado === EstadoPedidoHasProductos.sin_preparar);
-          } else {
-             // Si el pedido queda vacío, podrías querer eliminarlo del array principal `pedidosAgrupados`
-             // (Necesitarías acceso a `this.pedidosAgrupados` aquí o pasar una función callback)
-             // Ejemplo: this.eliminarPedidoDeVista(pedido.pedidoId.id_pedido);
-          }
-
-
-          // 6. Muestra mensaje de éxito
-          Swal.fire(
-            'Cancelado',
-            'El producto ha sido eliminado del pedido.',
-            'success'
-          );
-        } catch (error) {
-          // 7. Manejo de errores si la API falla
-          console.error('Error al eliminar el producto:', error);
-          Swal.fire('Error', 'No se pudo eliminar el producto.', 'error');
-        }
-      }
-      // 8. Si el usuario NO confirma (result.isConfirmed es false), no se hace nada más.
     });
 
+    if (!isConfirmed) return;
+
+    try {
+      await this.pedidosService.eliminarProductoDelPedido(producto.pedido_prod_id);
+      pedido.productos = pedido.productos.filter(p => p.pedido_prod_id !== producto.pedido_prod_id);
+      Swal.fire('Cancelado', 'El producto ha sido eliminado del pedido.', 'success');
+    } catch (error) {
+      console.error('Error al eliminar el producto:', error);
+      Swal.fire('Error', 'No se pudo eliminar el producto.', 'error');
+    }
   }
 
   async cambiarEstadoProducto(producto: Producto_extras_ingrSel, pedido: PedidoAgrupado): Promise<void> {
