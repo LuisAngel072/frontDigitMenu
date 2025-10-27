@@ -1,3 +1,4 @@
+/* === LISTA PEDIDOS === */
 .order-system-container {
   display: flex;
   flex-direction: column;
@@ -16,56 +17,14 @@
 
     .logo-digit {
       color: #ff8800;
-      font-weight: bold;
+      font-weight: 700;
       font-size: 1.2rem;
     }
 
     .logo-menu {
       color: #333;
-      font-weight: bold;
+      font-weight: 700;
       font-size: 1.2rem;
-    }
-  }
-
-  .navbar-icons {
-    display: flex;
-    gap: 15px;
-
-    .navbar-icon {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      width: 40px;
-      height: 40px;
-      padding: 0;
-      border-radius: 50%;
-      position: relative;
-
-      &:hover {
-        background-color: rgba(0, 0, 0, 0.05);
-      }
-
-      i {
-        font-size: 1.4rem;
-      }
-
-      &.notification-btn {
-        .notification-badge {
-          position: absolute;
-          top: -5px;
-          right: -5px;
-          background-color: #e74c3c;
-          color: white;
-          font-size: 0.7rem;
-          min-width: 18px;
-          height: 18px;
-          border-radius: 50%;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          font-weight: bold;
-        }
-      }
     }
   }
 
@@ -84,6 +43,7 @@
     height: 40px;
     border-radius: 50%;
     position: relative;
+    padding: 0;
 
     &:hover {
       background-color: rgba(0, 0, 0, 0.05);
@@ -98,7 +58,7 @@
       top: -5px;
       right: -5px;
       background-color: #e74c3c;
-      color: white;
+      color: #fff;
       font-size: 0.7rem;
       min-width: 18px;
       height: 18px;
@@ -106,12 +66,12 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      font-weight: bold;
+      font-weight: 700;
     }
   }
 }
 
-/* === LAYOUT GENERAL === */
+/* === CONTENT === */
 .content-container {
   display: flex;
   flex: 1;
@@ -119,6 +79,7 @@
   overflow-y: auto;
 }
 
+/* === SIDEBARS BASE === */
 .sidebar {
   position: fixed;
   top: 60px;
@@ -129,49 +90,29 @@
   z-index: 1020;
   overflow-y: auto;
   transition: left 0.3s ease-in-out;
-  /* Animate the 'left' property */
   left: -300px;
 }
 
-/* Reglas específicas para cada barra lateral cuando está abierta */
 .sidebar.open {
-  /* Cuando cualquier sidebar tiene la clase .open, se posiciona en la pantalla */
   left: 0;
 }
 
-.sidebar.notifications-sidebar {
-  /* La barra de notificaciones se maneja desde la derecha */
-  right: auto;
-  left: -300px;
-  /* Oculta a la derecha por defecto */
-  transition: right 0.3s ease-in-out;
-  /* Animamos 'right' */
-}
-
-.sidebar.notifications-sidebar.open {
-  left: 0; //Traemos la vista desde la derecha
-  right: auto;
-  /* Nos aseguramos de que no interfiera */
-}
-
-/* El estilo para .main-content y .main-content.shifted se mantiene igual,
-   ya que es correcto y responde al estado de la barra lateral. */
+/* === MAIN CONTENT === */
 .main-content {
   flex: 1;
-  padding: 1rem;
+  padding: 20px;
   transition: margin-left 0.3s ease-in-out;
   width: 100%;
 
   &.shifted {
     margin-left: 300px;
+    width: calc(100% - 300px);
   }
 }
 
-/* Menú de navegación */
+/* === NAVIGATION SIDEBAR === */
 .nav-sidebar {
-  transform: translateX(-100%);
-
-  .nav-items-container {
+  .nav-items {
     padding: 0.5rem 0;
 
     .nav-item {
@@ -195,85 +136,37 @@
         font-size: 1rem;
         color: #333;
       }
-
-      &:last-child {
-        margin-top: 1rem;
-        border-top: 1px solid #e9ecef;
-
-        i {
-          color: #dc3545;
-        }
-      }
     }
   }
 }
 
-/* Pedidos activos */
-.orders-sidebar {
-  transform: translateX(-100%);
-
+/* === ORDERS SIDEBAR === */
+.order-sidebar {
   .orders-container {
-    padding: 1rem 0;
-  }
-}
-
-/* Notificaciones */
-.notifications-sidebar {
-  transform: translateX(-100%);
-
-  .notifications-container {
-    padding: 0.5rem;
+    padding: 1rem;
   }
 
-  .notification-item {
-    margin-bottom: 0.5rem;
-    padding: 0.75rem;
-    border-radius: 8px;
+  .accordion-button {
     background-color: #f8f9fa;
-    cursor: pointer;
-    transition: background-color 0.2s ease;
-
-    &:hover {
-      background-color: #e9ecef;
-    }
-
-    &.unread {
-      background-color: #e3f2fd;
-      border-left: 3px solid #3498db;
-
-      &:hover {
-        background-color: #d0e8fb;
-      }
-    }
-
-    .notification-header {
-      margin-bottom: 0.3rem;
-
-      .notification-time {
-        font-size: 0.75rem;
-        color: #6c757d;
-      }
-    }
-
-    .notification-message {
-      font-size: 0.9rem;
-    }
+    font-weight: 600;
   }
 }
 
-/* === ORDER ACCORDION (PEDIDOS) === */
-.order-accordion {
+/* === ORDER ITEM === */
+.order-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  background-color: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 10px;
+  padding: 12px 14px;
   margin-bottom: 10px;
-  border-bottom: 1px solid #eee;
+  transition: all 0.2s ease-in-out;
 
-  .order-header {
-    background-color: #6bb5e3;
-    color: white;
-    cursor: pointer;
-
-    &:hover {
-      background-color: #5aa4d2;
-    }
+  &:hover {
+    background-color: #eef0f2;
+    border-color: #d0d5da;
   }
 
   /* Order items styling */
@@ -312,7 +205,7 @@
       }
     }
   }
-
+}
   /* Main content styling */
   .main-content {
     flex: 1;
@@ -364,12 +257,48 @@
     }
 
     .item-name {
-      font-weight: 500;
+      font-weight: 600;
+      font-size: 1rem;
+      color: #333;
+    }
+
+    small {
+      font-size: 0.85rem;
+      color: #777;
     }
 
     .status-text {
-      font-size: 0.8rem;
-      font-style: italic;
+      margin-top: 6px;
+      font-size: 0.9rem;
+      font-weight: 500;
+
+      &.text-warning {
+        color: #f39c12 !important;
+      }
+      &.text-success {
+        color: #28a745 !important;
+      }
+    }
+  }
+
+  .status-controls {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    min-width: 40px;
+
+    .delete-icon {
+      font-size: 22px;
+      color: #dc3545;
+      cursor: pointer;
+      transition: color 0.2s ease, transform 0.1s ease;
+
+      &:hover {
+        color: #b02a37;
+        transform: scale(1.1);
+      }
     }
 
     .form-check-input {
@@ -384,21 +313,125 @@
     }
   }
 
-  .order-item:hover {
-    background-color: #e9ecef;
-    border-color: #dee2e6;
+/* === RESPONSIVE ORDER ITEM === */
+@media (max-width: 768px) {
+  .order-item {
+    flex-direction: column;
+    align-items: flex-start;
+
+    .status-controls {
+      flex-direction: row;
+      justify-content: flex-end;
+      width: 100%;
+      margin-top: 8px;
+    }
+  }
+}
+/* === NOTIFICATIONS SIDEBAR === */
+.notifications-sidebar {
+  background-color: #ffffff;
+  border-left: 1px solid #e9ecef;
+  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+  transition: left 0.3s ease-in-out;
+  left: -300px;
+
+  &.open {
+    left: 0;
   }
 
-  .main-content {
+  .notifications-container {
+    padding: 1rem;
+  }
 
-    margin-left: 0;
-    padding: 20px;
-    width: 100%;
-    transition: margin-left 0.3s ease-in-out;
+  .notification-item {
+    background-color: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+    padding: 12px;
+    margin-bottom: 10px;
+    transition: all 0.2s ease-in-out;
+
+    &:hover {
+      background-color: #e9ecef;
+      border-color: #dee2e6;
+      transform: translateY(-1px);
+    }
+
+    &.unread {
+      border-left: 5px solid #3498db;
+      background-color: #eef6fb;
+    }
+
+    .notification-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 6px;
+
+      .table-badge {
+        font-weight: 600;
+        padding: 2px 8px;
+        border-radius: 12px;
+        font-size: 1rem;
+      }
+    }
+
+    .notification-body .notification-message {
+      font-size: 0.95rem;
+      color: #333;
+      margin-bottom: 8px;
+    }
+
+    .notification-footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+
+      .btn {
+        border-radius: 6px;
+        font-size: 0.85rem;
+        padding: 4px 10px;
+        transition: all 0.2s ease;
+
+        &.btn-primary {
+          background-color: #3498db;
+          border-color: #3498db;
+
+          &:hover {
+            background-color: #2d83c3;
+          }
+        }
+
+        &.btn-outline-secondary {
+          color: #555;
+          border-color: #ccc;
+
+          &:hover {
+            background-color: #f0f0f0;
+          }
+        }
+      }
+    }
+  }
+
+  .bi-bell-slash {
+    opacity: 0.6;
+  }
+
+  p.text-muted {
+    font-size: 0.9rem;
+  }
+}
+
+/* === RESPONSIVE GENERAL === */
+@media (max-width: 992px) {
+  .sidebar {
+    width: 80%;
+    max-width: 300px;
   }
 
   .main-content.shifted {
-    margin-left: 300px;
-    width: calc(100% - 300px);
+    margin-left: 0;
+    width: 100%;
   }
 }

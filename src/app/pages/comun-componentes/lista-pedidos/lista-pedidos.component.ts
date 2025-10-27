@@ -1,6 +1,8 @@
 // lista-pedidos.component.ts
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input, OnInit, OnDestroy } from '@angular/core';
 import { PedidosService } from '../../../services/pedidos.service';
+import { NotificacionesService, Notificacion } from '../../../services/notificaciones.service';
+import { MesasService, Mesa } from '../../../services/mesas.service';
 import {
   EstadoPedidoHasProductos,
   PedidoAgrupado,
@@ -25,24 +27,20 @@ interface OrderItem {
   name: string;
   opcion: string;
   precio: number;
-  status: 'Sin preparar' | 'Preparado' | 'Entregado' | 'Pagado';
-  previousStatus?: 'Sin preparar' | 'Preparado' | 'Entregado' | 'Pagado';
+  status: EstadoPedidoHasProductos;
+  previousStatus?: EstadoPedidoHasProductos;
   extras: any[];
   ingredientes: any[];
-}
-
-interface Notification {
-  id: number;
-  tableNumber: number;
-  message: string;
-  time: Date;
-  read: boolean;
 }
 
 interface NavItem {
   name: string;
   icon: string;
   route: string;
+}
+
+interface NotificacionConMesa extends Notificacion {
+  no_mesa?: number;
 }
 
 @Component({
@@ -52,42 +50,54 @@ interface NavItem {
   standalone: true,
   imports: [CommonModule],
 })
-export class ListaPedidosComponent implements OnInit {
+export class ListaPedidosComponent implements OnInit, OnDestroy {
+  @Input() rol: string = 'mesero';
+
   orders: Order[] = [];
-  notifications: Notification[] = [];
+  notificaciones = new Map<number, Notificacion[]>();
+  allNotifications: NotificacionConMesa[] = [];
+  pedidosAgrupados: PedidoAgrupado[] = [];
+  mesas: Mesa[] = [];
+
   sidebarOpen = false;
   notificationsOpen = false;
   navOpen = false;
   unreadNotifications = 0;
-  navItems: NavItem[] = [];
+  isLoading = true;
+  mesaSeleccionada: number | null = null;
+  mostrandoSoloMesa = false;
+  productosDelPedido: PedidoAgrupado[] = [];
+
+  navItems: NavItem[] = [
+    { name: 'Inicio', icon: 'bi-house', route: '/home' },
+    { name: 'Cocina', icon: 'bi-chef-hat', route: '/cocinero' },
+    { name: 'Menú', icon: 'bi-book', route: '/menu' },
+    { name: 'Mesas', icon: 'bi-grid', route: '/tables' },
+    { name: 'Configuración', icon: 'bi-gear', route: '/settings' },
+    { name: 'Cerrar Sesión', icon: 'bi-box-arrow-right', route: '' },
+  ];
+
   estadosProductos: EstadoPedidoHasProductos[] = [
     EstadoPedidoHasProductos.sin_preparar,
     EstadoPedidoHasProductos.preparado,
     EstadoPedidoHasProductos.entregado,
     EstadoPedidoHasProductos.pagado,
   ];
-  // Nuevas propiedades para el filtrado por mesa
-  mesaSeleccionada: number | null = null;
-  productosDelPedido: PedidoAgrupado[] = [];
-  mostrandoSoloMesa: boolean = false;
 
-  @Input() rol: string = 'mesero'; // Rol por defecto es mesero
-
-  public pedidosAgrupados: PedidoAgrupado[] = [];
-  public isLoading = true;
+  private intervalId: any;
 
   private nuevoProductoSub: Subscription | undefined;
   private estadoActualizadoSub: Subscription | undefined;
 
   constructor(
     private pedidosService: PedidosService,
+    private mesasService: MesasService,
     private pedidosSocket: CocinaSocketService,
+    private notificacionesService: NotificacionesService,
   ) {}
 
   ngOnInit(): void {
-    this.loadOrders();
-    this.loadNotifications();
-    this.loadNavigation();
+    this.cargarMesas();
     this.loadIcons();
     this.escucharActualizacionesEnVivo(); // Empieza a escuchar sockets
   }
@@ -96,45 +106,47 @@ export class ListaPedidosComponent implements OnInit {
     this.nuevoProductoSub?.unsubscribe();
     this.estadoActualizadoSub?.unsubscribe();
     this.pedidosSocket.disconnect();
+    this.intervalId = setInterval(() => this.cargarNotificaciones(), 10000);
+  }
+
+  async cargarMesas(): Promise<void> {
+    try {
+      this.mesas = await this.mesasService.obtenerMesas();
+      console.log('Mesas cargadas:', this.mesas);
+      this.loadOrders();
+      this.cargarNotificaciones();
+    } catch (error) {
+      console.error('Error al cargar mesas:', error);
+      this.loadOrders();
+    }
   }
 
   loadIcons(): void {
-    // Check if Bootstrap Icons are already loaded
-    const iconLink = document.querySelector('link[href*="bootstrap-icons"]');
-    if (!iconLink) {
-      const link = document.createElement('link');
-      link.rel = 'stylesheet';
-      link.href =
-        'https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css';
-      document.head.appendChild(link);
-    }
+    const links = [
+      { href: 'bootstrap-icons', url: 'https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css' },
+      { href: 'bootstrap', url: 'https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css' }
+    ];
 
-    // Add Bootstrap CSS if not present
-    const bootstrapLink = document.querySelector('link[href*="bootstrap"]');
-    if (!bootstrapLink) {
-      const link = document.createElement('link');
-      link.rel = 'stylesheet';
-      link.href =
-        'https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css';
-      document.head.appendChild(link);
-    }
+    links.forEach(({ href, url }) => {
+      if (!document.querySelector(`link[href*="${href}"]`)) {
+        const link = document.createElement('link');
+        link.rel = 'stylesheet';
+        link.href = url;
+        document.head.appendChild(link);
+      }
+    });
   }
 
   loadOrders(): void {
     this.isLoading = true;
     this.pedidosService.getPedidosActivosConDetalles(this.rol).subscribe({
       next: (pedidos) => {
-        // La API ya devuelve los datos en el formato que necesitamos.
-        // Simplemente asignamos la respuesta.
         this.pedidosAgrupados = pedidos;
-        console.log(
-          'Pedidos cargados y agrupados desde el backend:',
-          this.pedidosAgrupados
-        );
+        console.log('Pedidos cargados:', this.pedidosAgrupados);
         this.isLoading = false;
       },
       error: (err) => {
-        console.error('Error al cargar los pedidos:', err);
+        console.error('Error al cargar pedidos:', err);
         Swal.fire('Error', 'No se pudieron cargar los pedidos.', 'error');
         this.isLoading = false;
       },
@@ -250,101 +262,99 @@ export class ListaPedidosComponent implements OnInit {
       // Si el pedido no existía localmente y el estado no es relevante, no hacemos nada.
     }
   }
-  // MÉTODO REQUERIDO POR EL COMPONENTE MESEROS
-  cargarPedidosMesa(
-    mesaNumber: number,
-    productosYaFiltrados?: PedidoAgrupado[]
-  ): void {
+
+  async cargarNotificaciones(): Promise<void> {
+    // Cargar todas las notificaciones primero en estructuras temporales
+    const nuevasNotificacionesPorMesa = new Map<number, Notificacion[]>();
+    const nuevasNotificaciones: NotificacionConMesa[] = [];
+
+    for (const mesa of this.mesas) {
+      try {
+        const notificaciones = await this.notificacionesService.obtenerPorMesa(mesa.no_mesa);
+        const pendientes = notificaciones.filter((n: Notificacion) =>
+          n.estado?.toLowerCase() === 'pendiente'
+        );
+
+        nuevasNotificacionesPorMesa.set(mesa.no_mesa, pendientes);
+        nuevasNotificaciones.push(...pendientes.map(n => ({ ...n, no_mesa: mesa.no_mesa })));
+      } catch (error) {
+        console.error(`Error notificaciones mesa ${mesa.no_mesa}:`, error);
+      }
+    }
+
+    // Actualizar todo de una vez (evita parpadeo)
+    this.notificaciones = nuevasNotificacionesPorMesa;
+    this.allNotifications = nuevasNotificaciones;
+    this.updateUnreadCount();
+    console.log('Total notificaciones pendientes:', this.allNotifications.length);
+  }
+
+  obtenerNotificacionesPorMesa(noMesa: number): Notificacion[] {
+    return this.notificaciones.get(noMesa) || [];
+  }
+
+  tieneNotificaciones(noMesa: number): boolean {
+    return this.obtenerNotificacionesPorMesa(noMesa).length > 0;
+  }
+
+  async atenderNotificacion(notificacionId: number, mesaId: number): Promise<void> {
+    try {
+      await this.notificacionesService.atenderNotificacion(notificacionId);
+
+      const notifs = this.notificaciones.get(mesaId) || [];
+      this.notificaciones.set(mesaId, notifs.filter(n => n.id_notf !== notificacionId));
+      this.allNotifications = this.allNotifications.filter(n => n.id_notf !== notificacionId);
+      this.updateUnreadCount();
+
+      Swal.fire({
+        icon: 'success',
+        title: 'Atendida',
+        timer: 1500,
+        showConfirmButton: false
+      });
+    } catch (error) {
+      console.error('Error al atender notificación:', error);
+      Swal.fire('Error', 'No se pudo atender la notificación', 'error');
+    }
+  }
+
+  cargarPedidosMesa(mesaNumber: number, productosYaFiltrados?: PedidoAgrupado[]): void {
     console.log(`Cargando pedidos para mesa ${mesaNumber}`);
     this.mesaSeleccionada = mesaNumber;
     this.mostrandoSoloMesa = true;
 
-    if (productosYaFiltrados && productosYaFiltrados.length > 0) {
-      // Si ya tenemos los productos filtrados, los procesamos directamente
+    if (productosYaFiltrados?.length) {
       this.productosDelPedido = productosYaFiltrados;
-
-      console.log(`Pedidos cargados para mesa ${mesaNumber}:`, this.orders);
-
-      // Abrir el sidebar y expandir el pedido
       this.sidebarOpen = true;
       if (this.orders.length > 0) {
         this.orders[0].expanded = true;
         setTimeout(() => {
-          const orderElement = document.getElementById(
-            `order-${this.orders[0].id}`
-          );
-          if (orderElement) {
-            orderElement.scrollIntoView({ behavior: 'smooth' });
-          }
+          document.getElementById(`order-${this.orders[0].id}`)?.scrollIntoView({ behavior: 'smooth' });
         }, 300);
       }
       return;
     }
 
-    // Si no tenemos productos filtrados, los cargamos y filtramos
-    this.loadOrders(); // Esto ahora respetará el filtro por mesa
-  }
-
-  // MÉTODO AUXILIAR PARA PROCESAR PRODUCTOS DEL PEDIDO
-  private procesarProductosDelPedido(
-    productos: Producto_extras_ingrSel[]
-  ): void {
-    if (!productos || productos.length === 0) {
-      console.log('No hay productos para procesar');
-      this.orders = [];
-      return;
-    }
-
-    // Normalizar datos
-    const normalizado = productos.map((p) => ({
-      ...p,
-      extras: p.extras ?? [],
-      ingredientes: p.ingredientes ?? [],
-    }));
-
-    // Agrupar por pedido
-    const agrupados: { [id: number]: Producto_extras_ingrSel[] } = {};
-    normalizado.forEach((detalle) => {
-      const id = detalle.pedido_id.id_pedido;
-      if (!agrupados[id]) agrupados[id] = [];
-      agrupados[id].push(detalle);
+    // Filtrar los pedidos por mesa específica
+    this.isLoading = true;
+    this.pedidosService.getPedidosActivosConDetalles(this.rol).subscribe({
+      next: (pedidos) => {
+        // Filtrar solo los pedidos de la mesa seleccionada
+        this.productosDelPedido = pedidos.filter(
+          p => p.pedidoId.no_mesa.no_mesa === mesaNumber
+        );
+        console.log(`Pedidos filtrados para mesa ${mesaNumber}:`, this.productosDelPedido);
+        this.isLoading = false;
+        this.sidebarOpen = true;
+      },
+      error: (err) => {
+        console.error('Error al cargar pedidos de la mesa:', err);
+        Swal.fire('Error', 'No se pudieron cargar los pedidos de la mesa.', 'error');
+        this.isLoading = false;
+      },
     });
-
-    // Convertir a la estructura Order
-    const orders: Order[] = Object.entries(agrupados).map(
-      ([_, productosGrupo]) => {
-        const first = productosGrupo[0];
-        return {
-          id: first.pedido_id.id_pedido,
-          tableNumber: first.pedido_id.no_mesa.no_mesa,
-          // estado: first.pedido_id.estado || "Sin preparar",
-          estado: 'Sin preparar',
-          fecha_pedido: new Date(first.pedido_id.fecha_pedido),
-          expanded: false,
-          items: productosGrupo.map((p) => ({
-            pedido_prod_id: p.pedido_prod_id,
-            name: p.producto_id.nombre_prod,
-            opcion: p.opcion_id?.nombre_opcion || 'Sin opción',
-            precio: p.precio,
-            status: p.estado as
-              | 'Sin preparar'
-              | 'Preparado'
-              | 'Entregado'
-              | 'Pagado',
-            extras: p.extras,
-            ingredientes: p.ingredientes,
-          })),
-        };
-      }
-    );
-
-    // Ordenar por fecha más reciente
-    orders.sort((a, b) => b.fecha_pedido.getTime() - a.fecha_pedido.getTime());
-
-    this.orders = orders;
   }
 
-  // MÉTODO PARA MOSTRAR TODOS LOS PEDIDOS (QUITAR FILTRO)
   mostrarTodosLosPedidos(): void {
     this.mesaSeleccionada = null;
     this.mostrandoSoloMesa = false;
@@ -352,69 +362,25 @@ export class ListaPedidosComponent implements OnInit {
     this.loadOrders();
   }
 
-  // MÉTODO PARA VERIFICAR SI HAY PEDIDOS DE LA MESA SELECCIONADA
   tienePedidosMesa(): boolean {
     return this.orders.length > 0;
   }
 
-  // MÉTODO PARA OBTENER PRODUCTOS DE LA MESA SELECCIONADA
   obtenerProductosMesaSeleccionada(): PedidoAgrupado[] {
-    return this.productosDelPedido;
-  }
-
-  loadNotifications(): void {
-    // Por ahora mantenemos las notificaciones mock, pero podrías crear un servicio para esto
-    this.notifications = [
-      {
-        id: 1,
-        tableNumber: 6,
-        message: 'Nuevo pedido recibido',
-        time: new Date(Date.now() - 5 * 60000),
-        read: false,
-      },
-      {
-        id: 2,
-        tableNumber: 2,
-        message: 'Pedido listo para entregar',
-        time: new Date(Date.now() - 15 * 60000),
-        read: false,
-      },
-    ];
-
-    this.updateUnreadCount();
-  }
-
-  loadNavigation(): void {
-    this.navItems = [
-      { name: 'Inicio', icon: 'bi-house', route: '/home' },
-      { name: 'Cocina', icon: 'bi-chef-hat', route: '/cocinero' },
-      { name: 'Menú', icon: 'bi-book', route: '/menu' },
-      { name: 'Mesas', icon: 'bi-grid', route: '/tables' },
-      { name: 'Configuración', icon: 'bi-gear', route: '/settings' },
-      { name: 'Cerrar Sesión', icon: 'bi-box-arrow-right', route: '' },
-    ];
+    // Si estamos mostrando solo una mesa, devolver los productos filtrados
+    if (this.mostrandoSoloMesa && this.mesaSeleccionada !== null) {
+      return this.productosDelPedido;
+    }
+    // Si no, devolver todos los pedidos agrupados
+    return this.pedidosAgrupados;
   }
 
   updateUnreadCount(): void {
-    this.unreadNotifications = this.notifications.filter((n) => !n.read).length;
+    this.unreadNotifications = this.allNotifications.length;
   }
 
   toggleSidebar(): void {
-    if (this.notificationsOpen) {
-      this.notificationsOpen = false;
-    }
-    if (this.navOpen) {
-      this.navOpen = false;
-    }
-
-    // Si vamos a CERRAR el sidebar
-    if (this.sidebarOpen) {
-      // Resetear el filtro
-      this.mesaSeleccionada = null;
-      this.mostrandoSoloMesa = false;
-      this.productosDelPedido = [];
-    }
-
+    this.closeAllExcept('sidebar');
     this.sidebarOpen = !this.sidebarOpen;
 
     // Si vamos a ABRIR el sidebar
@@ -424,30 +390,19 @@ export class ListaPedidosComponent implements OnInit {
   }
 
   toggleNotifications(): void {
-    if (this.sidebarOpen) {
-      this.sidebarOpen = false;
-    }
-    if (this.navOpen) {
-      this.navOpen = false;
-    }
+    this.closeAllExcept('notifications');
     this.notificationsOpen = !this.notificationsOpen;
-
-    if (this.notificationsOpen) {
-      this.notifications.forEach((notification) => {
-        notification.read = true;
-      });
-      this.updateUnreadCount();
-    }
   }
 
   toggleNavigation(): void {
-    if (this.sidebarOpen) {
-      this.sidebarOpen = false;
-    }
-    if (this.notificationsOpen) {
-      this.notificationsOpen = false;
-    }
+    this.closeAllExcept('nav');
     this.navOpen = !this.navOpen;
+  }
+
+  private closeAllExcept(keep: 'sidebar' | 'notifications' | 'nav'): void {
+    if (keep !== 'sidebar') this.sidebarOpen = false;
+    if (keep !== 'notifications') this.notificationsOpen = false;
+    if (keep !== 'nav') this.navOpen = false;
   }
 
   toggleOrderExpanded(order: Order): void {
@@ -465,14 +420,7 @@ export class ListaPedidosComponent implements OnInit {
   }
 
   async toggleItemStatus(order: Order, item: OrderItem): Promise<void> {
-    Swal.fire({
-      title: 'Cargando...',
-      html: 'Por favor, espere mientras se procesa la información.',
-      allowOutsideClick: false,
-      allowEscapeKey: false,
-      allowEnterKey: false,
-      didOpen: () => Swal.showLoading(),
-    });
+    this.showLoading('Cargando...', 'Por favor, espere mientras se procesa la información.');
 
     try {
       await this.pedidosService.cambiarEstadoDeProducto(
@@ -489,17 +437,14 @@ export class ListaPedidosComponent implements OnInit {
         showConfirmButton: false,
       });
 
-      // Actualizar el estado local del item
       item.previousStatus = item.status;
       item.status = EstadoPedidoHasProductos.entregado;
-
-      // Verificar si todo el pedido está completado
       this.checkAllDelivered(order);
     } catch (error) {
       Swal.close();
       Swal.fire({
         title: '¡Error!',
-        text: 'Ocurrió un error al intentar cambiar el estado del producto. Por favor, revisa tu conexión.',
+        text: 'Ocurrió un error al intentar cambiar el estado del producto.',
         icon: 'error',
         timer: 2000,
         showConfirmButton: false,
@@ -507,32 +452,21 @@ export class ListaPedidosComponent implements OnInit {
     }
   }
 
-  getNextStatus(currentStatus: string): string | null {
-    const statusFlow = {
-      'Sin preparar': 'Preparado',
-      Preparado: 'Entregado',
-      Entregado: 'Entregado', // No hay siguiente estado
-      Pagado: 'Pagado', // Estado final
-    };
-
-    return statusFlow[currentStatus as keyof typeof statusFlow] || null;
-  }
-
-  async markAllAsDelivered(order: Order): Promise<any> {
+  async markAllAsDelivered(order: Order): Promise<void> {
     const itemsToUpdate = order.items.filter(
-      (item) =>
-        item.status !== EstadoPedidoHasProductos.entregado &&
-        item.status !== EstadoPedidoHasProductos.pagado
+      item => item.status !== EstadoPedidoHasProductos.entregado &&
+              item.status !== EstadoPedidoHasProductos.pagado
     );
 
     if (itemsToUpdate.length === 0) {
-      return Swal.fire({
+      await Swal.fire({
         title: 'Información',
         text: 'Todos los items ya están entregados o pagados',
         icon: 'info',
         timer: 1500,
         showConfirmButton: false,
       });
+      return;
     }
 
     const { isConfirmed } = await Swal.fire({
@@ -543,23 +477,14 @@ export class ListaPedidosComponent implements OnInit {
       confirmButtonText: 'Sí, marcar todo',
       cancelButtonText: 'Cancelar',
     });
-    if (!isConfirmed) {
-      return;
-    }
+
+    if (!isConfirmed) return;
 
     try {
-      Swal.fire({
-        title: 'Cargando...',
-        html: 'Por favor, espere mientras se procesan los cambios.',
-        allowOutsideClick: false,
-        allowEscapeKey: false,
-        allowEnterKey: false,
-        didOpen: () => Swal.showLoading(),
-      });
+      this.showLoading('Cargando...', 'Por favor, espere mientras se procesan los cambios.');
 
-      // Lanza todas las promesas en paralelo
       await Promise.all(
-        itemsToUpdate.map((item) =>
+        itemsToUpdate.map(item =>
           this.pedidosService.cambiarEstadoDeProducto(
             item.pedido_prod_id,
             EstadoPedidoHasProductos.entregado
@@ -567,8 +492,7 @@ export class ListaPedidosComponent implements OnInit {
         )
       );
 
-      // Actualiza estado local
-      itemsToUpdate.forEach((item) => {
+      itemsToUpdate.forEach(item => {
         item.previousStatus = item.status;
         item.status = EstadoPedidoHasProductos.entregado;
       });
@@ -582,7 +506,6 @@ export class ListaPedidosComponent implements OnInit {
         showConfirmButton: false,
       });
 
-      // Verificar si todo el pedido está completado
       this.checkAllDelivered(order);
     } catch (error) {
       Swal.close();
@@ -599,143 +522,112 @@ export class ListaPedidosComponent implements OnInit {
 
   checkAllDelivered(order: Order): void {
     const allDelivered = order.items.every(
-      (i) => i.status === 'Entregado' || i.status === 'Pagado'
+      i => i.status === EstadoPedidoHasProductos.entregado ||
+           i.status === EstadoPedidoHasProductos.pagado
     );
 
     if (allDelivered) {
-      // Actualizar estado del pedido completo si es necesario
-      this.pedidosService
-        .actualizarEstadoPedido(order.id, 'Entregado')
-        .subscribe({
-          next: () => {
-            order.estado = 'Completado';
-            Swal.fire({
-              title: '¡Pedido completado!',
-              text: `El pedido #${order.id} ha sido entregado por completo`,
-              icon: 'success',
-              timer: 2000,
-              showConfirmButton: false,
-            });
-          },
-          error: (error) => {
-            console.error('Error al actualizar estado del pedido:', error);
-          },
-        });
+      this.pedidosService.actualizarEstadoPedido(order.id, 'Entregado').subscribe({
+        next: () => {
+          order.estado = 'Completado';
+          Swal.fire({
+            title: '¡Pedido completado!',
+            text: `El pedido #${order.id} ha sido entregado por completo`,
+            icon: 'success',
+            timer: 2000,
+            showConfirmButton: false,
+          });
+        },
+        error: (error) => console.error('Error al actualizar estado del pedido:', error),
+      });
     }
   }
 
-  markNotificationAsRead(notification: Notification): void {
-    notification.read = true;
-    this.updateUnreadCount();
+  formatTime(date: string | Date): string {
+    const diffMinutes = Math.round((Date.now() - new Date(date).getTime()) / 60000);
+
+    if (diffMinutes < 1) return 'Ahora mismo';
+    if (diffMinutes < 60) return `Hace ${diffMinutes} min`;
+    if (diffMinutes < 1440) {
+      const hours = Math.floor(diffMinutes / 60);
+      return `Hace ${hours} ${hours === 1 ? 'hora' : 'horas'}`;
+    }
+    const days = Math.floor(diffMinutes / 1440);
+    return `Hace ${days} ${days === 1 ? 'día' : 'días'}`;
   }
 
   getStatusClass(status: string): string {
-    switch (status) {
-      case 'Sin preparar':
-        return 'text-danger';
-      case 'Preparado':
-        return 'text-warning';
-      case 'Entregado':
-        return 'text-success';
-      case 'Pagado':
-        return 'text-primary';
-      default:
-        return '';
-    }
+    const classes: Record<string, string> = {
+      'Sin preparar': 'text-danger',
+      'Preparado': 'text-warning',
+      'Entregado': 'text-success',
+      'Pagado': 'text-primary'
+    };
+    return classes[status] || '';
   }
 
   getStatusText(status: string): string {
-    switch (status) {
-      case 'Sin preparar':
-        return 'Sin preparar';
-      case 'Preparado':
-        return 'Preparado';
-      case 'Entregado':
-        return 'Entregado';
-      case 'Pagado':
-        return 'Pagado';
-      default:
-        return status;
-    }
+    return status;
   }
 
   getOrderStatusClass(status: string): string {
-    switch (status) {
-      case 'Iniciado':
-        return 'badge bg-primary';
-      case 'En preparación':
-        return 'badge bg-warning';
-      case 'Completado':
-        return 'badge bg-success';
-      case 'Pagado':
-        return 'badge bg-secondary';
-      default:
-        return 'badge bg-light';
-    }
+    const classes: Record<string, string> = {
+      'Iniciado': 'badge bg-primary',
+      'En preparación': 'badge bg-warning',
+      'Completado': 'badge bg-success',
+      'Pagado': 'badge bg-secondary'
+    };
+    return classes[status] || 'badge bg-light';
   }
 
   getOrderByTable(tableNumber: number): Order | undefined {
-    return this.orders.find((order) => order.tableNumber === tableNumber);
+    return this.orders.find(order => order.tableNumber === tableNumber);
   }
 
   goToOrder(tableNumber: number): void {
-    // Si no estamos mostrando solo una mesa, buscar el pedido por número de mesa
     if (!this.mostrandoSoloMesa) {
       const order = this.getOrderByTable(tableNumber);
       if (order) {
         this.notificationsOpen = false;
         this.sidebarOpen = true;
-
-        this.orders.forEach((o) => {
-          o.expanded = o.id === order.id;
-        });
-
+        this.orders.forEach(o => o.expanded = o.id === order.id);
         setTimeout(() => {
-          const orderElement = document.getElementById(`order-${order.id}`);
-          if (orderElement) {
-            orderElement.scrollIntoView({ behavior: 'smooth' });
-          }
+          document.getElementById(`order-${order.id}`)?.scrollIntoView({ behavior: 'smooth' });
         }, 300);
         return;
       }
     }
-
-    // Si ya estamos mostrando una mesa específica o no se encontró el pedido, cargar esa mesa
     this.cargarPedidosMesa(tableNumber);
   }
 
   navigate(route: string): void {
-    // Aquí implementarías la navegación real con Angular Router
     console.log(`Navegando a: ${route}`);
     this.navOpen = false;
   }
 
-  // Método para refrescar los datos
   refreshOrders(): void {
     this.loadOrders();
   }
 
-  // Calcular total del pedido
+  formatOrderDate(date: Date): string {
+    return new Intl.DateTimeFormat('es-ES', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    }).format(date);
+  }
+
   getOrderTotal(order: Order): number {
     return order.items.reduce((total, item) => {
       let precio = item.precio;
-
-      // Sumar extras si los hay
-      if (item.extras && item.extras.length > 0) {
-        const extrasTotal = item.extras.reduce((sum, extra: any) => {
-          return sum + +(extra.precio || 0);
-        }, 0);
-        precio += extrasTotal;
+      if (item.extras?.length) {
+        precio += item.extras.reduce((sum, extra: any) => sum + +(extra.precio || 0), 0);
       }
-
-      // Sumar ingredientes adicionales si los hay
-      if (item.ingredientes && item.ingredientes.length > 0) {
-        const ingredientesTotal = item.ingredientes.reduce((sum, ing: any) => {
-          return sum + +(ing.precio || 0);
-        }, 0);
-        precio += ingredientesTotal;
+      if (item.ingredientes?.length) {
+        precio += item.ingredientes.reduce((sum, ing: any) => sum + +(ing.precio || 0), 0);
       }
-
       return total + precio;
     }, 0);
   }
@@ -745,41 +637,17 @@ export class ListaPedidosComponent implements OnInit {
   }
 
   obtenerNombresExtras(extras: any[]): string {
-    if (!extras || extras.length === 0) {
-      return '';
-    }
-
-    return extras
-      .map((extra: any) => {
-        // Manejo más robusto del nombre del extra
-        return extra.nombre_extra || extra.nombre || extra.name || 'Extra';
-      })
-      .join(', ');
+    return extras?.length ? extras.map(e => e.nombre_extra || e.nombre || e.name || 'Extra').join(', ') : '';
   }
 
   obtenerNombresIngredientes(ingredientes: any[]): string {
-    if (!ingredientes || ingredientes.length === 0) {
-      return '';
-    }
-
-    return ingredientes
-      .map((ing: any) => {
-        return (
-          ing.nombre_ingrediente || ing.nombre || ing.name || 'Ingrediente'
-        );
-      })
-      .join(', ');
+    return ingredientes?.length ?
+      ingredientes.map(i => i.nombre_ingrediente || i.nombre || i.name || 'Ingrediente').join(', ') : '';
   }
 
-  /**
-   * Elimina un producto específico del pedido
-   * @param order - Pedido que contiene el producto
-   * @param item - Producto a eliminar
-   */
   async eliminarProducto(order: Order, item: OrderItem): Promise<void> {
-    // Verificar que el producto se puede eliminar
-    if (item.status !== 'Sin preparar') {
-      Swal.fire({
+    if (item.status !== EstadoPedidoHasProductos.sin_preparar) {
+      await Swal.fire({
         title: 'No se puede eliminar',
         text: `El producto "${item.name}" ya está en estado "${item.status}" y no se puede eliminar`,
         icon: 'warning',
@@ -807,38 +675,16 @@ export class ListaPedidosComponent implements OnInit {
       cancelButtonText: 'Cancelar',
     });
 
-    if (!isConfirmed) {
-      return;
-    }
+    if (!isConfirmed) return;
 
     try {
-      // Mostrar loading
-      Swal.fire({
-        title: 'Eliminando producto...',
-        html: 'Por favor, espere mientras se elimina el producto.',
-        allowOutsideClick: false,
-        allowEscapeKey: false,
-        allowEnterKey: false,
-        didOpen: () => Swal.showLoading(),
-      });
+      this.showLoading('Eliminando producto...', 'Por favor, espere mientras se elimina el producto.');
 
-      // Eliminar el producto del servidor
-      await this.pedidosService
-        .eliminarProductoDelPedido(item.pedido_prod_id)
-        .toPromise();
+      await this.pedidosService.eliminarProductoDelPedido(item.pedido_prod_id).toPromise();
 
-      // Remover el producto de la lista local
-      const itemIndex = order.items.indexOf(item);
-      if (itemIndex > -1) {
-        order.items.splice(itemIndex, 1);
-      }
-
-      // Si el pedido se quedó sin productos, removerlo completamente
+      order.items = order.items.filter(i => i !== item);
       if (order.items.length === 0) {
-        const orderIndex = this.orders.indexOf(order);
-        if (orderIndex > -1) {
-          this.orders.splice(orderIndex, 1);
-        }
+        this.orders = this.orders.filter(o => o !== order);
       }
 
       Swal.close();
@@ -849,30 +695,22 @@ export class ListaPedidosComponent implements OnInit {
         timer: 2000,
         showConfirmButton: false,
       });
-
-      console.log(`Producto ${item.pedido_prod_id} eliminado exitosamente`);
     } catch (error) {
       Swal.close();
       console.error('Error al eliminar el producto:', error);
 
-      let errorMessage = 'Ocurrió un error al eliminar el producto';
+      const errorMessages: Record<number, string> = {
+        400: 'No se puede eliminar el producto porque ya está en preparación',
+        404: 'El producto no existe o ya fue eliminado',
+        403: 'No tiene permisos para eliminar este producto'
+      };
 
-      // Manejo específico de errores
-      if (error && typeof error === 'object') {
-        const err = error as any;
-        if (err.status === 400) {
-          errorMessage =
-            'No se puede eliminar el producto porque ya está en preparación';
-        } else if (err.status === 404) {
-          errorMessage = 'El producto no existe o ya fue eliminado';
-        } else if (err.status === 403) {
-          errorMessage = 'No tiene permisos para eliminar este producto';
-        }
-      }
+      const err = error as any;
+      const message = errorMessages[err?.status] || 'Ocurrió un error al eliminar el producto';
 
       Swal.fire({
         title: 'Error al eliminar',
-        text: errorMessage,
+        text: message,
         icon: 'error',
         timer: 3000,
         showConfirmButton: false,
@@ -880,16 +718,6 @@ export class ListaPedidosComponent implements OnInit {
     }
   }
 
-  /**
-   * CÓDIGO REFACTORIZADO
-   */
-
-  /**
-   * Verifica si un producto puede ser eliminado
-   * Solo se pueden eliminar productos en estado "Sin preparar"
-   * @param producto - Producto a verificar
-   * @returns true si el producto puede ser eliminado
-   */
   puedeEliminarProducto(producto: Producto_extras_ingrSel): boolean {
     return producto.estado === EstadoPedidoHasProductos.sin_preparar;
   }
@@ -902,8 +730,13 @@ export class ListaPedidosComponent implements OnInit {
     producto: Producto_extras_ingrSel,
     pedido: PedidoAgrupado
   ): Promise<void> {
-    if (!this.puedeEliminarProducto(producto)) return;
+    // 1. Verifica si se puede eliminar
+    if (!this.puedeEliminarProducto(producto)) {
+       Swal.fire('Acción no permitida', 'Solo se pueden cancelar productos que no han sido preparados.', 'warning');
+       return; // Sale temprano si no se puede eliminar
+    }
 
+    // 2. Muestra la confirmación
     Swal.fire({
       title: '¿Cancelar producto?',
       text: `Se eliminará "${producto.producto_id.nombre_prod}" del pedido. Esta acción no se puede deshacer.`,
@@ -912,104 +745,105 @@ export class ListaPedidosComponent implements OnInit {
       confirmButtonText: 'Sí, cancelar',
       cancelButtonText: 'No',
     }).then(async (result) => {
+      // 3. Si el usuario confirma DENTRO del .then()...
       if (result.isConfirmed) {
         try {
+          // 4. Llama al servicio para eliminar en el backend
           await this.pedidosService.eliminarProductoDelPedido(
             producto.pedido_prod_id
           );
 
-          // Actualización visual instantánea: elimina el producto de la lista
+          // 5. Actualización visual instantánea: elimina el producto de la lista local
           pedido.productos = pedido.productos.filter(
             (p) => p.pedido_prod_id !== producto.pedido_prod_id
           );
 
+          // Opcional: Recalcular si el pedido sigue teniendo pendientes
+          if (pedido.productos.length > 0) {
+             pedido.tieneProductosPendientes = pedido.productos.some(p => p.estado === EstadoPedidoHasProductos.sin_preparar);
+          } else {
+             // Si el pedido queda vacío, podrías querer eliminarlo del array principal `pedidosAgrupados`
+             // (Necesitarías acceso a `this.pedidosAgrupados` aquí o pasar una función callback)
+             // Ejemplo: this.eliminarPedidoDeVista(pedido.pedidoId.id_pedido);
+          }
+
+
+          // 6. Muestra mensaje de éxito
           Swal.fire(
             'Cancelado',
             'El producto ha sido eliminado del pedido.',
             'success'
           );
         } catch (error) {
+          // 7. Manejo de errores si la API falla
           console.error('Error al eliminar el producto:', error);
           Swal.fire('Error', 'No se pudo eliminar el producto.', 'error');
         }
       }
+      // 8. Si el usuario NO confirma (result.isConfirmed es false), no se hace nada más.
     });
+
   }
 
-  /**
-   * REFACTORIZADO: Cambia el estado de un solo producto.
-   * Acepta la nueva interfaz 'Producto_extras_ingrSel'.
-   */
-  async cambiarEstadoProducto(
-    producto: Producto_extras_ingrSel,
-    pedido: PedidoAgrupado
-  ): Promise<void> {
+  async cambiarEstadoProducto(producto: Producto_extras_ingrSel, pedido: PedidoAgrupado): Promise<void> {
     try {
-      // Llama a la API para cambiar el estado a 'Entregado'
       await this.pedidosService.cambiarEstadoDeProducto(
         producto.pedido_prod_id,
         EstadoPedidoHasProductos.entregado
       );
 
-      // Actualización visual instantánea: elimina el producto de la lista local
-      pedido.productos = pedido.productos.filter(
-        (p) => p.pedido_prod_id !== producto.pedido_prod_id
-      );
+      pedido.productos = pedido.productos.filter(p => p.pedido_prod_id !== producto.pedido_prod_id);
 
-      // Si el pedido ya no tiene productos visibles, se elimina el pedido completo de la vista
       if (pedido.productos.length === 0) {
         this.pedidosAgrupados = this.pedidosAgrupados.filter(
-          (p) => p.pedidoId.id_pedido !== pedido.pedidoId.id_pedido
+          p => p.pedidoId.id_pedido !== pedido.pedidoId.id_pedido
         );
       }
     } catch (error) {
       console.error('Error al cambiar el estado del producto:', error);
-      Swal.fire(
-        'Error',
-        'No se pudo actualizar el estado del producto.',
-        'error'
-      );
+      Swal.fire('Error', 'No se pudo actualizar el estado del producto.', 'error');
     }
   }
 
-  /**
-   * REFACTORIZADO: Marca todos los productos de un pedido como preparados.
-   * Acepta la nueva interfaz 'PedidoAgrupado'.
-   */
-  marcarPedidoCompleto(pedido: PedidoAgrupado): void {
-    Swal.fire({
+  async marcarPedidoCompleto(pedido: PedidoAgrupado): Promise<void> {
+    const { isConfirmed } = await Swal.fire({
       title: '¿Confirmar entrega?',
       text: `Se marcarán todos los productos de la mesa ${pedido.pedidoId.no_mesa.no_mesa} como entregados.`,
       icon: 'question',
       showCancelButton: true,
       confirmButtonText: 'Sí, entregar todo',
       cancelButtonText: 'Cancelar',
-    }).then(async (result) => {
-      if (result.isConfirmed) {
-        try {
-          // Crea una promesa para cada actualización de producto
-          const promesasDeActualizacion = pedido.productos.map((producto) =>
-            this.pedidosService.cambiarEstadoDeProducto(
-              producto.pedido_prod_id,
-              EstadoPedidoHasProductos.entregado
-            )
-          );
-          // Espera a que todas las promesas se completen
-          await Promise.all(promesasDeActualizacion);
+    });
 
-          // Actualización visual instantánea: elimina el pedido completo de la lista
-          this.pedidosAgrupados = this.pedidosAgrupados.filter(
-            (p) => p.pedidoId.id_pedido !== pedido.pedidoId.id_pedido
-          );
-        } catch (error) {
-          console.error('Error al marcar el pedido como completado:', error);
-          Swal.fire(
-            'Error',
-            'No se pudieron actualizar todos los productos.',
-            'error'
-          );
-        }
-      }
+    if (!isConfirmed) return;
+
+    try {
+      await Promise.all(
+        pedido.productos.map(producto =>
+          this.pedidosService.cambiarEstadoDeProducto(
+            producto.pedido_prod_id,
+            EstadoPedidoHasProductos.entregado
+          )
+        )
+      );
+
+      this.pedidosAgrupados = this.pedidosAgrupados.filter(
+        p => p.pedidoId.id_pedido !== pedido.pedidoId.id_pedido
+      );
+    } catch (error) {
+      console.error('Error al marcar el pedido como completado:', error);
+      Swal.fire('Error', 'No se pudieron actualizar todos los productos.', 'error');
+    }
+  }
+
+  private showLoading(title: string, html: string): void {
+    Swal.fire({
+      title,
+      html,
+      allowOutsideClick: false,
+      allowEscapeKey: false,
+      allowEnterKey: false,
+      didOpen: () => Swal.showLoading(),
     });
   }
 }
