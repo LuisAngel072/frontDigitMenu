@@ -42,7 +42,6 @@ export class CategoriasComponent {
     private readonly catServices: CategoriasService,
     private readonly subcatServices: SubcategoriasService, // Servicio para subcategorías
     private readonly logsServices: LogsService,
-    private readonly authService: AuthService,
     private adminComponente: AdministradorComponent
   ) {}
 
@@ -97,6 +96,8 @@ export class CategoriasComponent {
       });
       const categoria = this.categorias.find((cat) => cat.id_cat === id_cat);
       this.imgCatUrl = environment.ApiUp + categoria?.ruta_img;
+      console.log(this.imgCatUrl);
+
       if (!categoria) {
         Swal.fire({
           icon: 'error',
@@ -109,7 +110,7 @@ export class CategoriasComponent {
       Swal.close();
       Swal.fire({
         title: 'Ver categoría',
-        imageUrl: environment.ApiUp + categoria.ruta_img,
+        imageUrl: this.imgCatUrl,
         html: `
           <div class="input-group mt-2 mb-3 center-content me-3">
             <span class="input-group-text border-secondary">Nombre de la categoría</span>

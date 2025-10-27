@@ -8,7 +8,8 @@ import {
 } from '../../../interfaces/types';
 import Swal from 'sweetalert2';
 import { CommonModule } from '@angular/common';
-
+import { Subscription } from 'rxjs';
+import { CocinaSocketService } from '../../../gateways/pedidos-gateway.service';
 
 interface Order {
   id: number;
@@ -75,13 +76,26 @@ export class ListaPedidosComponent implements OnInit {
   public pedidosAgrupados: PedidoAgrupado[] = [];
   public isLoading = true;
 
-  constructor(private pedidosService: PedidosService) {}
+  private nuevoProductoSub: Subscription | undefined;
+  private estadoActualizadoSub: Subscription | undefined;
+
+  constructor(
+    private pedidosService: PedidosService,
+    private pedidosSocket: CocinaSocketService,
+  ) {}
 
   ngOnInit(): void {
     this.loadOrders();
     this.loadNotifications();
     this.loadNavigation();
     this.loadIcons();
+    this.escucharActualizacionesEnVivo(); // Empieza a escuchar sockets
+  }
+
+  ngOnDestroy(): void {
+    this.nuevoProductoSub?.unsubscribe();
+    this.estadoActualizadoSub?.unsubscribe();
+    this.pedidosSocket.disconnect();
   }
 
   loadIcons(): void {
@@ -126,7 +140,116 @@ export class ListaPedidosComponent implements OnInit {
       },
     });
   }
+  /**
+   * Se suscribe a los eventos del socket para actualizaciones en tiempo real.
+   */
+  escucharActualizacionesEnVivo(): void {
+    this.nuevoProductoSub = this.pedidosSocket
+      .onNuevoProducto()
+      .subscribe((nuevoProducto) => {
+        console.log('Socket (Mesero) recibió nuevoProducto:', nuevoProducto);
+        this.agregarOActualizarProductoEnVista(nuevoProducto);
+      });
 
+    this.estadoActualizadoSub = this.pedidosSocket
+      .onEstadoActualizado()
+      .subscribe((productoActualizado) => {
+        console.log(
+          'Socket (Mesero) recibió estadoActualizado:',
+          productoActualizado
+        );
+        this.agregarOActualizarProductoEnVista(productoActualizado);
+      });
+  }
+  /**
+   * Lógica centralizada para actualizar la vista del MESERO basada en datos del socket.
+   */
+  private agregarOActualizarProductoEnVista(
+    productoData: Producto_extras_ingrSel
+  ): void {
+    const pedidoIdRecibido = productoData.pedido_id.id_pedido;
+    const productoIdRecibido = productoData.pedido_prod_id;
+    const estadoRecibido = productoData.estado;
+
+    // Estados relevantes para el MESERO
+    const estadosVisiblesMesero = [
+      EstadoPedidoHasProductos.sin_preparar,
+      EstadoPedidoHasProductos.preparado,
+    ];
+
+    let pedidoExistente = this.pedidosAgrupados.find(
+      (p) => p.pedidoId.id_pedido === pedidoIdRecibido
+    );
+
+    // --- Si el producto está en un estado que el mesero debe ver ---
+    if (estadosVisiblesMesero.includes(estadoRecibido)) {
+      if (pedidoExistente) {
+        // Pedido existe, buscar producto
+        const productoIndex = pedidoExistente.productos.findIndex(
+          (p) => p.pedido_prod_id === productoIdRecibido
+        );
+        if (productoIndex !== -1) {
+          // Producto existe, actualizarlo (importante por si cambia de 'Sin preparar' a 'Preparado')
+          pedidoExistente.productos[productoIndex] = productoData;
+          console.log(
+            `Producto ${productoIdRecibido} actualizado en pedido ${pedidoIdRecibido}`
+          );
+        } else {
+          // Producto nuevo en pedido existente, añadirlo
+          pedidoExistente.productos.push(productoData);
+          console.log(
+            `Producto ${productoIdRecibido} añadido a pedido existente ${pedidoIdRecibido}`
+          );
+        }
+        // Recalcular estado pendiente
+        pedidoExistente.tieneProductosPendientes =
+          pedidoExistente.productos.some(
+            (p) => p.estado === EstadoPedidoHasProductos.sin_preparar
+          );
+      } else {
+        // Pedido es nuevo para la vista del mesero
+        const nuevoPedido: PedidoAgrupado = {
+          pedidoId: productoData.pedido_id,
+          productos: [productoData],
+          expandido: true, // Mostrar expandido por defecto al llegar nuevo
+          tieneProductosPendientes:
+            estadoRecibido === EstadoPedidoHasProductos.sin_preparar,
+        };
+        this.pedidosAgrupados.unshift(nuevoPedido); // Añadir al principio
+        console.log(`Nuevo pedido ${pedidoIdRecibido} añadido a la vista`);
+      }
+    }
+    // --- Si el producto está en un estado que el mesero NO debe ver (ej: 'Entregado') ---
+    else {
+      if (pedidoExistente) {
+        // Eliminar el producto de la lista del pedido
+        const productosOriginales = pedidoExistente.productos.length;
+        pedidoExistente.productos = pedidoExistente.productos.filter(
+          (p) => p.pedido_prod_id !== productoIdRecibido
+        );
+        console.log(
+          `Producto ${productoIdRecibido} eliminado de la vista del pedido ${pedidoIdRecibido} (estado: ${estadoRecibido})`
+        );
+
+        // Si el pedido queda sin productos visibles para el mesero, eliminar el pedido completo
+        if (pedidoExistente.productos.length === 0 && productosOriginales > 0) {
+          this.pedidosAgrupados = this.pedidosAgrupados.filter(
+            (p) => p.pedidoId.id_pedido !== pedidoIdRecibido
+          );
+          console.log(
+            `Pedido ${pedidoIdRecibido} eliminado de la vista (sin productos visibles para mesero)`
+          );
+        } else if (pedidoExistente.productos.length > 0) {
+          // Recalcular estado pendiente (si aún quedan productos 'Sin preparar')
+          pedidoExistente.tieneProductosPendientes =
+            pedidoExistente.productos.some(
+              (p) => p.estado === EstadoPedidoHasProductos.sin_preparar
+            );
+        }
+      }
+      // Si el pedido no existía localmente y el estado no es relevante, no hacemos nada.
+    }
+  }
   // MÉTODO REQUERIDO POR EL COMPONENTE MESEROS
   cargarPedidosMesa(
     mesaNumber: number,
@@ -775,7 +898,10 @@ export class ListaPedidosComponent implements OnInit {
    * Elimina un producto de un pedido.
    * Acepta la nueva interfaz 'Producto_extras_ingrSel'.
    */
-  async eliminarProductoDelPedido(producto: Producto_extras_ingrSel, pedido: PedidoAgrupado): Promise<void> {
+  async eliminarProductoDelPedido(
+    producto: Producto_extras_ingrSel,
+    pedido: PedidoAgrupado
+  ): Promise<void> {
     if (!this.puedeEliminarProducto(producto)) return;
 
     Swal.fire({
@@ -788,12 +914,20 @@ export class ListaPedidosComponent implements OnInit {
     }).then(async (result) => {
       if (result.isConfirmed) {
         try {
-          await this.pedidosService.eliminarProductoDelPedido(producto.pedido_prod_id);
+          await this.pedidosService.eliminarProductoDelPedido(
+            producto.pedido_prod_id
+          );
 
           // Actualización visual instantánea: elimina el producto de la lista
-          pedido.productos = pedido.productos.filter(p => p.pedido_prod_id !== producto.pedido_prod_id);
+          pedido.productos = pedido.productos.filter(
+            (p) => p.pedido_prod_id !== producto.pedido_prod_id
+          );
 
-          Swal.fire('Cancelado', 'El producto ha sido eliminado del pedido.', 'success');
+          Swal.fire(
+            'Cancelado',
+            'El producto ha sido eliminado del pedido.',
+            'success'
+          );
         } catch (error) {
           console.error('Error al eliminar el producto:', error);
           Swal.fire('Error', 'No se pudo eliminar el producto.', 'error');

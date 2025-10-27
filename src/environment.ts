@@ -1,7 +1,7 @@
 export const environment = {
     production: false,
     ApiIP: "http://localhost:3000/api/",
-    ApiUp: "http://localhost:3000/uploads/",
+    ApiUp: "http://localhost:3000/uploads",
 
     /**
      * General

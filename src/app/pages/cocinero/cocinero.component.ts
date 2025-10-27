@@ -9,7 +9,7 @@ import {
 import Swal from 'sweetalert2';
 import { CommonModule } from '@angular/common';
 import { HeaderComponent } from '../comun-componentes/header/header.component';
-import { CocinaSocketService } from '../../gateways/cocina-gateway.service';
+import { CocinaSocketService } from '../../gateways/pedidos-gateway.service';
 import { Subscription, firstValueFrom } from 'rxjs';
 
 @Component({
@@ -24,7 +24,7 @@ export class CocineroComponent implements OnInit {
   private rol = 'cocinero';
   isLoading = true;
 
-  // ✅ Guardar suscripciones para limpiar después
+  // Guardar suscripciones para limpiar después
   private nuevoProductoSub: Subscription | undefined;
   private estadoActualizadoSub: Subscription | undefined;
 

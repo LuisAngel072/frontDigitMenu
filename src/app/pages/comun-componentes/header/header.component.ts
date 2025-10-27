@@ -8,11 +8,11 @@ import { Subscription } from 'rxjs';
 import { CommonModule } from '@angular/common';
 
 @Component({
-    selector: 'app-header',
-    standalone: true,
-    imports: [CommonModule],
-    templateUrl: './header.component.html',
-    styleUrl: './header.component.css'
+  selector: 'app-header',
+  standalone: true,
+  imports: [CommonModule],
+  templateUrl: './header.component.html',
+  styleUrl: './header.component.css',
 })
 export class HeaderComponent {
   public usuario: Usuarios | undefined;
@@ -26,23 +26,28 @@ export class HeaderComponent {
   constructor(
     private readonly authService: AuthService,
     private readonly usuariosService: UsuariosService,
-    private readonly sharedService: SharedService,
+    private readonly sharedService: SharedService
   ) {
     console.log(this.username);
     console.log(this.usercode);
   }
 
   async ngOnInit() {
-    this.usuario = await this.usuariosService.obtenerUnUsuario(String(this.usercode));
-    this.profileImageUrl = environment.ApiUp + (this.usuario?.img_perfil.img_ruta || '');
+    this.usuario = await this.usuariosService.obtenerUnUsuario(
+      String(this.usercode)
+    );
+    this.profileImageUrl =
+      environment.ApiUp + '/' + (this.usuario?.img_perfil.img_ruta || '');
 
     // Suscribirse a los cambios en la imagen de perfil
-    const profileImgSubscription = this.sharedService.profileImg.subscribe((newProfileImg) => {
-      if (newProfileImg) {
-        this.profileImageUrl = newProfileImg;
+    const profileImgSubscription = this.sharedService.profileImg.subscribe(
+      (newProfileImg) => {
+        if (newProfileImg) {
+          this.profileImageUrl = newProfileImg;
+        }
       }
-    });
-    console.log('Nueva imagen de perfil:', this.profileImageUrl)
+    );
+    console.log('Nueva imagen de perfil:', this.profileImageUrl);
     this.subscriptions.add(profileImgSubscription);
   }
 

@@ -268,7 +268,7 @@ export class PedidosService {
     extras: number[];
     ingr: number[];
   }): Observable<any> {
-    console.log('➕ Registrando producto al pedido:', payloadProducto);
+    console.log('Registrando producto al pedido:', payloadProducto);
     return this.http.post(
       `${this.baseUrl}/registrar/productos`,
       payloadProducto
