@@ -1,7 +1,7 @@
 // cocina-gateway.service.ts (Frontend - Corregido)
 
 import { Injectable } from '@angular/core';
-import { io, Socket } from 'socket.io-client';
+import { io, ManagerOptions, Socket } from 'socket.io-client';
 import { Observable } from 'rxjs';
 import { environment } from '../../environment'; // Asegúrate que la ruta sea correcta
 import { Producto_extras_ingrSel } from '../interfaces/types'; // Importa la interfaz correcta
@@ -14,10 +14,12 @@ export class CocinaSocketService {
   private readonly serverUrl = environment.ApiIP.replace('/api/', ''); // Conecta a la URL base
 
   constructor() {
-    this.socket = io(this.serverUrl);
-    console.log(`🔌 CocinaSocketService conectando a: ${this.serverUrl}`);
+    console.log('<<<<< NUEVA INSTANCIA DE PedidosGatewayService CREADA >>>>>');
 
-    // Listeners básicos para depuración
+    this.socket = io(this.serverUrl);
+
+
+    // Listeners básicos (sin cambios)
     this.socket.on('connect', () =>
       console.log('Socket conectado:', this.socket.id)
     );
