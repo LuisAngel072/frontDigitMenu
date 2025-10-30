@@ -249,9 +249,12 @@ export class CrudProductosComponent {
             descripcion: `Se eliminó el producto ${producto.nombre_prod}`,
           };
           await this.logsService.crearLog(log);
-          this.adminComponente.productos =
-            await this.productosService.obtenerProductos();
-          this.productos = this.adminComponente.productos;
+
+          this.productos = this.productos.filter((p) => p.id_prod !== id_prod);
+          this.productosFiltrados = this.productosFiltrados.filter(
+            (p) => p.id_prod !== id_prod
+          );
+          this.adminComponente.productos = this.productos;
           Swal.fire({
             icon: 'success',
             title: 'Éxito',

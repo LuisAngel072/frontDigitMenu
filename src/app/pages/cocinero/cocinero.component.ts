@@ -67,7 +67,7 @@ export class CocineroComponent implements OnInit {
   }
 
   /**
-   * ✅ Se suscribe a los eventos del socket para actualizaciones en tiempo real.
+   * Se suscribe a los eventos del socket para actualizaciones en tiempo real.
    */
   escucharActualizacionesEnVivo(): void {
     // --- Escuchar Nuevos Productos ---
@@ -82,7 +82,7 @@ export class CocineroComponent implements OnInit {
   }
 
   /**
-   * ✅ Lógica centralizada para manejar la llegada de un producto (nuevo o actualizado).
+   * Lógica centralizada para manejar la llegada de un producto (nuevo o actualizado).
    * Añade, actualiza o elimina el producto/pedido de la vista del cocinero.
    */
   private agregarOActualizarProductoEnVista(productoData: Producto_extras_ingrSel): void {

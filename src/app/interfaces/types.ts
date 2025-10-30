@@ -125,7 +125,7 @@ export type P_H_I = {
 };
 
 export enum EstadoPedido {
-  iniciado = 'Iniciado',
+  no_pagado = 'No pagado',
   pagado = 'Pagado',
 }
 

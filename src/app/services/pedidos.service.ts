@@ -11,6 +11,7 @@ import {
 import { catchError, map, switchMap, tap } from 'rxjs/operators';
 import { environment } from '../../environment';
 import {
+  EstadoPedido,
   EstadoPedidoHasProductos,
   PedidoAgrupado,
   Pedidos,
@@ -30,16 +31,25 @@ export class PedidosService {
     private readonly authService: AuthService
   ) {}
 
-  getPedidosActivosConDetalles(rol: string | null): Observable<PedidoAgrupado[]> {
+  getPedidosActivosConDetalles(
+    rol: string | null
+  ): Observable<PedidoAgrupado[]> {
     console.log('Iniciando getPedidosActivosConDetalles (Optimizado)...');
 
-    return this.http.get<PedidoAgrupado[]>(`${this.baseUrl}/activos/${rol}`).pipe(
-      tap(resultado => console.log('Respuesta completa del backend:', resultado)),
-      catchError(err => {
-        console.error('Error al obtener los pedidos activos con detalles', err);
-        return throwError(() => err);
-      })
-    );
+    return this.http
+      .get<PedidoAgrupado[]>(`${this.baseUrl}/activos/${rol}`)
+      .pipe(
+        tap((resultado) =>
+          console.log('Respuesta completa del backend:', resultado)
+        ),
+        catchError((err) => {
+          console.error(
+            'Error al obtener los pedidos activos con detalles',
+            err
+          );
+          return throwError(() => err);
+        })
+      );
   }
 
   getPedidosConProductosDetalles(
@@ -58,7 +68,9 @@ export class PedidosService {
         const observablesDeProductos = pedidos.map((pedido) =>
           // 🔧 CORREGIDO: Removida la barra final
           this.http.get<Pedidos_has_productos[]>(
-            `${this.baseUrl}/productos/${pedido.id_pedido}${rol ? '/' + rol : ''}`
+            `${this.baseUrl}/productos/${pedido.id_pedido}${
+              rol ? '/' + rol : ''
+            }`
           )
         );
 
@@ -148,14 +160,18 @@ export class PedidosService {
           const estadosActivos = [null, undefined, 'Iniciado', 'No pagado'];
           const estadoActivo = estadosActivos.includes(p.estado);
 
-          console.log(`Pedido ${p.id_pedido}: mesa=${p.no_mesa?.no_mesa}, estado=${p.estado}, mesaMatch=${mesaMatch}, estadoActivo=${estadoActivo}`);
+          console.log(
+            `Pedido ${p.id_pedido}: mesa=${p.no_mesa?.no_mesa}, estado=${p.estado}, mesaMatch=${mesaMatch}, estadoActivo=${estadoActivo}`
+          );
 
           return mesaMatch && estadoActivo;
         });
 
         if (pedidosActivos.length > 0) {
           // Retornamos el más reciente (mayor id_pedido)
-          const pedidoMasReciente = pedidosActivos.sort((a, b) => b.id_pedido - a.id_pedido)[0];
+          const pedidoMasReciente = pedidosActivos.sort(
+            (a, b) => b.id_pedido - a.id_pedido
+          )[0];
           console.log('✅ Pedido activo encontrado:', pedidoMasReciente);
           return pedidoMasReciente;
         }
@@ -192,19 +208,26 @@ export class PedidosService {
     }
   }
 
-
   obtenerOCrearPedidoPorMesa(numeroMesa: number): Observable<number> {
     console.log(`📋 obtenerOCrearPedidoPorMesa para mesa: ${numeroMesa}`);
 
     return this.buscarPedidoActivoPorMesa(numeroMesa).pipe(
       switchMap((pedidoExistente) => {
         if (pedidoExistente && pedidoExistente.id_pedido) {
-          console.log('✅ Pedido existente encontrado, ID:', pedidoExistente.id_pedido);
+          console.log(
+            '✅ Pedido existente encontrado, ID:',
+            pedidoExistente.id_pedido
+          );
           return of(pedidoExistente.id_pedido);
         } else {
-          console.log('🆕 No existe pedido, creando uno nuevo para mesa:', numeroMesa);
+          console.log(
+            '🆕 No existe pedido, creando uno nuevo para mesa:',
+            numeroMesa
+          );
           return this.crearNuevoPedido(numeroMesa).pipe(
-            tap((response) => console.log('✅ Respuesta de creación:', response)),
+            tap((response) =>
+              console.log('✅ Respuesta de creación:', response)
+            ),
             // 🔧 CORREGIDO: Usar el ID del pedido de la respuesta directamente
             map((response: any) => {
               // El backend puede retornar el objeto completo o solo el ID
@@ -223,9 +246,12 @@ export class PedidosService {
               console.error('❌ Error al crear pedido:', error);
               // Como fallback, intentamos buscar el pedido recién creado
               return this.buscarPedidoActivoPorMesa(numeroMesa).pipe(
-                map(pedido => {
+                map((pedido) => {
                   if (pedido && pedido.id_pedido) {
-                    console.log('✅ Pedido recuperado después de error:', pedido.id_pedido);
+                    console.log(
+                      '✅ Pedido recuperado después de error:',
+                      pedido.id_pedido
+                    );
                     return pedido.id_pedido;
                   }
                   throw new Error('No se pudo crear ni encontrar el pedido');
@@ -309,10 +335,15 @@ export class PedidosService {
     return this.http.get<any[]>(`${this.baseUrl}/productos/${idPedido}`);
   }
 
-  actualizarEstadoPedido(idPedido: number, estado: string): Observable<any> {
-    return this.http.patch<any>(`${this.baseUrl}/actualizar/${idPedido}`, {
-      estado,
-    });
+  async actualizarEstadoPedido(id_pedido: number, estado: EstadoPedido) {
+    try {
+      const response$ = await this.http.patch<any>(
+        this.baseUrl + `/${id_pedido}`,
+        { estado },
+        { headers: { Authorization: `Bearer ${this.authService.getToken()}` } }
+      );
+      return await lastValueFrom(response$);
+    } catch (error) {}
   }
 
   eliminarProductoDelPedido(pedidoProdId: number): Observable<any> {

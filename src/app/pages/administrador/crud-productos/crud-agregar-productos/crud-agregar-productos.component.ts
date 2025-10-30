@@ -26,6 +26,10 @@ import { NgxPaginationModule } from 'ngx-pagination';
 import { ActivatedRoute } from '@angular/router';
 import { LogsService } from '../../../../services/logs.service';
 import { LogsDto } from '../../../../interfaces/dtos';
+import { IngredientesService } from '../../../../services/ingredientes.service';
+import { ExtrasService } from '../../../../services/extras.service';
+import { OpcionesService } from '../../../../services/opciones.service';
+import { SubcategoriasService } from '../../../../services/subcategorias.service';
 
 @Component({
   selector: 'app-crud-agregar-productos',
@@ -81,14 +85,29 @@ export class CrudAgregarProductosComponent implements OnInit {
     private fb: FormBuilder,
     private route: ActivatedRoute,
     private router: Router,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private ingredientesService: IngredientesService,
+    private extrasService: ExtrasService,
+    private opcionesService: OpcionesService,
+    private subCategoriasService: SubcategoriasService
   ) {}
 
-  ngOnInit() {
-    this.ingredientes = this.administradorComponent.ingredientes;
-    this.extras = this.administradorComponent.extras;
-    this.opciones = this.administradorComponent.opciones;
-    this.sub_categorias = this.administradorComponent.subcategorias;
+  async ngOnInit() {
+    this.ingredientes = await this.ingredientesService.getIngredientes();
+    this.extras = await this.extrasService.getExtras();
+    this.opciones = await this.opcionesService.getOpciones();
+    this.sub_categorias =
+      await this.subCategoriasService.obtenerSubcategorias();
+
+    console.log(this.ingredientes);
+    console.log(this.extras);
+    console.log(this.opciones);
+    console.log(this.sub_categorias);
+    this.ingredientesFiltrados = this.ingredientes;
+    this.extrasFiltrados = this.extras;
+    this.opcionesFiltradas = this.opciones;
+
+    this.cdr.detectChanges();
 
     this.route.paramMap.subscribe(async (params) => {
       const idParam = params.get('id_prod');
@@ -96,6 +115,7 @@ export class CrudAgregarProductosComponent implements OnInit {
         this.id_prod = +idParam;
         this.modoEdicion = true;
         await this.cargarProducto(this.id_prod);
+        this.cdr.detectChanges();
       }
     });
   }
@@ -334,7 +354,9 @@ export class CrudAgregarProductosComponent implements OnInit {
               localStorage.getItem('nombres'),
             accion: 'Editar producto',
             modulo: 'Productos',
-            descripcion: `Se actualizó el producto ${this.producto?.nombre_prod ?? ''}`,
+            descripcion: `Se actualizó el producto ${
+              this.producto?.nombre_prod ?? ''
+            }`,
           };
           await this.logsService.crearLog(log);
           this.resetSelections();
@@ -344,9 +366,12 @@ export class CrudAgregarProductosComponent implements OnInit {
           this.router.navigate(['/Administrador/productos']);
         } else {
           console.log(dto);
-          const prodCr = await this.productosService.registrarProducto(dto as ProductosDto);
+          await this.productosService.registrarProducto(
+            dto as ProductosDto
+          );
 
           Swal.fire('Éxito', 'Producto creado', 'success');
+
           const log: LogsDto = {
             usuario:
               localStorage.getItem('codigo') +
@@ -354,7 +379,7 @@ export class CrudAgregarProductosComponent implements OnInit {
               localStorage.getItem('nombres'),
             accion: 'Crear producto',
             modulo: 'Productos',
-            descripcion: `Se creó el producto ${prodCr.nombre_prod ?? ''}`,
+            descripcion: `Se creó el producto ${dto.nombre_prod ?? ''}`,
           };
           await this.logsService.crearLog(log);
         }

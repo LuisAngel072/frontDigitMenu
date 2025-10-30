@@ -1,74 +1,120 @@
-import { Component } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { PedidosService } from '../../../services/pedidos.service';
 import {
   EstadoPedido,
   EstadoPedidoHasProductos,
+  PedidoAgrupado,
   Pedidos,
   Producto_extras_ingrSel,
 } from '../../../interfaces/types';
 import { CommonModule } from '@angular/common';
 import Swal from 'sweetalert2';
+import { firstValueFrom, Subscription } from 'rxjs';
+import { PedidosSocketService } from '../../../gateways/pedidos-gateway.service';
 
 @Component({
-    selector: 'app-caja',
-    standalone: true,
-    imports: [CommonModule],
-    templateUrl: './caja.component.html',
-    styleUrl: './caja.component.css'
+  selector: 'app-caja',
+  standalone: true,
+  imports: [CommonModule],
+  templateUrl: './caja.component.html',
+  styleUrl: './caja.component.css',
 })
-export class CajaComponent {
-  constructor(private readonly pedidosService: PedidosService) {}
-  pedidosAgrupados: {
-    pedidoId: Pedidos;
-    productos: Producto_extras_ingrSel[];
-  }[] = [];
-  private rol = 'caja';
-  ngOnInit(): void {
-    this.cargarPedidos();
-    console.log(this.pedidosAgrupados);
+export class CajaComponent implements OnInit, OnDestroy {
+  constructor(
+    private readonly pedidosService: PedidosService,
+    private readonly cajaGatewayService: PedidosSocketService
+  ) {}
 
+  pedidosAgrupados: PedidoAgrupado[] = [];
+  isLoading = true;
+
+  private rol = 'caja';
+
+  private estadoActualizadoSub: Subscription | undefined;
+
+  ngOnInit(): void {
+    this.cargarPedidosIniciales();
+    console.log(this.pedidosAgrupados);
   }
+  ngOnDestroy(): void {
+    // Limpiar la suscripción para evitar fugas de memoria
+    this.estadoActualizadoSub?.unsubscribe();
+  }
+
   /**
    * Obtiene todos los pedidos con sus productos relacionados
    */
-  async cargarPedidos() {
-    this.pedidosService.getPedidosConProductosDetalles('caja').subscribe({
-      next: (data) => {
-        // 1) Normalizar
-        const normalizado = data.map((p) => ({
-          ...p,
-          extras: p.extras ?? [],
-          ingredientes: p.ingredientes ?? [],
-        }));
-
-        // 2) Agrupar por pedido
-        const agrupados: { [id: number]: Producto_extras_ingrSel[] } = {};
-        normalizado.forEach((detalle) => {
-          const id = detalle.pedido_id.id_pedido;
-          if (!agrupados[id]) agrupados[id] = [];
-          agrupados[id].push(detalle);
-        });
-
-        // 3) Armar array intermedio de “orders” con sus items
-        let lista = Object.entries(agrupados).map(([_, productos]) => ({
-          pedidoId: productos[0].pedido_id,
-          productos,
-        }));
-
-        // 4) Filtrar OUT aquellos pedidos cuyos productos
-        //    **todos** estén en estado distinto de "Entregado"
-        lista = lista.filter((entry) =>
-          entry.productos.some((p) => p.estado === 'Entregado')
-        );
-
-        // 6) Asignar al componente
-        this.pedidosAgrupados = lista;
-      },
-      error: (error) => {
-        console.error('Error cargando pedidos:', error);
-      },
-    });
+  /**
+   * Carga la lista inicial de pedidos para el cocinero.
+   */
+  async cargarPedidosIniciales(): Promise<void> {
+    this.isLoading = true;
+    try {
+      this.pedidosAgrupados = await firstValueFrom(
+        this.pedidosService.getPedidosActivosConDetalles(this.rol)
+      );
+      console.log('Pedidos iniciales cargados:', this.pedidosAgrupados);
+    } catch (error) {
+      console.error('Error al cargar pedidos iniciales:', error);
+      Swal.fire('Error', 'No se pudieron cargar los pedidos.', 'error');
+    } finally {
+      this.isLoading = false;
+    }
   }
+
+  /**
+   * Se suscribe a los eventos del socket.
+   */
+  private escucharActualizacionesEnVivo(): void {
+    this.estadoActualizadoSub = this.cajaGatewayService
+      .onEstadoActualizado()
+      .subscribe((productoActualizado) => {
+        // Lógica de Caja: Solo nos importa si el estado es 'Entregado'
+        if (productoActualizado.estado === EstadoPedidoHasProductos.entregado) {
+          this.agregarProductoEntregado(productoActualizado);
+        }
+      });
+  }
+
+  /**
+   * Lógica para añadir dinámicamente productos 'Entregados' a la vista.
+   */
+  private agregarProductoEntregado(producto: Producto_extras_ingrSel): void {
+    const pedidoId = producto.pedido_id.id_pedido;
+    const productoId = producto.pedido_prod_id;
+
+    // 1. Buscar si el pedido ya existe en la lista de Caja
+    let pedidoExistente = this.pedidosAgrupados.find(
+      (p) => p.pedidoId.id_pedido === pedidoId
+    );
+
+    if (pedidoExistente) {
+      // 2. Si el pedido existe, buscar si el producto ya está en la lista (evitar duplicados)
+      const productoExistente = pedidoExistente.productos.find(
+        (p) => p.pedido_prod_id === productoId
+      );
+      if (!productoExistente) {
+        // Añadir el producto 'Entregado' a la lista de ese pedido
+        pedidoExistente.productos.push(producto);
+        console.log(
+          `Producto ${productoId} añadido dinámicamente al pedido ${pedidoId} en Caja.`
+        );
+      }
+    } else {
+      // 3. Si el pedido no existe (es el primer producto 'Entregado' de ese pedido)
+      // Creamos un nuevo PedidoAgrupado para la vista de Caja
+      const nuevoPedido: PedidoAgrupado = {
+        pedidoId: producto.pedido_id, // El objeto Pedido completo viene en el producto
+        productos: [producto],
+        expandido: true, // Expandir por defecto para que sea visible
+        tieneProductosPendientes: false, // Caja no usa esta lógica, pero la interfaz lo requiere
+      };
+      // Añadir el nuevo pedido al inicio de la lista
+      this.pedidosAgrupados.unshift(nuevoPedido);
+      console.log(`Nuevo pedido ${pedidoId} añadido dinámicamente a Caja.`);
+    }
+  }
+
   /**
    * Esta función se encarga de mostrar los datos del pedido a cobrar, buscando
    * el pedido de entre el arreglo de this.pedidosAgrupados. Mapea los productos del pedido
