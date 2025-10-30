@@ -9,7 +9,7 @@ import { Producto_extras_ingrSel } from '../interfaces/types'; // Importa la int
 @Injectable({
   providedIn: 'root',
 })
-export class CocinaSocketService {
+export class PedidosSocketService {
   private socket: Socket;
   private readonly serverUrl = environment.ApiIP.replace('/api/', ''); // Conecta a la URL base
 

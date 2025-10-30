@@ -135,6 +135,7 @@ export type Pedidos = {
   no_mesa: Mesas;
   fecha_pedido: Date;
   total: number;
+  estado: EstadoPedido;
 };
 // Tabla mesas
 export type Mesas = {

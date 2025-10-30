@@ -9,7 +9,7 @@ import {
 import Swal from 'sweetalert2';
 import { CommonModule } from '@angular/common';
 import { HeaderComponent } from '../comun-componentes/header/header.component';
-import { CocinaSocketService } from '../../gateways/pedidos-gateway.service';
+import { PedidosSocketService } from '../../gateways/pedidos-gateway.service';
 import { Subscription, firstValueFrom } from 'rxjs';
 
 @Component({
@@ -34,7 +34,7 @@ export class CocineroComponent implements OnInit {
 
   constructor(
     private pedidosService: PedidosService,
-    private cocinaSocket: CocinaSocketService
+    private cocinaSocket: PedidosSocketService
   ) {}
 
   ngOnInit(): void {

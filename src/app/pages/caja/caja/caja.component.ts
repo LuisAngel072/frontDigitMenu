@@ -22,7 +22,7 @@ export class CajaComponent {
     pedidoId: Pedidos;
     productos: Producto_extras_ingrSel[];
   }[] = [];
-
+  private rol = 'caja';
   ngOnInit(): void {
     this.cargarPedidos();
     console.log(this.pedidosAgrupados);
