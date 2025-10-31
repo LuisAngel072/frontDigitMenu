@@ -150,7 +150,6 @@ export class ClientesMenuComponent implements OnInit {
     this.selectedExtras = [];
     this.selectedOpcion = null;
     this.precioTotal = parseFloat(prod.precio);
-    this.ingredientes = [];
 
     try {
       const [opciones, extras, ingredientes] = await Promise.all([
@@ -161,8 +160,10 @@ export class ClientesMenuComponent implements OnInit {
 
       this.opciones = opciones;
       this.extras = extras;
-      this.ingredientes = Array.isArray(ingredientes)
-        ? ingredientes.map((item: any) => item.ingrediente_id)
+      
+      // ✅ Cargar ingredientes completos con checked: true
+      this.ingredientes = Array.isArray(ingredientes) 
+        ? ingredientes.map((item: any) => ({ ...item.ingrediente_id, checked: true }))
         : [];
 
       setTimeout(() => {
@@ -207,12 +208,15 @@ export class ClientesMenuComponent implements OnInit {
         didOpen: () => Swal.showLoading()
       });
 
+      // ✅ Filtrar solo ingredientes marcados
+      const ingredientesSeleccionados = this.ingredientes.filter(ing => ing.checked);
+
       await this.pedidosService.agregarProductoCompleto(
         parseInt(this.mesaId!),
         this.selectedProduct,
         this.selectedOpcion,
         this.selectedExtras,
-        this.ingredientes,
+        ingredientesSeleccionados,
         this.precioTotal
       ).toPromise();
 
@@ -225,7 +229,6 @@ export class ClientesMenuComponent implements OnInit {
         showConfirmButton: false
       });
 
-      // 🔧 OPTIMIZADO: Tiempo ajustado para mejor sincronización
       setTimeout(() => {
         this.cargarPedidoMesa();
       }, 600);

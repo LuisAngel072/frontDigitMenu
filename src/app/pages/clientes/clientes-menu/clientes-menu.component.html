@@ -109,11 +109,12 @@
                 </div>
               </div>
 
-              <div class="mb-3">
+              <div class="mb-3" *ngIf="ingredientes.length > 0">
                 <h6 class="fw-semibold">Ingredientes:</h6>
-                <ul class="list-unstyled ps-3">
-                  <li *ngFor="let ing of ingredientes" class="mb-1">• {{ ing.nombre_ingrediente }}</li>
-                </ul>
+                <div *ngFor="let ing of ingredientes" class="form-check">
+                  <input class="form-check-input" type="checkbox" [(ngModel)]="ing.checked">
+                  <label class="form-check-label">{{ ing.nombre_ingrediente }}</label>
+                </div>
               </div>
 
               <div class="mt-4">
