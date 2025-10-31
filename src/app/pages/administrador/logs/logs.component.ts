@@ -4,12 +4,12 @@ import { NgxPaginationModule } from 'ngx-pagination';
 import { Logs } from '../../../interfaces/types';
 import { LogsService } from '../../../services/logs.service';
 import Swal from 'sweetalert2';
-
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-logs',
   standalone: true,
-  imports: [NgxPaginationModule, CommonModule],
+  imports: [NgxPaginationModule, CommonModule, FormsModule],
   templateUrl: './logs.component.html',
   styleUrl: './logs.component.css',
 })
@@ -20,8 +20,9 @@ export class LogsComponent {
   logs: Logs[] = []; //Aquí se almacenan todos los logs
   logsFiltrados: Logs[] = []; //Aquí se almacenan los logs filtrados
 
-  fechaInicio: Date | null = null;
-  fechaFin: Date | null = null;
+  searchTerm: string = '';
+  fechaInicio: string = '';
+  fechaFin: string = '';
 
   constructor(private readonly logsService: LogsService) {}
 
@@ -43,100 +44,43 @@ export class LogsComponent {
     }
   }
 
-  filtrarLogs(event: any) {
-    const valor = event.target.lowerCase();
-    this.logsFiltrados = this.logs.filter((log) => {
-      const usuario = log.usuario.toLowerCase() || '';
-      const accion = log.accion.toLowerCase() || '';
-      const modulo = log.modulo.toString().toLowerCase() || '';
-      const ip = log.ip.toString().toLowerCase() || '';
+  aplicarFiltros(): void {
+    // Empezar con la lista original completa
+    let logsTemp = this.logs;
 
-      return (
-        usuario.includes(valor) ||
-        accion.includes(valor) ||
-        modulo.includes(valor) ||
-        ip.includes(valor)
+    // 1. Filtrar por término de búsqueda
+    if (this.searchTerm && this.searchTerm.trim() !== '') {
+      const term = this.searchTerm.toLowerCase();
+      logsTemp = logsTemp.filter(
+        (log) =>
+          log.usuario.toLowerCase().includes(term) ||
+          log.accion.toLowerCase().includes(term) ||
+          log.modulo.toLowerCase().includes(term) ||
+          (log.ip && log.ip.toLowerCase().includes(term))
       );
-    });
-  }
-
-  /**
-   *
-   * FILTRADO POR FECHAS
-   */
-
-  actualizarFechaInicio(event: Event) {
-    const fechaSeleccionada = event.target as HTMLSelectElement;
-    this.fechaInicio = fechaSeleccionada.value
-      ? new Date(fechaSeleccionada.value)
-      : null;
-    this.filtrarPorFechas();
-  }
-  actualizarFechaFin(event: Event) {
-    const fechaSeleccionada = event.target as HTMLSelectElement;
-    this.fechaFin = fechaSeleccionada.value
-      ? new Date(fechaSeleccionada.value)
-      : null;
-    this.filtrarPorFechas();
-  }
-  // Filtra los tickets por el rango de fechas
-  filtrarPorFechas() {
-    if (!this.fechaInicio || !this.fechaFin) {
-      const mensaje = !this.fechaInicio
-        ? 'Por favor selecciona una fecha de inicio.'
-        : 'Por favor selecciona una fecha de fin.';
-      Swal.fire({
-        icon: 'warning',
-        title: 'Faltan datos',
-        text: mensaje,
-        toast: true,
-        position: 'top-end',
-        showConfirmButton: false,
-        timer: 3000,
-      });
-      return;
     }
 
-    // Verifica el rango de fechas
-    if (this.fechaInicio > this.fechaFin) {
-      Swal.fire({
-        icon: 'error',
-        title: 'Error en las fechas',
-        text: 'La fecha de inicio no puede ser mayor a la fecha de fin.',
-        toast: true,
-        position: 'top-end',
-        showConfirmButton: false,
-        timer: 3000,
-      });
-      return;
+    // 2. Filtrar por fecha de inicio
+    if (this.fechaInicio) {
+      // Se añade T00:00:00 para asegurar que se compare desde el inicio del día
+      const inicio = new Date(this.fechaInicio + 'T00:00:00');
+      logsTemp = logsTemp.filter((log) => new Date(log.fecha) >= inicio);
     }
 
-    // Filtrar logs
-    if (
-      this.fechaInicio !== null &&
-      this.fechaFin !== null
-    ) {
-      this.logsFiltrados = this.logs.filter((log) => {
-        const fechaAccion = new Date(log.fecha);
-        return (
-          fechaAccion >= this.fechaInicio! &&
-          fechaAccion <= this.fechaFin!
-        );
-      });
-
-      // Mensaje de éxito
-      Swal.fire({
-        icon: 'success',
-        title: 'Filtrado exitoso',
-        text: `Se encontraron ${this.logsFiltrados.length} registros en el rango seleccionado.`,
-        toast: true,
-        position: 'top-end',
-        showConfirmButton: false,
-        timer: 3000,
-      });
+    // 3. Filtrar por fecha de fin
+    if (this.fechaFin) {
+      // Se añade T23:59:59 para asegurar que se compare hasta el fin del día
+      const fin = new Date(this.fechaFin + 'T23:59:59');
+      logsTemp = logsTemp.filter((log) => new Date(log.fecha) <= fin);
     }
 
+    // Asignar el resultado final
+    this.logsFiltrados = logsTemp;
+
+    // Reiniciar la paginación a la primera página
+    this.currentPage = 1;
   }
+
   async verLog(id_log: number) {
     try {
       const log = this.logsFiltrados.find((log) => log.id_log === id_log);
@@ -159,7 +103,9 @@ export class LogsComponent {
           <p><strong>Fecha:</strong> ${new Date(log.fecha).toLocaleString()}</p>
           <p><strong>IP:</strong> ${log.ip}</p>
           <p><strong>Descripción:</strong></p>
-          <p>${log.descripcion ? log.descripcion : 'No hay descripción disponible.'}</p>
+          <p>${
+            log.descripcion ? log.descripcion : 'No hay descripción disponible.'
+          }</p>
         `,
         confirmButtonText: 'Aceptar',
         customClass: {
