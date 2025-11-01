@@ -1,22 +1,23 @@
 import { Component } from '@angular/core';
 import { PedidosService } from '../../../services/pedidos.service';
-import { Pedidos, Producto_extras_ingrSel } from '../../../interfaces/types';
+import {
+  PedidoAgrupado,
+  Pedidos,
+  Producto_extras_ingrSel,
+} from '../../../interfaces/types';
 import { CommonModule } from '@angular/common';
 import Swal from 'sweetalert2';
 import { NgxPaginationModule } from 'ngx-pagination';
 @Component({
-    selector: 'app-ventas',
-    standalone: true,
-    imports: [CommonModule, NgxPaginationModule],
-    templateUrl: './ventas.component.html',
-    styleUrl: './ventas.component.css'
+  selector: 'app-ventas',
+  standalone: true,
+  imports: [CommonModule, NgxPaginationModule],
+  templateUrl: './ventas.component.html',
+  styleUrl: './ventas.component.css',
 })
 export class VentasComponent {
   constructor(private readonly pedidosService: PedidosService) {}
-  pedidosAgrupados: {
-    pedidoId: Pedidos;
-    productos: Producto_extras_ingrSel[];
-  }[] = [];
+  pedidosAgrupados: PedidoAgrupado[] = [];
 
   pageSize: number = 7;
   currentPage: number = 0;
@@ -29,38 +30,30 @@ export class VentasComponent {
     await this.cargarPedidos();
     await console.log(this.pedidosAgrupados);
   }
+
   async cargarPedidos() {
-    this.pedidosService.getPedidosConProductosDetalles('ventas').subscribe({
-      next: (data) => {
-        // 1) Normalizar
-        const normalizado = data.map((p) => ({
-          ...p,
-          extras: p.extras ?? [],
-          ingredientes: p.ingredientes ?? [],
-        }));
+    this.pedidosService.getPedidosActivosConDetalles('ventas').subscribe({
+      next: (data: PedidoAgrupado[]) => {
 
-        // 2) Agrupar por pedido
-        const agrupados: { [id: number]: Producto_extras_ingrSel[] } = {};
-        normalizado.forEach((detalle) => {
-          const id = detalle.pedido_id.id_pedido;
-          if (!agrupados[id]) agrupados[id] = [];
-          agrupados[id].push(detalle);
-        });
-
-        // 3) Armar array intermedio de “orders” con sus items
-        let lista = Object.entries(agrupados).map(([_, productos]) => ({
-          pedidoId: productos[0].pedido_id,
-          productos,
-        }));
-
-        // 4) Filtrar OUT aquellos pedidos cuyos productos
-        //    **todos** estén en estado distinto de "Entregado"
-        lista = lista.filter((entry) =>
+        // 1. (Opcional) Filtrar si es necesario
+        // (Aunque tu backend ya parece filtrar por 'Pagado' para 'ventas')
+        const listaFiltrada = data.filter((entry) =>
           entry.productos.some((p) => p.estado === 'Pagado')
         );
 
-        // 6) Asignar al componente
-        this.pedidosAgrupados = lista;
+        // 2. (Opcional pero recomendado) Normalizar nulos DENTRO de los productos
+        //    para asegurar que 'extras' e 'ingredientes' nunca sean 'null'
+        listaFiltrada.forEach((pedido) => {
+          pedido.productos.forEach((producto) => {
+            producto.extras = producto.extras ?? [];
+            producto.ingredientes = producto.ingredientes ?? [];
+          });
+        });
+
+        // 3. Asignar directamente al componente
+        this.pedidosAgrupados = listaFiltrada;
+
+        console.log('Datos asignados (corregidos):', this.pedidosAgrupados);
       },
       error: (error) => {
         console.error('Error cargando pedidos:', error);
@@ -70,41 +63,76 @@ export class VentasComponent {
 
   async verPedido(id_pedido: number) {
     try {
-      const pedido:
-        | {
-            pedidoId: Pedidos;
-            productos: Producto_extras_ingrSel[];
-          }
-        | undefined = this.pedidosAgrupados.find(
+      const pedido: PedidoAgrupado | undefined = this.pedidosAgrupados.find(
         (p) => p.pedidoId.id_pedido === id_pedido
       );
-
+      console.log(pedido);
       if (pedido) {
-        const productos = pedido.productos.map((pr) => {
-          return `
+        // 1. Mapea los productos a filas HTML
+        const productos = pedido.productos
+          .map((pr) => {
+            // 2. Genera el HTML para extras (con .join('') y chequeo de nulo)
+            const extrasHtml = (pr.extras || [])
+              .map((ext) => {
+                return `<li>${ext.nombre_extra} $${ext.precio}</li>`;
+              })
+              .join('');
+
+            // 3. Genera el HTML para ingredientes (con .join('') y chequeo de nulo)
+            const ingredientesHtml = (pr.ingredientes || [])
+              .map((ingr) => {
+                return `<li>${ingr.nombre_ingrediente} $${ingr.precio}</li>`;
+              })
+              .join('');
+
+            return `
               <tr>
                 <td>${pr.producto_id.nombre_prod}</td>
                 <td>${pr.opcion_id.nombre_opcion} %${
-            pr.opcion_id.porcentaje
-          }</td>
-                <td><ul>${pr.extras.map((ext) => {
-                  return `<li>${ext.nombre_extra} $${ext.precio}</li>`;
-                })}</ul>
-                </td>
-                <td><ul>${pr.ingredientes.map((ingr) => {
-                  return `<li>${ingr.nombre_ingrediente} $${ingr.precio}</li>`;
-                })}</ul>
-                </td>
+              pr.opcion_id.porcentaje
+            }</td>
+                <td><ul>${extrasHtml || 'N/A'}</ul></td>
+                <td><ul>${ingredientesHtml || 'N/A'}</ul></td>
                 <td>$${pr.precio}</td>
               </tr>`;
-        });
+          })
+          .join('');
+
+        // 4. Define los estilos CSS para la tabla dentro del modal
+        const modalStyles = `
+          <style>
+            .swal-table {
+              width: 100%; /* <-- SOLUCIÓN AL ANCHO */
+              border-collapse: collapse;
+              margin-top: 15px;
+            }
+            .swal-table th, .swal-table td {
+              border: 1px solid #ddd;
+              padding: 8px;
+              text-align: left;
+            }
+            .swal-table th {
+              background-color: #f2f2f2;
+              font-weight: bold;
+            }
+            .swal-table ul {
+              padding-left: 20px;
+              margin: 0;
+            }
+            .swal-total {
+              font-weight: bold;
+              font-size: 1.1rem;
+              text-align: right;
+              margin-top: 15px;
+            }
+          </style>
+        `;
 
         Swal.fire({
-          title: `Ver pedido ${pedido.pedidoId.id_pedido}`,
-          width: '80%',
+          title: `Pedido ${pedido.pedidoId.id_pedido}`,
+          width: '60%',
           html: `
-              <table>
-                <thead>
+              ${modalStyles} <table class="swal-table"> <thead>
                   <tr>
                     <th>Producto</th>
                     <th>Opción</th>
@@ -117,14 +145,14 @@ export class VentasComponent {
                   ${productos}
                 </tbody>
               </table>
-
-              <p><strong>Total:</strong> ${pedido.pedidoId.total}</p>
+              <p class="swal-total"><strong>Total:</strong> ${pedido.pedidoId.total}</p>
               `,
           focusConfirm: false,
           showCancelButton: false,
           confirmButtonText: 'Aceptar',
           customClass: {
             confirmButton: 'btn btn-prim',
+            title: 'cocogoose-font',
           },
         });
       }
@@ -133,11 +161,16 @@ export class VentasComponent {
       console.error('Error al ver el pedido:', error);
       Swal.fire({
         title: 'Error',
-        text: 'Hubo un al intentar ver el pedido',
+        text: 'Hubo un error al intentar ver el pedido',
         icon: 'error',
         timer: 2000,
         showConfirmButton: false,
       });
     }
+  }
+
+  formatDate(date: Date): string {
+    const d = new Date(date);
+    return d.toLocaleString(); // Formatea la fecha a una cadena legible
   }
 }

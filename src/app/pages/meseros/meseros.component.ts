@@ -144,7 +144,10 @@ export class MeserosComponent implements OnInit, OnDestroy {
       html: html,
       showConfirmButton: false,
       showCancelButton: true,
-      cancelButtonText: 'Cerrar'
+      cancelButtonText: 'Cerrar',
+      customClass: {
+        title:'cocoogose-font'
+      }
     });
   }
 
