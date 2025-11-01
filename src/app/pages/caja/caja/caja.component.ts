@@ -149,7 +149,7 @@ export class CajaComponent implements OnInit, OnDestroy {
           </td>
           <td>$${pr.precio}</td>
         </tr>`;
-        });
+        }).join('');
 
         Swal.fire({
           title: `Cobrar pedido ${pedido.pedidoId.id_pedido}`,
@@ -179,6 +179,7 @@ export class CajaComponent implements OnInit, OnDestroy {
           customClass: {
             confirmButton: 'btn btn-prim',
             cancelButton: 'btn btn-peligro',
+            title: 'cocogoose-font'
           },
         }).then(async (result) => {
           if (result.isConfirmed) {

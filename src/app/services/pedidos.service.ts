@@ -338,12 +338,18 @@ export class PedidosService {
   async actualizarEstadoPedido(id_pedido: number, estado: EstadoPedido) {
     try {
       const response$ = await this.http.patch<any>(
-        this.baseUrl + `/${id_pedido}`,
+        environment.ApiIP + environment.ApiActualizarPedido + id_pedido,
         { estado },
         { headers: { Authorization: `Bearer ${this.authService.getToken()}` } }
       );
       return await lastValueFrom(response$);
-    } catch (error) {}
+    } catch (error) {
+      console.error(
+        `Ocurrió un error al intentar actualizar el estado del pedido con id ${id_pedido}`,
+        error
+      );
+      throw error;
+    }
   }
 
   eliminarProductoDelPedido(pedidoProdId: number): Observable<any> {
