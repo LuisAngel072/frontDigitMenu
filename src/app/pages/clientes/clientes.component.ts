@@ -2,13 +2,12 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { PedidosService } from '../../services/pedidos.service';
 import { Pedidos } from '../../interfaces/types';
-import { firstValueFrom } from 'rxjs';
 
 @Component({
-    selector: 'app-clientes',
-    standalone: true,
-    templateUrl: './clientes.component.html',
-    styleUrl: './clientes.component.css'
+  selector: 'app-clientes',
+  standalone: true,
+  templateUrl: './clientes.component.html',
+  styleUrl: './clientes.component.css'
 })
 export class ClientesComponent implements OnInit {
   mesaId: string | null = null;
@@ -23,15 +22,19 @@ export class ClientesComponent implements OnInit {
   ngOnInit(): void {
     this.route.queryParams.subscribe(async (params) => {
       this.mesaId = params['mesa'];
-
       if (this.mesaId) {
         console.log('🔍 Mesa ID recibida:', this.mesaId);
         const no_mesa: number = parseInt(this.mesaId);
-
+        
         try {
-          // Buscamos el pedido iniciado
-          this.pedido = await this.pedidosService.getPedidoIniciadoByNoMesa(no_mesa);
-          console.log('📋 Pedido encontrado:', this.pedido);
+          // Buscar pedido ACTIVO (no pagado) usando el nuevo método
+          this.pedido = await this.pedidosService.getPedidoActivoByNoMesa(no_mesa);
+          
+          if (this.pedido) {
+            console.log('📋 Pedido activo encontrado:', this.pedido);
+          } else {
+            console.log('ℹ️ No hay pedido activo, se creará uno nuevo');
+          }
         } catch (error) {
           console.error('❌ Error al buscar pedido:', error);
           this.pedido = null;
@@ -50,24 +53,21 @@ export class ClientesComponent implements OnInit {
     console.log('🚀 Navegando al menú para mesa:', no_mesa);
 
     try {
+      // Si no hay pedido activo (null, pagado o inexistente), crear uno nuevo
       if (this.pedido === null) {
-        // No existe pedido iniciado, lo creamos
-        console.log('🆕 No existe pedido, creando uno nuevo...');
-
-        await firstValueFrom(this.pedidosService.crearNuevoPedido(no_mesa));
-        console.log('✅ Pedido creado exitosamente');
+        console.log('No existe pedido activo, creando uno nuevo...');
+        const response = await this.pedidosService.crearNuevoPedido(no_mesa).toPromise();
+        console.log('Pedido creado exitosamente:', response);
       } else {
-        console.log('✅ Usando pedido existente:', this.pedido.id_pedido);
+        console.log('Usando pedido existente:', this.pedido.id_pedido);
       }
 
-      // Navegamos al menú
+      // Navegar al menú
       this.router.navigate(['/clientes-menu'], {
         queryParams: { mesa: this.mesaId }
       });
-
     } catch (error) {
       console.error('❌ Error al crear pedido o navegar:', error);
-      // Opcional: mostrar mensaje de error al usuario
     }
   }
 }

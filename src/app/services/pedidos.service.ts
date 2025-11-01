@@ -3,7 +3,6 @@ import { HttpClient } from '@angular/common/http';
 import {
   Observable,
   forkJoin,
-  from,
   lastValueFrom,
   of,
   throwError,
@@ -66,7 +65,6 @@ export class PedidosService {
         }
 
         const observablesDeProductos = pedidos.map((pedido) =>
-          // 🔧 CORREGIDO: Removida la barra final
           this.http.get<Pedidos_has_productos[]>(
             `${this.baseUrl}/productos/${pedido.id_pedido}${
               rol ? '/' + rol : ''
@@ -145,7 +143,7 @@ export class PedidosService {
   }
 
   /**
-   * 🔧 CORREGIDO: Acepta estados: null, undefined, 'Iniciado', 'No pagado'
+   * Acepta estados: null, undefined, 'Iniciado', 'No pagado'
    */
   buscarPedidoActivoPorMesa(numeroMesa: number): Observable<any | null> {
     return this.obtenerTodosPedidos().pipe(
@@ -156,7 +154,7 @@ export class PedidosService {
         const pedidosActivos = pedidos.filter((p) => {
           const mesaMatch = p.no_mesa?.no_mesa === numeroMesa;
 
-          // ✅ CORREGIDO: Acepta estados que indican que el pedido está activo
+          // Acepta estados que indican que el pedido está activo
           const estadosActivos = [null, undefined, 'Iniciado', 'No pagado'];
           const estadoActivo = estadosActivos.includes(p.estado);
 
@@ -203,7 +201,6 @@ export class PedidosService {
         `Ocurrió un error al intentar obtener el pedido iniciado según el no.mesa ${no_mesa}`,
         error
       );
-      // 🔧 CORREGIDO: Retornamos null en lugar de lanzar error
       return null;
     }
   }
@@ -228,7 +225,6 @@ export class PedidosService {
             tap((response) =>
               console.log('✅ Respuesta de creación:', response)
             ),
-            // 🔧 CORREGIDO: Usar el ID del pedido de la respuesta directamente
             map((response: any) => {
               // El backend puede retornar el objeto completo o solo el ID
               if (response.id_pedido) {
@@ -367,6 +363,55 @@ export class PedidosService {
         error
       );
       throw error;
+    }
+  }
+
+  /**
+   * Obtiene el pedido activo (no pagado) de una mesa
+   * Usa el método existente getPedidoIniciadoByNoMesa pero verifica el estado
+   * @param no_mesa Número de mesa
+   * @returns Pedido activo o null si está pagado o no existe
+   */
+  async getPedidoActivoByNoMesa(no_mesa: number): Promise<Pedidos | null> {
+    try {
+      const pedido = await this.getPedidoIniciadoByNoMesa(no_mesa);
+      
+      // Si no hay pedido o está pagado, retornamos null
+      if (!pedido || pedido.estado === 'Pagado') {
+        console.log('ℹ️ No hay pedido activo (está pagado o no existe)');
+        return null;
+      }
+      
+      console.log('✅ Pedido activo encontrado:', pedido);
+      return pedido;
+    } catch (error) {
+      console.error('Error al obtener pedido activo:', error);
+      return null;
+    }
+  }
+
+  /**
+   * Verifica si un pedido específico tiene estado "Pagado"
+   * @param pedidoId ID del pedido a verificar
+   * @returns Promise<boolean> true si está pagado, false en caso contrario
+   */
+  async verificarEstadoPagado(pedidoId: number): Promise<boolean> {
+    try {
+      const pedidos = await lastValueFrom(this.obtenerTodosPedidos());
+      const pedido = pedidos.find(p => p.id_pedido === pedidoId);
+      
+      if (!pedido) {
+        console.warn(`⚠️ No se encontró el pedido ${pedidoId}`);
+        return false;
+      }
+      
+      const estaPagado = pedido.estado === 'Pagado';
+      console.log(`💳 Pedido ${pedidoId} - Estado: ${pedido.estado} - Pagado: ${estaPagado}`);
+      
+      return estaPagado;
+    } catch (error) {
+      console.error('Error al verificar estado de pedido:', error);
+      return false;
     }
   }
 }

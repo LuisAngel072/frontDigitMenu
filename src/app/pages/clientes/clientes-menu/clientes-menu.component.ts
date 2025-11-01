@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import Swal from 'sweetalert2';
 import { environment } from '../../../../environment';
 import { CommonModule } from '@angular/common';
@@ -10,6 +10,7 @@ import { CategoriasService } from '../../../services/categorias.service';
 import { SubcategoriaService } from '../../../services/subcategoria.service';
 import { NotificacionesService } from '../../../services/notificaciones.service';
 import { Producto_extras_ingrSel } from '../../../interfaces/types';
+import { interval, Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-clientes-menu',
@@ -23,6 +24,7 @@ export class ClientesMenuComponent implements OnInit {
   categorias: any[] = [];
   categoriasOriginales: any[] = [];
   baseUrl = environment.ApiUp;
+  private verificacionSubscription?: Subscription;
 
   // Producto seleccionado
   selectedProduct: any = null;
@@ -47,7 +49,8 @@ export class ClientesMenuComponent implements OnInit {
     private pedidosService: PedidosService,
     private categoriasService: CategoriasService,
     private subcategoriaService: SubcategoriaService,
-    private notificacionesService: NotificacionesService
+    private notificacionesService: NotificacionesService,
+    private router: Router,
   ) {}
 
   ngOnInit(): void {
@@ -55,11 +58,50 @@ export class ClientesMenuComponent implements OnInit {
       this.mesaId = params['mesa'];
       if (this.mesaId) {
         this.cargarPedidoMesa();
+        this.iniciarVerificacionEstado(); 
       }
     });
 
     this.cargarCategoriasYSubcategorias();
   }
+
+  ngOnDestroy(): void {
+    this.verificacionSubscription?.unsubscribe();
+  }
+
+  private iniciarVerificacionEstado(): void {
+  this.verificacionSubscription = interval(5000).subscribe(async () => {
+    if (this.pedidoActual?.id_pedido) {
+      try {
+        const estaPagado = await this.pedidosService.verificarEstadoPagado(
+          this.pedidoActual.id_pedido
+        );
+        
+        if (estaPagado) {
+          console.log('💳 Pedido pagado detectado. Redirigiendo...');
+          
+          this.verificacionSubscription?.unsubscribe();
+          
+          await Swal.fire({
+            title: '¡Pedido Pagado!',
+            text: 'Tu pedido ha sido pagado. Serás redirigido para comenzar uno nuevo.',
+            icon: 'success',
+            timer: 3000,
+            timerProgressBar: true,
+            showConfirmButton: false,
+            allowOutsideClick: false
+          });
+
+          this.router.navigate(['/clientes'], {
+            queryParams: { mesa: this.mesaId }
+          });
+        }
+      } catch (error) {
+        console.error('❌ Error al verificar estado del pedido:', error);
+      }
+    }
+  });
+}
 
   // ==================== CARRITO ====================
 
@@ -77,7 +119,8 @@ export class ClientesMenuComponent implements OnInit {
 
         const mesaIdNum = parseInt(this.mesaId!);
         const productosDeMiMesa = normalizado.filter(detalle =>
-          detalle.pedido_id?.no_mesa?.no_mesa === mesaIdNum
+          detalle.pedido_id?.no_mesa?.no_mesa === mesaIdNum &&
+          detalle.pedido_id?.estado !== 'Pagado' // ✅ AGREGAR ESTA LÍNEA
         );
 
         console.log('🎯 Productos de mi mesa:', productosDeMiMesa);
