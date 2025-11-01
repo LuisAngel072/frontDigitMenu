@@ -331,15 +331,10 @@ export class PedidosService {
     return this.http.get<any[]>(`${this.baseUrl}/productos/${idPedido}`);
   }
 
-  async actualizarEstadoPedido(id_pedido: number, estado: EstadoPedido) {
-    try {
-      const response$ = await this.http.patch<any>(
-        this.baseUrl + `/${id_pedido}`,
-        { estado },
-        { headers: { Authorization: `Bearer ${this.authService.getToken()}` } }
-      );
-      return await lastValueFrom(response$);
-    } catch (error) {}
+  actualizarEstadoPedido(idPedido: number, estado: string): Observable<any> {
+    return this.http.patch<any>(`${this.baseUrl}/actualizar/${idPedido}`, {
+      estado,
+    });
   }
 
   eliminarProductoDelPedido(pedidoProdId: number): Observable<any> {
