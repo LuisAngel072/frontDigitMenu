@@ -107,29 +107,38 @@ export class ClientesMenuComponent implements OnInit {
 
   cargarPedidoMesa(): void {
     if (!this.mesaId) return;
-    this.pedidosService.getPedidosConProductosDetalles('cliente').subscribe({
+
+    this.pedidosService.getPedidosActivosConDetalles('cliente').subscribe({
       next: (data) => {
         console.log('📦 Datos recibidos de pedidos:', data);
 
-        const normalizado = data.map(p => ({
-          ...p,
-          extras: p.extras ?? [],
-          ingredientes: p.ingredientes ?? []
-        }));
-
         const mesaIdNum = parseInt(this.mesaId!);
-        const productosDeMiMesa = normalizado.filter(detalle =>
-          detalle.pedido_id?.no_mesa?.no_mesa === mesaIdNum &&
-          detalle.pedido_id?.estado !== 'Pagado' // ✅ AGREGAR ESTA LÍNEA
+        
+        // Buscar el pedido de mi mesa
+        const miPedido = data.find(pedido => 
+          pedido.pedidoId?.no_mesa?.no_mesa === mesaIdNum &&
+          pedido.pedidoId?.estado !== 'Pagado'
         );
 
-        console.log('🎯 Productos de mi mesa:', productosDeMiMesa);
+        console.log('🎯 Mi pedido encontrado:', miPedido);
 
-        if (productosDeMiMesa.length > 0) {
-          this.pedidoActual = productosDeMiMesa[0].pedido_id;
-          this.productosEnPedido = productosDeMiMesa;
+        if (miPedido && miPedido.productos && miPedido.productos.length > 0) {
+          this.pedidoActual = miPedido.pedidoId;
+          
+          this.productosEnPedido = miPedido.productos.map(prod => ({
+            pedido_prod_id: prod.pedido_prod_id,
+            estado: prod.estado,
+            precio: prod.precio,
+            opcion_id: prod.opcion_id,
+            producto_id: prod.producto_id,
+            extras: prod.extras || [],
+            ingredientes: prod.ingredientes || [],
+            pedido_id: miPedido.pedidoId
+          }));
+          
           this.calcularTotalCarrito();
           console.log('✅ Pedido cargado. Total productos:', this.productosEnPedido.length);
+          console.log('🔍 Productos con extras:', this.productosEnPedido);
         } else {
           console.log('ℹ️ No hay productos en el pedido actual');
           this.pedidoActual = null;
@@ -204,7 +213,7 @@ export class ClientesMenuComponent implements OnInit {
       this.opciones = opciones;
       this.extras = extras;
       
-      // ✅ Cargar ingredientes completos con checked: true
+      // Cargar ingredientes completos con checked: true
       this.ingredientes = Array.isArray(ingredientes) 
         ? ingredientes.map((item: any) => ({ ...item.ingrediente_id, checked: true }))
         : [];
@@ -251,7 +260,7 @@ export class ClientesMenuComponent implements OnInit {
         didOpen: () => Swal.showLoading()
       });
 
-      // ✅ Filtrar solo ingredientes marcados
+      // Filtrar solo ingredientes marcados
       const ingredientesSeleccionados = this.ingredientes.filter(ing => ing.checked);
 
       await this.pedidosService.agregarProductoCompleto(

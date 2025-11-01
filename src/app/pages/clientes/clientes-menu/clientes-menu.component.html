@@ -166,14 +166,7 @@
                     <small *ngIf="producto.extras.length > 0">
                       <ul class="list-unstyled mb-0">
                         <li *ngFor="let extra of producto.extras">
-                          ✅ {{ extra.nombre_extra }}
-                        </li>
-                      </ul>
-                    </small>
-                    <small *ngIf="producto.ingredientes.length > 0">
-                      <ul class="list-unstyled mb-0">
-                        <li *ngFor="let ing of producto.ingredientes">
-                          🧂 {{ ing.nombre_ingrediente }}
+                          {{ extra.nombre_extra }}
                         </li>
                       </ul>
                     </small>
