@@ -40,7 +40,7 @@
         </button>
       </div>
       <div class="nav-items">
-        <div *ngFor="let item of navItems" class="nav-item" (click)="navigate(item.route)">
+        <div *ngFor="let item of navItems" class="nav-item" (click)="navigate(item)">
           <i [class]="'bi ' + item.icon"></i>
           <span>{{ item.name }}</span>
         </div>

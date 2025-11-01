@@ -12,6 +12,7 @@ import Swal from 'sweetalert2';
 import { CommonModule } from '@angular/common';
 import { Subscription } from 'rxjs';
 import { PedidosSocketService } from '../../../gateways/pedidos-gateway.service';
+import { Router } from '@angular/router';
 
 interface Order {
   id: number;
@@ -69,11 +70,13 @@ export class ListaPedidosComponent implements OnInit, OnDestroy {
   productosDelPedido: PedidoAgrupado[] = [];
 
   navItems: NavItem[] = [
+    /**
     { name: 'Inicio', icon: 'bi-house', route: '/home' },
     { name: 'Cocina', icon: 'bi-chef-hat', route: '/cocinero' },
     { name: 'Menú', icon: 'bi-book', route: '/menu' },
     { name: 'Mesas', icon: 'bi-grid', route: '/tables' },
     { name: 'Configuración', icon: 'bi-gear', route: '/settings' },
+      */
     { name: 'Cerrar Sesión', icon: 'bi-box-arrow-right', route: '' },
   ];
 
@@ -94,6 +97,7 @@ export class ListaPedidosComponent implements OnInit, OnDestroy {
     private mesasService: MesasService,
     private pedidosSocket: PedidosSocketService,
     private notificacionesService: NotificacionesService,
+    private router: Router
   ) {}
 
   ngOnInit(): void {
@@ -120,6 +124,8 @@ export class ListaPedidosComponent implements OnInit, OnDestroy {
       this.loadOrders();
     }
   }
+
+
 
   loadIcons(): void {
     const links = [
@@ -577,11 +583,36 @@ export class ListaPedidosComponent implements OnInit, OnDestroy {
     this.cargarPedidosMesa(tableNumber);
   }
 
-  navigate(route: string): void {
-    console.log(`Navegando a: ${route}`);
-    this.navOpen = false;
+  navigate(item: NavItem): void {
+    if (item.name === 'Cerrar Sesión') {
+      this.logout(); // Llama a la función de logout
+    } else if (item.route) {
+      this.router.navigate([item.route]); // Navegación normal
+    }
   }
 
+  logout(): void {
+    Swal.fire({
+      title: '¿Cerrar Sesión?',
+      text: '¿Estás seguro de que quieres salir?',
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonText: 'Salir',
+      cancelButtonText: 'Cancelar',
+      customClass: {
+        confirmButton: 'btn btn-peligro cocogoose-font',
+        cancelButton: 'btn btn-secondary cocogoose-font'
+      }
+    }).then((result) => {
+      if (result.isConfirmed) {
+        // Limpia los datos de sesión (ajusta esto si usas algo diferente a localStorage)
+        localStorage.clear();
+
+        // Redirige a la página de login (asumiendo que la ruta es '/login')
+        this.router.navigate(['']);
+      }
+    });
+  }
   refreshOrders(): void {
     this.loadOrders();
   }
