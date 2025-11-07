@@ -34,6 +34,7 @@ export class CajaComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.cargarPedidosIniciales();
+    this.escucharActualizacionesEnVivo();
     console.log(this.pedidosAgrupados);
   }
   ngOnDestroy(): void {
@@ -220,6 +221,9 @@ export class CajaComponent implements OnInit, OnDestroy {
                   pedido.pedidoId.id_pedido,
                   EstadoPedido.pagado
                 )
+              );
+              this.pedidosAgrupados = this.pedidosAgrupados.filter(
+                (p) => p.pedidoId.id_pedido !== pedido.pedidoId.id_pedido
               );
               Swal.close();
               Swal.fire({
