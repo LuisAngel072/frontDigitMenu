@@ -59,7 +59,7 @@ export class ListaPedidosComponent implements OnInit, OnDestroy {
   allNotifications: NotificacionConMesa[] = [];
   pedidosAgrupados: PedidoAgrupado[] = [];
   mesas: Mesa[] = [];
-  
+
   sidebarOpen = false;
   notificationsOpen = false;
   navOpen = false;
@@ -156,21 +156,21 @@ export class ListaPedidosComponent implements OnInit, OnDestroy {
     // Cargar todas las notificaciones primero en estructuras temporales
     const nuevasNotificacionesPorMesa = new Map<number, Notificacion[]>();
     const nuevasNotificaciones: NotificacionConMesa[] = [];
-    
+
     for (const mesa of this.mesas) {
       try {
         const notificaciones = await this.notificacionesService.obtenerPorMesa(mesa.no_mesa);
         const pendientes = notificaciones.filter((n: Notificacion) =>
           n.estado?.toLowerCase() === 'pendiente'
         );
-        
+
         nuevasNotificacionesPorMesa.set(mesa.no_mesa, pendientes);
         nuevasNotificaciones.push(...pendientes.map(n => ({ ...n, no_mesa: mesa.no_mesa })));
       } catch (error) {
         console.error(`Error notificaciones mesa ${mesa.no_mesa}:`, error);
       }
     }
-    
+
     // Actualizar todo de una vez (evita parpadeo)
     this.notificaciones = nuevasNotificacionesPorMesa;
     this.allNotifications = nuevasNotificaciones;
@@ -351,7 +351,7 @@ export class ListaPedidosComponent implements OnInit, OnDestroy {
       confirmButtonText: 'Sí, marcar todo',
       cancelButtonText: 'Cancelar',
     });
-    
+
     if (!isConfirmed) return;
 
     try {
@@ -396,7 +396,7 @@ export class ListaPedidosComponent implements OnInit, OnDestroy {
 
   checkAllDelivered(order: Order): void {
     const allDelivered = order.items.every(
-      i => i.status === EstadoPedidoHasProductos.entregado || 
+      i => i.status === EstadoPedidoHasProductos.entregado ||
            i.status === EstadoPedidoHasProductos.pagado
     );
 
@@ -540,7 +540,7 @@ export class ListaPedidosComponent implements OnInit, OnDestroy {
   }
 
   obtenerNombresIngredientes(ingredientes: any[]): string {
-    return ingredientes?.length ? 
+    return ingredientes?.length ?
       ingredientes.map(i => i.nombre_ingrediente || i.nombre || i.name || 'Ingrediente').join(', ') : '';
   }
 
@@ -673,6 +673,10 @@ export class ListaPedidosComponent implements OnInit, OnDestroy {
       showCancelButton: true,
       confirmButtonText: 'Sí, entregar todo',
       cancelButtonText: 'Cancelar',
+      customClass: {
+        confirmButton: 'btn btn-success cocogoose-font',
+        cancelButton: 'btn btn-danger cocogoose-font'
+      }
     });
 
     if (!isConfirmed) return;

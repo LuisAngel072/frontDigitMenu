@@ -248,7 +248,7 @@ export class MeserosComponent implements OnInit, OnDestroy {
             </div>
           </div>
         `;
-      });
+      })
 
       html += `
           </div>

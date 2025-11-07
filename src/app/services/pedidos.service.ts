@@ -1,12 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import {
-  Observable,
-  forkJoin,
-  lastValueFrom,
-  of,
-  throwError,
-} from 'rxjs';
+import { Observable, forkJoin, lastValueFrom, of, throwError } from 'rxjs';
 import { catchError, map, switchMap, tap } from 'rxjs/operators';
 import { environment } from '../../environment';
 import {
@@ -332,9 +326,17 @@ export class PedidosService {
   }
 
   actualizarEstadoPedido(idPedido: number, estado: string): Observable<any> {
-    return this.http.patch<any>(`${this.baseUrl}/actualizar/${idPedido}`, {
-      estado,
-    });
+    try {
+      return this.http.patch<any>(`${this.baseUrl}/actualizar/${idPedido}`, {
+        estado,
+      });
+    } catch (error) {
+      console.error(
+        `No se pudo conseguir actualizar el estado del pedido ${idPedido} a ${estado}`,
+        error
+      );
+      throw error;
+    }
   }
 
   eliminarProductoDelPedido(pedidoProdId: number): Observable<any> {
@@ -370,13 +372,13 @@ export class PedidosService {
   async getPedidoActivoByNoMesa(no_mesa: number): Promise<Pedidos | null> {
     try {
       const pedido = await this.getPedidoIniciadoByNoMesa(no_mesa);
-      
+
       // Si no hay pedido o está pagado, retornamos null
       if (!pedido || pedido.estado === 'Pagado') {
         console.log('ℹ️ No hay pedido activo (está pagado o no existe)');
         return null;
       }
-      
+
       console.log('✅ Pedido activo encontrado:', pedido);
       return pedido;
     } catch (error) {
@@ -393,16 +395,18 @@ export class PedidosService {
   async verificarEstadoPagado(pedidoId: number): Promise<boolean> {
     try {
       const pedidos = await lastValueFrom(this.obtenerTodosPedidos());
-      const pedido = pedidos.find(p => p.id_pedido === pedidoId);
-      
+      const pedido = pedidos.find((p) => p.id_pedido === pedidoId);
+
       if (!pedido) {
         console.warn(`⚠️ No se encontró el pedido ${pedidoId}`);
         return false;
       }
-      
+
       const estaPagado = pedido.estado === 'Pagado';
-      console.log(`💳 Pedido ${pedidoId} - Estado: ${pedido.estado} - Pagado: ${estaPagado}`);
-      
+      console.log(
+        `💳 Pedido ${pedidoId} - Estado: ${pedido.estado} - Pagado: ${estaPagado}`
+      );
+
       return estaPagado;
     } catch (error) {
       console.error('Error al verificar estado de pedido:', error);

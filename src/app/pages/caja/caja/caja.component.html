@@ -41,7 +41,7 @@
         <td>{{ pedido.pedidoId.id_pedido }}</td>
         <td>{{ pedido.pedidoId.no_mesa.no_mesa }}</td>
         <td>{{ pedido.pedidoId.total }}</td>
-        <td>{{ pedido.pedidoId.fecha_pedido }}</td>
+        <td>{{ formatDate(pedido.pedidoId.fecha_pedido) }}</td>
         <td class="icon_eye_col">
           <span
             class="material-symbols-outlined icon icon-eye"

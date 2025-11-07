@@ -141,11 +141,11 @@ export class CajaComponent implements OnInit, OnDestroy {
           <td>${pr.opcion_id.nombre_opcion} %${pr.opcion_id.porcentaje}</td>
           <td><ul>${pr.extras.map((ext) => {
             return `<li>${ext.nombre_extra} $${ext.precio}</li>`;
-          })}</ul>
+          }).join('')}</ul>
           </td>
           <td><ul>${pr.ingredientes.map((ingr) => {
             return `<li>${ingr.nombre_ingrediente} $${ingr.precio}</li>`;
-          })}</ul>
+          }).join('')}</ul>
           </td>
           <td>$${pr.precio}</td>
         </tr>`;
@@ -153,7 +153,7 @@ export class CajaComponent implements OnInit, OnDestroy {
 
         Swal.fire({
           title: `Cobrar pedido ${pedido.pedidoId.id_pedido}`,
-          width: '80%',
+          width: '70%',
           html: `
         <table>
           <thead>
@@ -215,9 +215,11 @@ export class CajaComponent implements OnInit, OnDestroy {
                 )
               );
 
-              await this.pedidosService.actualizarEstadoPedido(
-                pedido.pedidoId.id_pedido,
-                EstadoPedido.pagado
+              await firstValueFrom(
+                this.pedidosService.actualizarEstadoPedido(
+                  pedido.pedidoId.id_pedido,
+                  EstadoPedido.pagado
+                )
               );
               Swal.close();
               Swal.fire({
@@ -242,5 +244,10 @@ export class CajaComponent implements OnInit, OnDestroy {
         showConfirmButton: false,
       });
     }
+  }
+
+  formatDate(date: Date): string {
+    const d = new Date(date);
+    return d.toLocaleString(); // Formatea la fecha a una cadena legible
   }
 }
