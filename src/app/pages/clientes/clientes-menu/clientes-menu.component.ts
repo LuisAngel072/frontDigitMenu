@@ -58,7 +58,7 @@ export class ClientesMenuComponent implements OnInit {
       this.mesaId = params['mesa'];
       if (this.mesaId) {
         this.cargarPedidoMesa();
-        this.iniciarVerificacionEstado(); 
+        this.iniciarVerificacionEstado();
       }
     });
 
@@ -76,12 +76,12 @@ export class ClientesMenuComponent implements OnInit {
         const estaPagado = await this.pedidosService.verificarEstadoPagado(
           this.pedidoActual.id_pedido
         );
-        
+
         if (estaPagado) {
-          console.log('💳 Pedido pagado detectado. Redirigiendo...');
-          
+
+
           this.verificacionSubscription?.unsubscribe();
-          
+
           await Swal.fire({
             title: '¡Pedido Pagado!',
             text: 'Tu pedido ha sido pagado. Serás redirigido para comenzar uno nuevo.',
@@ -110,21 +110,21 @@ export class ClientesMenuComponent implements OnInit {
 
     this.pedidosService.getPedidosActivosConDetalles('cliente').subscribe({
       next: (data) => {
-        console.log('📦 Datos recibidos de pedidos:', data);
+
 
         const mesaIdNum = parseInt(this.mesaId!);
-        
+
         // Buscar el pedido de mi mesa
-        const miPedido = data.find(pedido => 
+        const miPedido = data.find(pedido =>
           pedido.pedidoId?.no_mesa?.no_mesa === mesaIdNum &&
           pedido.pedidoId?.estado !== 'Pagado'
         );
 
-        console.log('🎯 Mi pedido encontrado:', miPedido);
+
 
         if (miPedido && miPedido.productos && miPedido.productos.length > 0) {
           this.pedidoActual = miPedido.pedidoId;
-          
+
           this.productosEnPedido = miPedido.productos.map(prod => ({
             pedido_prod_id: prod.pedido_prod_id,
             estado: prod.estado,
@@ -135,12 +135,12 @@ export class ClientesMenuComponent implements OnInit {
             ingredientes: prod.ingredientes || [],
             pedido_id: miPedido.pedidoId
           }));
-          
+
           this.calcularTotalCarrito();
-          console.log('✅ Pedido cargado. Total productos:', this.productosEnPedido.length);
-          console.log('🔍 Productos con extras:', this.productosEnPedido);
+
+
         } else {
-          console.log('ℹ️ No hay productos en el pedido actual');
+
           this.pedidoActual = null;
           this.productosEnPedido = [];
           this.totalCarrito = 0;
@@ -159,7 +159,7 @@ export class ClientesMenuComponent implements OnInit {
       total + (parseFloat(producto.precio.toString()) || 0), 0
     );
     this.totalCarrito = Math.round(this.totalCarrito * 100) / 100;
-    console.log('💰 Total del carrito:', this.totalCarrito);
+
   }
 
   mostrarCarrito(): void {
@@ -212,9 +212,9 @@ export class ClientesMenuComponent implements OnInit {
 
       this.opciones = opciones;
       this.extras = extras;
-      
+
       // Cargar ingredientes completos con checked: true
-      this.ingredientes = Array.isArray(ingredientes) 
+      this.ingredientes = Array.isArray(ingredientes)
         ? ingredientes.map((item: any) => ({ ...item.ingrediente_id, checked: true }))
         : [];
 

@@ -28,8 +28,8 @@ export class HeaderComponent {
     private readonly usuariosService: UsuariosService,
     private readonly sharedService: SharedService
   ) {
-    console.log(this.username);
-    console.log(this.usercode);
+
+
   }
 
   async ngOnInit() {
@@ -47,7 +47,7 @@ export class HeaderComponent {
         }
       }
     );
-    console.log('Nueva imagen de perfil:', this.profileImageUrl);
+
     this.subscriptions.add(profileImgSubscription);
   }
 

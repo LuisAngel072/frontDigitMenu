@@ -37,7 +37,7 @@ export class UsuariosService {
         }
       );
       const response = lastValueFrom(response$);
-      console.log(response)
+
       return response;
     } catch (error) {
       console.error(
@@ -55,7 +55,7 @@ export class UsuariosService {
         { headers: { Authorization: `Bearer ${this.authService.getToken()}` } }
       );
       const response = await lastValueFrom(response$);
-      console.log(response);
+
       return response;
     } catch (error) {
       console.error(

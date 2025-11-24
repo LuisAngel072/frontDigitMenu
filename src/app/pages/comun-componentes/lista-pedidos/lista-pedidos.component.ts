@@ -123,7 +123,7 @@ export class ListaPedidosComponent implements OnInit, OnDestroy {
   async cargarMesas(): Promise<void> {
     try {
       this.mesas = await this.mesasService.obtenerMesas();
-      console.log('Mesas cargadas:', this.mesas);
+
       this.loadOrders();
       this.cargarNotificaciones();
     } catch (error) {
@@ -161,7 +161,7 @@ export class ListaPedidosComponent implements OnInit, OnDestroy {
     this.pedidosService.getPedidosActivosConDetalles(this.rol).subscribe({
       next: (pedidos) => {
         this.pedidosAgrupados = pedidos;
-        console.log('Pedidos cargados:', this.pedidosAgrupados);
+
         this.isLoading = false;
       },
       error: (err) => {
@@ -173,12 +173,11 @@ export class ListaPedidosComponent implements OnInit, OnDestroy {
   }
 
   private escucharActualizacionesEnVivo(): void {
-    console.log('Mesero: Escuchando actualizaciones en vivo...');
+
 
     this.nuevoProductoSub = this.pedidosGatewayService
       .onNuevoProducto()
       .subscribe((nuevoProducto) => {
-        console.log('Socket (Mesero) recibió nuevoProducto:', nuevoProducto);
         this._actualizarVistaConProducto(nuevoProducto);
       });
 
@@ -325,7 +324,7 @@ export class ListaPedidosComponent implements OnInit, OnDestroy {
     mesaNumber: number,
     productosYaFiltrados?: PedidoAgrupado[]
   ): void {
-    console.log(`Cargando pedidos para mesa ${mesaNumber}`);
+
     this.mesaSeleccionada = mesaNumber;
     this.mostrandoSoloMesa = true;
 

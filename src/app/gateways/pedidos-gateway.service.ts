@@ -14,21 +14,11 @@ export class PedidosSocketService {
   private readonly serverUrl = environment.ApiIP.replace('/api/', ''); // Conecta a la URL base
 
   constructor() {
-    console.log('<<<<< NUEVA INSTANCIA DE PedidosGatewayService CREADA >>>>>');
+
 
     this.socket = io(this.serverUrl);
 
 
-    // Listeners básicos (sin cambios)
-    this.socket.on('connect', () =>
-      console.log('Socket conectado:', this.socket.id)
-    );
-    this.socket.on('disconnect', (reason) =>
-      console.log('Socket desconectado:', reason)
-    );
-    this.socket.on('connect_error', (err) =>
-      console.error('Error de conexión Socket:', err)
-    );
   }
 
   /**
@@ -38,7 +28,7 @@ export class PedidosSocketService {
   onNuevoProducto(): Observable<Producto_extras_ingrSel> {
     return new Observable((subscriber) => {
       this.socket.on('nuevoProducto', (data: Producto_extras_ingrSel) => {
-        console.log("📨 Socket recibió 'nuevoProducto':", data);
+
         subscriber.next(data);
       });
       // Limpieza al desuscribirse
@@ -55,7 +45,7 @@ export class PedidosSocketService {
   onEstadoActualizado(): Observable<Producto_extras_ingrSel> {
     return new Observable((subscriber) => {
       this.socket.on('estadoActualizado', (data: Producto_extras_ingrSel) => {
-        console.log("📨 Socket recibió 'estadoActualizado':", data);
+
         subscriber.next(data);
       });
       // Limpieza al desuscribirse
@@ -71,7 +61,7 @@ export class PedidosSocketService {
   disconnect() {
     if (this.socket) {
       this.socket.disconnect();
-      console.log('🔌 Socket desconectado manualmente.');
+
     }
   }
 }

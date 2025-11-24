@@ -35,7 +35,7 @@ export class CajaComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.cargarPedidosIniciales();
     this.escucharActualizacionesEnVivo();
-    console.log(this.pedidosAgrupados);
+
   }
   ngOnDestroy(): void {
     // Limpiar la suscripción para evitar fugas de memoria
@@ -54,7 +54,7 @@ export class CajaComponent implements OnInit, OnDestroy {
       this.pedidosAgrupados = await firstValueFrom(
         this.pedidosService.getPedidosActivosConDetalles(this.rol)
       );
-      console.log('Pedidos iniciales cargados:', this.pedidosAgrupados);
+
     } catch (error) {
       console.error('Error al cargar pedidos iniciales:', error);
       Swal.fire('Error', 'No se pudieron cargar los pedidos.', 'error');
@@ -112,7 +112,7 @@ export class CajaComponent implements OnInit, OnDestroy {
       };
       // Añadir el nuevo pedido al inicio de la lista
       this.pedidosAgrupados.unshift(nuevoPedido);
-      console.log(`Nuevo pedido ${pedidoId} añadido dinámicamente a Caja.`);
+
     }
   }
 

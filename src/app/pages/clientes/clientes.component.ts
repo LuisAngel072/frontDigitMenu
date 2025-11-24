@@ -23,17 +23,17 @@ export class ClientesComponent implements OnInit {
     this.route.queryParams.subscribe(async (params) => {
       this.mesaId = params['mesa'];
       if (this.mesaId) {
-        console.log('🔍 Mesa ID recibida:', this.mesaId);
+
         const no_mesa: number = parseInt(this.mesaId);
-        
+
         try {
           // Buscar pedido ACTIVO (no pagado) usando el nuevo método
           this.pedido = await this.pedidosService.getPedidoActivoByNoMesa(no_mesa);
-          
+
           if (this.pedido) {
-            console.log('📋 Pedido activo encontrado:', this.pedido);
+
           } else {
-            console.log('ℹ️ No hay pedido activo, se creará uno nuevo');
+
           }
         } catch (error) {
           console.error('❌ Error al buscar pedido:', error);
@@ -50,16 +50,16 @@ export class ClientesComponent implements OnInit {
     }
 
     const no_mesa: number = parseInt(this.mesaId);
-    console.log('🚀 Navegando al menú para mesa:', no_mesa);
+
 
     try {
       // Si no hay pedido activo (null, pagado o inexistente), crear uno nuevo
       if (this.pedido === null) {
-        console.log('No existe pedido activo, creando uno nuevo...');
+
         const response = await this.pedidosService.crearNuevoPedido(no_mesa).toPromise();
-        console.log('Pedido creado exitosamente:', response);
+
       } else {
-        console.log('Usando pedido existente:', this.pedido.id_pedido);
+
       }
 
       // Navegar al menú

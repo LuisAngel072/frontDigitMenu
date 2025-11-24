@@ -53,7 +53,7 @@ export class MeserosComponent implements OnInit, OnDestroy {
     this.mesasService.obtenerMesas()
       .then(mesas => {
         this.mesas = mesas;
-        console.log('Mesas cargadas:', mesas);
+
         this.cargarNotificaciones();
       })
       .catch(error => {
@@ -74,7 +74,7 @@ export class MeserosComponent implements OnInit, OnDestroy {
     for (const mesa of this.mesas) {
       try {
         const notificaciones = await this.notificacionesService.obtenerPorMesa(mesa.no_mesa);
-        console.log(`Notificaciones mesa ${mesa.no_mesa}:`, notificaciones);
+
         // Filtrar solo pendientes (comparación case-insensitive)
         const pendientes = notificaciones.filter(n =>
           n.estado && n.estado.toLowerCase() === 'pendiente'
@@ -167,14 +167,14 @@ export class MeserosComponent implements OnInit, OnDestroy {
       // Buscar pedidos de la mesa usando el mismo método que usa el carrito
       this.pedidosService.getPedidosActivosConDetalles('mesero').subscribe({
         next: (data) => {
-          console.log('Todos los pedidos obtenidos:', data);
+
 
           // Filtrar productos que pertenecen a la mesa seleccionada
           const productosDeMesa = data.filter(detalle =>
             detalle.pedidoId?.no_mesa?.no_mesa === mesa.no_mesa
           );
 
-          console.log(`Productos encontrados para mesa ${mesa.no_mesa}:`, productosDeMesa);
+
 
           Swal.close();
 

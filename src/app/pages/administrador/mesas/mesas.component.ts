@@ -31,7 +31,7 @@ export class MesasComponent {
             id: mesa.no_mesa, // Ajusta según cómo tu backend regrese los datos
             qrData: mesa.qr_code_url
           }));
-          console.log('✅ Mesas cargadas:', this.mesas);
+
         },
         error: (error) => {
           console.error('❌ Error al obtener mesas:', error);
@@ -71,7 +71,7 @@ export class MesasComponent {
           qr_code_url: qrData
         }).subscribe({
           next: (res) => {
-            console.log('✅ Mesa guardada en base de datos:', res);
+
           },
           error: (err) => {
             console.error('❌ Error al guardar mesa en DB:', err);

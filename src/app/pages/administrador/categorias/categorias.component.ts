@@ -96,7 +96,7 @@ export class CategoriasComponent {
       });
       const categoria = this.categorias.find((cat) => cat.id_cat === id_cat);
       this.imgCatUrl = environment.ApiUp + categoria?.ruta_img;
-      console.log(this.imgCatUrl);
+
 
       if (!categoria) {
         Swal.fire({
@@ -261,13 +261,13 @@ export class CategoriasComponent {
             ruta_img: ruta_img ? ruta_img.name : '',
           };
           this.formData = body;
-          console.log(this.formData);
+
           return body;
         },
       }).then(async (result) => {
         if (result.isConfirmed) {
           const formData: CategoriasDTO = result.value;
-          console.log(formData);
+
           const confirmacion = await Swal.fire({
             title: '¿Estás seguro de agregar la categoría?',
             showDenyButton: true,
@@ -296,10 +296,10 @@ export class CategoriasComponent {
                   .subirImg(this.selectedFile)
                   .pipe(
                     switchMap((res) => {
-                      console.log('Ruta de la imagen subida:', res.ruta_img);
+
                       this.formData.ruta_img =
                         '/categorias/' + String(res.ruta_img);
-                      console.log(this.formData);
+
                       return this.catServices.crearCategoria(formData);
                     })
                   )
@@ -445,10 +445,10 @@ export class CategoriasComponent {
                   .subirImg(this.selectedFile)
                   .pipe(
                     switchMap((res) => {
-                      console.log('Ruta de la imagen subida:', res.ruta_img);
+
                       this.formData.ruta_img =
                         '/categorias/' + String(res.ruta_img);
-                      console.log(this.formData);
+
                       return this.catServices.upCategoria(
                         id_cat,
                         this.formData
@@ -676,10 +676,10 @@ export class CategoriasComponent {
                   .subirImg(this.selectedFile)
                   .pipe(
                     switchMap((res) => {
-                      console.log('Ruta de la imagen subida:', res.ruta_img);
+
                       this.formData.ruta_img =
                         '/subcategorias/' + String(res.ruta_img);
-                      console.log(this.formData);
+
                       return this.subcatServices.editarSubCategoria(
                         id_subcat,
                         this.formData
@@ -867,7 +867,7 @@ export class CategoriasComponent {
             ruta_img: ruta_img ? ruta_img.name : '',
           };
           this.formData = body;
-          console.log(this.formData);
+
           return body;
         },
       }).then(async (result) => {
@@ -900,10 +900,10 @@ export class CategoriasComponent {
                   .subirImg(this.selectedFile)
                   .pipe(
                     switchMap((res) => {
-                      console.log('Ruta de la imagen subida:', res.ruta_img);
+
                       this.formData.ruta_img =
                         '/subcategorias/' + String(res.ruta_img);
-                      console.log(this.formData);
+
                       return this.subcatServices.registrarSubCategoria(
                         this.formData
                       );

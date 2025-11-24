@@ -239,7 +239,7 @@ export class CrudIngredientesComponent {
               this.ingredientes = await this.ingrServices.getIngredientes();
               this.ingredientesFiltrados = this.ingredientes;
               this.adminComponente.ingredientes = this.ingredientes;
-              console.log(this.ingredientes);
+
               Swal.close();
               Swal.fire({
                 icon: 'success',
@@ -583,7 +583,7 @@ export class CrudIngredientesComponent {
       }).then(async (result) => {
         if (result.isConfirmed) {
           const formData: OpcionesDTO = result.value;
-          console.log(formData);
+
           const confirmacion = await Swal.fire({
             title: '¿Estás seguro de agregar la opcion?',
             showDenyButton: true,
@@ -608,7 +608,7 @@ export class CrudIngredientesComponent {
                 },
               });
               const opcion = await this.opcionesService.crearOpcion(formData);
-              console.log(opcion)
+
               const log: LogsDto = {
                 usuario:
                   localStorage.getItem('codigo') +

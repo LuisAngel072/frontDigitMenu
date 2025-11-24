@@ -40,7 +40,7 @@ export class CrudProductosComponent {
   ) {
     this.productos = adminComponente.productos;
     this.categorias = adminComponente.categorias;
-    console.log(this.productos);
+
   }
 
   async ngOnInit() {

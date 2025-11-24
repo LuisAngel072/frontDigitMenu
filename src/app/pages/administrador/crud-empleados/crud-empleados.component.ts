@@ -149,7 +149,7 @@ export class CrudEmpleadosComponent implements OnInit {
     if (this.selectedFile) {
       this.usuariosService.subirImg(this.selectedFile).subscribe({
         next: (res) => {
-          console.log('Ruta de la imagen subida:', res.img_ruta);
+
           // Aquí puedes actualizar la base de datos con la ruta devuelta
         },
         error: (err) => {
@@ -478,11 +478,11 @@ export class CrudEmpleadosComponent implements OnInit {
                 .subirImg(this.selectedFile)
                 .pipe(
                   switchMap((res) => {
-                    console.log('Ruta de la imagen subida:', res.img_ruta);
+
                     this.formData.img_perfil.img_ruta =
                       'img-us/' + String(res.img_ruta);
                     // Una vez que la imagen se ha subido y la ruta se ha asignado, registramos al usuario
-                    console.log(this.formData);
+
                     return this.usuariosService.registrarUsuario(this.formData);
                   })
                 )
@@ -532,7 +532,7 @@ export class CrudEmpleadosComponent implements OnInit {
                   },
                 });
             } else {
-              console.log(this.formData);
+
               this.formData.img_us.img_ruta = 'Pendiente';
               // Si no hay una imagen seleccionada, procede directamente a registrar el usuario
               this.usuariosService.registrarUsuario(this.formData).subscribe({
@@ -1036,7 +1036,7 @@ export class CrudEmpleadosComponent implements OnInit {
             icon: 'warning',
           });
           if (confirmacion.isConfirmed) {
-            console.log('Datos a actualizar:', this.formData);
+
             // Llamada al servicio para actualizar el empleado
             Swal.fire({
               title: 'Cargando...',
@@ -1053,11 +1053,11 @@ export class CrudEmpleadosComponent implements OnInit {
                 .subirImg(this.selectedFile)
                 .pipe(
                   switchMap((res) => {
-                    console.log('Ruta de la imagen subida:', res.img_ruta);
+
                     this.formData.img_perfil.img_ruta =
                       'img-us/' + String(res.img_ruta);
                     // Una vez que la imagen se ha subido y la ruta se ha asignado, actualizamos al usuario
-                    console.log(this.formData);
+
                     return this.usuariosService.actualizarUsuario(
                       usF.usuario_id.id_usuario,
                       this.formData
@@ -1066,7 +1066,7 @@ export class CrudEmpleadosComponent implements OnInit {
                 )
                 .subscribe({
                   next: async (response) => {
-                    console.log(this.formData);
+
                     Swal.close();
                     Swal.fire({
                       title: 'Empleado actualizado correctamente',
@@ -1117,7 +1117,7 @@ export class CrudEmpleadosComponent implements OnInit {
                   },
                 });
             } else {
-              console.log(this.formData);
+
               this.formData.img_us.img_ruta = 'Pendiente';
               // Si no hay una imagen seleccionada, procede directamente a registrar el usuario
               this.usuariosService

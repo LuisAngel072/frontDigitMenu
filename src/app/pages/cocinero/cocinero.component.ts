@@ -57,7 +57,7 @@ export class CocineroComponent implements OnInit {
       this.pedidosAgrupados = await firstValueFrom(
         this.pedidosService.getPedidosActivosConDetalles(this.rol)
       );
-      console.log('Pedidos iniciales cargados:', this.pedidosAgrupados);
+
     } catch (error) {
       console.error('Error al cargar pedidos iniciales:', error);
       Swal.fire('Error', 'No se pudieron cargar los pedidos.', 'error');
