@@ -14,6 +14,7 @@ import { CategoriasComponent } from './pages/administrador/categorias/categorias
 import { VentasComponent } from './pages/administrador/ventas/ventas.component';
 import { CrudIngredientesComponent } from './pages/administrador/crud-ingredientes/crud-ingredientes.component';
 import { LogsComponent } from './pages/administrador/logs/logs.component';
+import { RoleGuard } from './guards/role.guard';
 
 export const routes: Routes = [
   {
@@ -22,7 +23,9 @@ export const routes: Routes = [
   },
   {
     path: 'Administrador',
+    canActivate: [RoleGuard],
     component: AdministradorComponent,
+    data: { expectedRoles: ['Administrador'] }, // Solo admin
     children: [
       { path: '', redirectTo: 'empleados', pathMatch: 'full' },
       {
@@ -80,6 +83,8 @@ export const routes: Routes = [
   },
   {
     path: 'Cocinero', // Agregar ruta para el componente cocinero
+    canActivate: [RoleGuard],
+    data: { expectedRoles: ['Cocinero'] }, // Solo cocinero
     component: CocineroComponent,
   },
   // Redirección para asegurar case-sensitivity
@@ -91,6 +96,8 @@ export const routes: Routes = [
   {
     path: 'Mesero',
     component: MeserosComponent,
+    canActivate: [RoleGuard],
+    data: { expectedRoles: ['Mesero', 'Administrador'] },
   },
   // Redirección para asegurar case-sensitivity - ESTE ES EL QUE TE IMPORTA
   {
@@ -100,6 +107,8 @@ export const routes: Routes = [
   },
   {
     path: 'Cajero',
+    canActivate: [RoleGuard],
+    data: { expectedRoles: ['Cajero'] },
     component: CajeroComponent,
   },
   // Redirección para asegurar case-sensitivity
