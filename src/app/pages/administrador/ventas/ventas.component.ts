@@ -2,22 +2,28 @@ import { Component } from '@angular/core';
 import { PedidosService } from '../../../services/pedidos.service';
 import {
   PedidoAgrupado,
-  Pedidos,
-  Producto_extras_ingrSel,
 } from '../../../interfaces/types';
 import { CommonModule } from '@angular/common';
 import Swal from 'sweetalert2';
 import { NgxPaginationModule } from 'ngx-pagination';
+import { FormsModule } from '@angular/forms';
+
 @Component({
   selector: 'app-ventas',
   standalone: true,
-  imports: [CommonModule, NgxPaginationModule],
+  imports: [CommonModule, NgxPaginationModule, FormsModule],
   templateUrl: './ventas.component.html',
   styleUrl: './ventas.component.css',
 })
 export class VentasComponent {
   constructor(private readonly pedidosService: PedidosService) {}
+  pedidosOriginales: PedidoAgrupado[] = [];
   pedidosAgrupados: PedidoAgrupado[] = [];
+
+  // Filtros
+  searchTerm: string = '';
+  fechaInicio: string = '';
+  fechaFin: string = '';
 
   pageSize: number = 7;
   currentPage: number = 0;
@@ -29,6 +35,52 @@ export class VentasComponent {
   async ngOnInit() {
     await this.cargarPedidos();
     await console.log(this.pedidosAgrupados);
+  }
+
+  /**
+   * Función para filtrar las ventas
+   * Lo hace por medio de 3 criterios:
+   * 1. Un término de búsqueda (ID pedido, No. Mesa o Total)
+   * 2. Fecha de inicio
+   * 3. Fecha de fin
+   */
+  aplicarFiltros(): void {
+    // Reiniciamos con la lista completa
+    let resultados = [...this.pedidosOriginales];
+
+    // 1. Filtro por buscador (ID pedido, No. Mesa o Total)
+    if (this.searchTerm && this.searchTerm.trim() !== '') {
+      const term = this.searchTerm.toLowerCase();
+      resultados = resultados.filter((p) =>
+        p.pedidoId.id_pedido.toString().includes(term) ||
+        p.pedidoId.no_mesa.no_mesa.toString().includes(term) ||
+        p.pedidoId.total.toString().includes(term)
+      );
+    }
+
+    // 2. Filtro por Fecha Inicio
+    if (this.fechaInicio) {
+      // Crear fecha local al inicio del día (00:00:00)
+      const inicio = new Date(this.fechaInicio + 'T00:00:00');
+      resultados = resultados.filter((p) => {
+        const fechaPedido = new Date(p.pedidoId.fecha_pedido);
+        return fechaPedido >= inicio;
+      });
+    }
+
+    // 3. Filtro por Fecha Fin
+    if (this.fechaFin) {
+      // Crear fecha local al final del día (23:59:59)
+      const fin = new Date(this.fechaFin + 'T23:59:59');
+      resultados = resultados.filter((p) => {
+        const fechaPedido = new Date(p.pedidoId.fecha_pedido);
+        return fechaPedido <= fin;
+      });
+    }
+
+    // Actualizamos la vista
+    this.pedidosAgrupados = resultados;
+    this.currentPage = 1; // Resetear paginación
   }
 
   async cargarPedidos() {
@@ -51,6 +103,7 @@ export class VentasComponent {
         });
 
         // 3. Asignar directamente al componente
+        this.pedidosOriginales = listaFiltrada;
         this.pedidosAgrupados = listaFiltrada;
 
         console.log('Datos asignados (corregidos):', this.pedidosAgrupados);
