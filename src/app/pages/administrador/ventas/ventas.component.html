@@ -4,12 +4,12 @@
   <div class="filtros">
     <div class="filtro-item">
       <label for="fecha-inicio">Fecha inicio</label>
-      <input class="form-control" id="fecha-inicio" type="date" />
+      <input [(ngModel)]="fechaInicio" class="form-control" id="fecha-inicio" type="date" />
     </div>
 
     <div class="filtro-item">
       <label for="fecha-fin">Fecha fin</label>
-      <input class="form-control" id="fecha-fin" type="date" />
+      <input [(ngModel)]="fechaFin" class="form-control" id="fecha-fin" type="date" />
     </div>
 
     <div class="filtro-item">
@@ -19,10 +19,11 @@
         type="search"
         class="form-control search"
         placeholder="🔎 Buscar venta"
+        [(ngModel)]="searchTerm"
       />
     </div>
 
-    <button class="btn-filtrar">Filtrar</button>
+    <button (click)="aplicarFiltros()" class="btn-filtrar">Filtrar</button>
   </div>
 
   <!-- Tabla de ventas -->
