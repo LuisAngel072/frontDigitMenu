@@ -1,7 +1,6 @@
-// src/services/mesas.service.ts (Frontend)
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { firstValueFrom } from 'rxjs';
+import { lastValueFrom } from 'rxjs';
 import { environment } from '../../environment';
 
 export interface Mesa {
@@ -18,34 +17,39 @@ export class MesasService {
   constructor(private http: HttpClient) { }
 
   async obtenerMesas(): Promise<Mesa[]> {
-    console.log(`${environment.ApiIP}mesas`);
-    
     try {
-      // Usando firstValueFrom para convertir el Observable a Promise
-      return await firstValueFrom(this.http.get<Mesa[]>(`${environment.ApiIP}mesas`));
+      const response$ = this.http.get<Mesa[]>(
+        `${environment.ApiIP}${environment.ApiObtenerMesas}`
+      );
+      return await lastValueFrom(response$);
     } catch (error) {
       console.error('Error al obtener mesas:', error);
       throw error;
     }
   }
 
-  async obtenerMesaPorNumero(noMesa: number): Promise<Mesa> {
+  async crearMesa(noMesa: number, qrCodeUrl: string): Promise<Mesa> {
     try {
-      return await firstValueFrom(this.http.get<Mesa>(`${environment.ApiIP}/mesas/${noMesa}`));
+      const response$ = this.http.post<Mesa>(
+        `${environment.ApiIP}${environment.ApiCrearMesa}`,
+        { no_mesa: noMesa, qr_code_url: qrCodeUrl }
+      );
+      return await lastValueFrom(response$);
     } catch (error) {
-      console.error(`Error al obtener mesa ${noMesa}:`, error);
+      console.error('Error al crear mesa:', error);
       throw error;
     }
   }
 
-  async verificarPedidosActivos(noMesa: number): Promise<boolean> {
+  async eliminarMesa(noMesa: number): Promise<any> {
     try {
-      // Esta es una llamada de ejemplo, ajusta según tu API real
-      return await firstValueFrom(this.http.get<boolean>(`${environment.ApiIP}/pedidos/mesa/${noMesa}/activo`));
+      const response$ = this.http.delete<any>(
+        `${environment.ApiIP}${environment.ApiEliminarMesa}${noMesa}`
+      );
+      return await lastValueFrom(response$);
     } catch (error) {
-      console.error(`Error al verificar pedidos activos de mesa ${noMesa}:`, error);
-      // En caso de error, asumimos que no hay pedidos activos
-      return false;
+      console.error('Error al eliminar mesa:', error);
+      throw error;
     }
   }
 }

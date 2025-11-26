@@ -1,7 +1,7 @@
 export const environment = {
     production: false,
-    ApiIP: "http://localhost:3000/api/",
-    ApiUp: "http://localhost:3000/uploads",
+    ApiIP: "http://18.191.20.158:3000/api/",
+    ApiUp: "http://18.191.20.158:3000/uploads",
 
     /**
      * General
@@ -99,6 +99,13 @@ export const environment = {
   ApiCrearNotificacion: "notificaciones", // POST
   ApiObtenerNotificacionesPorMesa: "notificaciones/mesa/", // GET /:mesaId
   ApiAtenderNotificacion: "notificaciones/", // PATCH /:id/atender
+
+  /**
+   * Mesas
+  */
+  ApiObtenerMesas: "mesas", // GET
+  ApiCrearMesa: "mesas", // POST
+  ApiEliminarMesa: "mesas/", // DELETE /:no_mesa
 
   /**
    * Logs
