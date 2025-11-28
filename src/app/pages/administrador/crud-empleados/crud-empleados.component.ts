@@ -55,16 +55,23 @@ export class CrudEmpleadosComponent implements OnInit {
     this.rolSeleccionado = 0;
     this.activo = 0;
   }
-
+  /**
+   * Carga inicial de datos al iniciar el componente
+   * Carga los roles para el SELECT de filtrado
+   */
   async ngOnInit() {
     await this.cargarUsuarios();
     this.roles = await this.rolesService.obtenerRoles();
   }
-
+  /**
+   * Paginador
+   */
   async onPageChange(page: number) {
     this.currentPage = page;
   }
-
+  /**
+   * Carga los usuarios y sus roles desde el servicio
+   */
   async cargarUsuarios() {
     try {
       this.usuarios = await this.usuariosService.obtenerUsuariosYRoles();
@@ -78,7 +85,14 @@ export class CrudEmpleadosComponent implements OnInit {
       });
     }
   }
-
+  /**
+   * Filtrar usuarios según el valor ingresado en el input de búsqueda
+   * codigo
+   * nombres
+   * apellidos
+   * rol
+   * @param event
+   */
   filtrarUsuarios(event: any) {
     const valor = event.target.lowerCase();
     this.usuariosFiltrados = this.adminComponente.usuarios.filter((usuario) => {
@@ -100,12 +114,16 @@ export class CrudEmpleadosComponent implements OnInit {
     });
   }
 
+  // Filtro para usuarios activos
   filtrarUsuariosActivos() {
     this.usuarios = this.usuarios.filter(
       (usuario) => usuario.usuario_id.activo === true
     );
   }
-
+  /**
+   * Filtrar usuarios según su estado activo/inactivo o todos
+   * @param event
+   */
   filtrarActivos(event: Event) {
     const element = event.target as HTMLSelectElement;
     this.activo = Number(element.value);
@@ -130,6 +148,10 @@ export class CrudEmpleadosComponent implements OnInit {
         break;
     }
   }
+  /**
+   * Filtrar usuarios según el rol seleccionado del select
+   * @param event
+   */
   filtrarUsuariosPorRol(event: Event) {
     const element = event.target as HTMLSelectElement;
     this.rolSeleccionado = Number(element.value);
@@ -138,7 +160,7 @@ export class CrudEmpleadosComponent implements OnInit {
       (usuario) => usuario.rol_id.id_rol === this.rolSeleccionado
     );
   }
-
+  // Manejar la selección de archivo para la imagen de perfil
   onFileSelected(event: Event) {
     const input = event.target as HTMLInputElement;
     if (input.files && input.files.length > 0) {
@@ -158,7 +180,7 @@ export class CrudEmpleadosComponent implements OnInit {
       });
     }
   }
-
+  //Roles casados con el ID según la base de datos
   obtenerIdRol(rol: string): number {
     if (rol == 'Administrador') return 1;
     else if (rol == 'Cocinero') return 2;
@@ -167,9 +189,14 @@ export class CrudEmpleadosComponent implements OnInit {
 
     return 0;
   }
-
+  /**
+   * Establece el formulario para agregar un nuevo empleado y lo registra por medio del servicio
+   */
   async agregarEmpleadosBoton() {
     try {
+      /**
+       * MODAL FORMULARIO AGREGAR EMPLEADO
+       */
       Swal.fire({
         title: 'Agregar Nuevo Usuario',
         html: `
@@ -368,6 +395,9 @@ export class CrudEmpleadosComponent implements OnInit {
             if (nss === usuario.usuario_id.nss.nss)
               Swal.showValidationMessage('El nss debe ser único');
           }
+          //Casa el rol seleccionado con su descripción registrada en la base de datos.
+          //Si cuestiona que este código es infeciente, está en lo correcto.
+          //Simplemente alguien no diseño bien la API de crearEmpleado (es un tanto compleja)
           let rolUs = {
             id_rol: 1,
             rol: 'Administrador',
@@ -573,6 +603,11 @@ export class CrudEmpleadosComponent implements OnInit {
     }
   }
 
+  /**
+   * Muestra la información de un empleado en un modal de solo lectura
+   * @param id_usuario Usuario a mostrar segun el id dado
+   * @returns
+   */
   async verEmpleado(id_usuario: number) {
     try {
       const usF = this.usuarios.find(
@@ -587,6 +622,9 @@ export class CrudEmpleadosComponent implements OnInit {
         });
         return;
       }
+      /**
+       * MODAL VER EMPLEADO
+       */
       Swal.fire({
         title: 'Ver empleado',
         html: `
@@ -718,6 +756,12 @@ export class CrudEmpleadosComponent implements OnInit {
     }
   }
 
+  /**
+   * Función para editar un empleado existente por medio de un modal con formulario y la
+   * llamada al servicio de usuarios
+   * @param id_usuario Usuario a editar dada el id
+   * @returns Usuario actualizado 204
+   */
   async editarEmpleado(id_usuario: number) {
     try {
       const usF = this.usuarios.find(
@@ -732,7 +776,9 @@ export class CrudEmpleadosComponent implements OnInit {
         });
         return;
       }
-
+      /**
+       * MODAL EDITAR EMPLEADO
+       */
       Swal.fire({
         title: 'Editar empleado',
         html: `
@@ -1160,6 +1206,12 @@ export class CrudEmpleadosComponent implements OnInit {
     }
   }
 
+  /**
+   * Esta función NO elimina un empleado, solo lo desactiva para que no pueda iniciar sesión
+   * cambia su estado a 0 por medio del servicio de usuarios
+   * @param id_usuario Usuario a desactivar
+   * @returns
+   */
   async desactivarEmpleado(id_usuario: number) {
     try {
       const usF = this.usuarios.find(
@@ -1243,6 +1295,12 @@ export class CrudEmpleadosComponent implements OnInit {
     }
   }
 
+  /**
+   * Esta función reactiva un empleado desactivado para que pueda iniciar sesión
+   * cambia su estado a 1 por medio del servicio de usuarios
+   * @param id_usuario Usuario a reactivar
+   * @returns
+   */
   async reactivarEmpleado(id_usuario: number) {
     try {
       const usF = this.usuarios.find(

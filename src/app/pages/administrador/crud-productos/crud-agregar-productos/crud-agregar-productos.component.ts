@@ -30,7 +30,14 @@ import { IngredientesService } from '../../../../services/ingredientes.service';
 import { ExtrasService } from '../../../../services/extras.service';
 import { OpcionesService } from '../../../../services/opciones.service';
 import { SubcategoriasService } from '../../../../services/subcategorias.service';
-
+/**
+ * Componente para agregar o editar productos en el sistema de administración.
+ * Permite la creación y modificación de productos, incluyendo la selección
+ * de ingredientes, extras y opciones asociadas.
+ *
+ * Este componente SÍ fue un dolor de huevos, haciendo el rol de administración
+ * uno de los más complejos de la aplicación web.
+ */
 @Component({
   selector: 'app-crud-agregar-productos',
   standalone: true,
@@ -44,6 +51,25 @@ import { SubcategoriasService } from '../../../../services/subcategorias.service
   styleUrl: './crud-agregar-productos.component.css',
 })
 export class CrudAgregarProductosComponent implements OnInit {
+
+  /**
+   * Todo este componente se trata de un formulario reactivo para agregar o editar productos,
+   * con funcionalidades de paginación y filtrado para ingredientes, extras y opciones.
+   * También maneja la carga de imágenes y la validación del formulario.
+   *
+   * Se utilizan servicios para interactuar con la API y registrar logs de acciones.
+   *
+   * El Formulario se compone de las siguientes librerías indispensables:
+   * FormBuilder
+   * FormGroup
+   * Validators
+   * FormsModule
+   * ReactiveFormsModule
+   *
+   * Estas manejas los NgModel, NgModelChange y NgModelOptions en la vista HTML.
+   */
+
+  // Propiedades para manejar el modo de edición y el ID del producto
   id_prod?: number;
   modoEdicion: boolean = false;
 
@@ -61,12 +87,19 @@ export class CrudAgregarProductosComponent implements OnInit {
   @Input() opciones: Opciones[] = [];
   @Input() sub_categorias: Sub_categorias[] = [];
 
+  //Producto a editar
   producto: Productos | undefined = undefined;
 
+  /**
+   * Objetos principales para manejar los datos filtrados de ingredientes, extras y opciones.
+   */
   ingredientesFiltrados: Ingredientes[] = [];
   extrasFiltrados: Extras[] = [];
   opcionesFiltradas: Opciones[] = [];
 
+  /**
+   * Propiedades para manejar la paginación de ingredientes, extras y opciones.
+   */
   currentPageIngr: number = 1;
   currentPageExt: number = 1;
   currentPageOpc: number = 1;
@@ -93,6 +126,10 @@ export class CrudAgregarProductosComponent implements OnInit {
   ) {}
 
   async ngOnInit() {
+    /**
+     * Carga inicial de ingredientes, extras, opciones y
+     * subcategorías desde sus respectivos servicios.
+     */
     this.ingredientes = await this.ingredientesService.getIngredientes();
     this.extras = await this.extrasService.getExtras();
     this.opciones = await this.opcionesService.getOpciones();
@@ -108,7 +145,11 @@ export class CrudAgregarProductosComponent implements OnInit {
     this.opcionesFiltradas = this.opciones;
 
     this.cdr.detectChanges();
-
+    /**
+     * Suscripción a los parámetros de la ruta para determinar si se está
+     * en modo edición y cargar el producto correspondiente.
+     * También se fuerza la detección de cambios para actualizar la vista.
+     */
     this.route.paramMap.subscribe(async (params) => {
       const idParam = params.get('id_prod');
       if (idParam) {
@@ -160,8 +201,7 @@ export class CrudAgregarProductosComponent implements OnInit {
     } else {
       this.selectedIngredientes.delete(id);
     }
-    // Actualizar validación del formulario
-    this.updateFormValidation();
+
   }
 
   onExtraChange(isChecked: boolean, id: number) {
@@ -179,10 +219,14 @@ export class CrudAgregarProductosComponent implements OnInit {
       this.selectedOpciones.delete(id);
     }
   }
-
+  /**
+   * Obtiene y carga los datos de un producto específico para edición.
+   * @param id Id del producto a editar.
+   */
   async cargarProducto(id: number) {
     this.producto = await this.productosService.obtenerProducto(id);
     console.log(this.producto);
+    // Rellenar el formulario con los datos del producto
     this.form.patchValue({
       nombre_prod: this.producto.nombre_prod,
       descripcion: this.producto.descripcion,
@@ -202,7 +246,10 @@ export class CrudAgregarProductosComponent implements OnInit {
       this.productosService.obtenerExtrasDeProducto(id),
       this.productosService.obtenerOpcionesDeProducto(id),
     ]);
-
+    /**
+     * Recorrer los ingredientes, extras y opciones del producto
+     * y agregarlos a los sets de selección correspondientes.
+     */
     ingredientesProd.forEach((ing: Pedidos_has_ingrsel) =>
       this.selectedIngredientes.add(ing.ingrediente_id.id_ingr)
     );
@@ -225,11 +272,7 @@ export class CrudAgregarProductosComponent implements OnInit {
     this.cdr.detectChanges();
   }
 
-  // Actualizar validación personalizada
-  private updateFormValidation() {
-    // Puedes agregar validación personalizada aquí si necesitas
-    // que el formulario sea inválido cuando no hay ingredientes seleccionados
-  }
+
 
   // Métodos de filtrado
   filtrarIngredientes(event: any) {
@@ -262,7 +305,13 @@ export class CrudAgregarProductosComponent implements OnInit {
     this.currentPageExt = 1; // Reset a primera página al filtrar
   }
 
-  // Envío del formulario
+  /**
+   * Esta función maneja el envío del formulario para crear o actualizar un producto.
+   * Realiza validaciones, muestra confirmaciones y utiliza servicios para interactuar
+   * con la API y registrar logs de acciones.
+   * Esta función se ejecuta al presionar el botón de enviar en el formulario.
+   * @returns Producto creado/actualizado
+   */
   async onSubmit() {
     try {
       if (this.form.invalid) {

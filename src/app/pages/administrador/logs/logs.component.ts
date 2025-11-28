@@ -6,6 +6,11 @@ import { LogsService } from '../../../services/logs.service';
 import Swal from 'sweetalert2';
 import { FormsModule } from '@angular/forms';
 
+/**
+ * Componente para la visualización y gestión de logs en la aplicación.
+ * Permite filtrar logs por término de búsqueda y rango de fechas,
+ * así como paginarlos para una mejor experiencia de usuario.
+ */
 @Component({
   selector: 'app-logs',
   standalone: true,

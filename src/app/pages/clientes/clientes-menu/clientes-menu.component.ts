@@ -11,7 +11,10 @@ import { SubcategoriaService } from '../../../services/subcategoria.service';
 import { NotificacionesService } from '../../../services/notificaciones.service';
 import { Producto_extras_ingrSel } from '../../../interfaces/types';
 import { interval, Subscription } from 'rxjs';
-
+/**
+ * Componente de menú de clientes. Muestra las categorías y productos disponibles para el cliente.
+ * Permite agregar productos al pedido, ver el carrito y llamar al mesero.
+ */
 @Component({
   selector: 'app-clientes-menu',
   standalone: true,
@@ -52,13 +55,17 @@ export class ClientesMenuComponent implements OnInit {
     private notificacionesService: NotificacionesService,
     private router: Router,
   ) {}
-
+  /**
+   * Inicializa el componente, cargando el ID de la mesa desde los parámetros de la ruta,
+   * cargando el pedido asociado a la mesa y comenzando la verificación periódica del
+   * estado del pedido.
+   */
   ngOnInit(): void {
     this.route.queryParams.subscribe(params => {
       this.mesaId = params['mesa'];
       if (this.mesaId) {
         this.cargarPedidoMesa();
-        this.iniciarVerificacionEstado(); 
+        this.iniciarVerificacionEstado();
       }
     });
 
@@ -68,7 +75,10 @@ export class ClientesMenuComponent implements OnInit {
   ngOnDestroy(): void {
     this.verificacionSubscription?.unsubscribe();
   }
-
+  /**
+   * Inicia la verificación periódica del estado del pedido para detectar si ha sido pagado.
+   * Si el pedido es pagado, muestra una alerta y redirige al cliente a la página inicial.
+   */
   private iniciarVerificacionEstado(): void {
   this.verificacionSubscription = interval(5000).subscribe(async () => {
     if (this.pedidoActual?.id_pedido) {
@@ -76,12 +86,12 @@ export class ClientesMenuComponent implements OnInit {
         const estaPagado = await this.pedidosService.verificarEstadoPagado(
           this.pedidoActual.id_pedido
         );
-        
+
         if (estaPagado) {
           console.log('💳 Pedido pagado detectado. Redirigiendo...');
-          
+
           this.verificacionSubscription?.unsubscribe();
-          
+
           await Swal.fire({
             title: '¡Pedido Pagado!',
             text: 'Tu pedido ha sido pagado. Serás redirigido para comenzar uno nuevo.',
@@ -105,6 +115,11 @@ export class ClientesMenuComponent implements OnInit {
 
   // ==================== CARRITO ====================
 
+  /**
+   * Carga el pedido activo de la mesa y sus productos asociados. Si no hay pedido activo,
+   * limpia el carrito. Lo hace mediante una función especial getPedidosActivosConDetalles.
+   * @returns
+   */
   cargarPedidoMesa(): void {
     if (!this.mesaId) return;
 
@@ -113,9 +128,9 @@ export class ClientesMenuComponent implements OnInit {
         console.log('📦 Datos recibidos de pedidos:', data);
 
         const mesaIdNum = parseInt(this.mesaId!);
-        
+
         // Buscar el pedido de mi mesa
-        const miPedido = data.find(pedido => 
+        const miPedido = data.find(pedido =>
           pedido.pedidoId?.no_mesa?.no_mesa === mesaIdNum &&
           pedido.pedidoId?.estado !== 'Pagado'
         );
@@ -124,7 +139,7 @@ export class ClientesMenuComponent implements OnInit {
 
         if (miPedido && miPedido.productos && miPedido.productos.length > 0) {
           this.pedidoActual = miPedido.pedidoId;
-          
+          // Mapear productos con extras e ingredientes
           this.productosEnPedido = miPedido.productos.map(prod => ({
             pedido_prod_id: prod.pedido_prod_id,
             estado: prod.estado,
@@ -135,7 +150,7 @@ export class ClientesMenuComponent implements OnInit {
             ingredientes: prod.ingredientes || [],
             pedido_id: miPedido.pedidoId
           }));
-          
+
           this.calcularTotalCarrito();
           console.log('✅ Pedido cargado. Total productos:', this.productosEnPedido.length);
           console.log('🔍 Productos con extras:', this.productosEnPedido);
@@ -153,7 +168,9 @@ export class ClientesMenuComponent implements OnInit {
       }
     });
   }
-
+  /**
+   * Calcula el total del carrito sumando los precios de todos los productos en el pedido.
+   */
   calcularTotalCarrito(): void {
     this.totalCarrito = this.productosEnPedido.reduce((total, producto) =>
       total + (parseFloat(producto.precio.toString()) || 0), 0
@@ -161,7 +178,9 @@ export class ClientesMenuComponent implements OnInit {
     this.totalCarrito = Math.round(this.totalCarrito * 100) / 100;
     console.log('💰 Total del carrito:', this.totalCarrito);
   }
-
+  /**
+   * Muestra el modal del carrito de compras, cargando primero el pedido de la mesa.
+   */
   mostrarCarrito(): void {
     this.cargarPedidoMesa();
     setTimeout(() => {
@@ -171,7 +190,13 @@ export class ClientesMenuComponent implements OnInit {
       modal.show();
     });
   }
-
+  /**
+   * Cancela el pedido actual, eliminando todos sus productos y el pedido mismo. Si y solo si
+   * está en estado Sin preparar. Una vez entra en Preparación o estados posteriores,
+   * no se puede cancelar.
+   * @param producto
+   * @returns
+   */
   async eliminarProducto(producto: Producto_extras_ingrSel): Promise<void> {
     try {
       const { isConfirmed } = await Swal.fire({
@@ -196,7 +221,12 @@ export class ClientesMenuComponent implements OnInit {
   }
 
   // ==================== PRODUCTOS ====================
-
+  /**
+   * showProduct abre el modal para mostrar los detalles de un producto seleccionado,
+   * incluyendo opciones, extras e ingredientes. Carga los datos necesarios desde el servicio
+   * de productos y prepara la interfaz para la selección del cliente.
+   * @param prod
+   */
   async showProduct(prod: any): Promise<void> {
     this.selectedProduct = prod;
     this.selectedExtras = [];
@@ -212,9 +242,9 @@ export class ClientesMenuComponent implements OnInit {
 
       this.opciones = opciones;
       this.extras = extras;
-      
+
       // Cargar ingredientes completos con checked: true
-      this.ingredientes = Array.isArray(ingredientes) 
+      this.ingredientes = Array.isArray(ingredientes)
         ? ingredientes.map((item: any) => ({ ...item.ingrediente_id, checked: true }))
         : [];
 
@@ -229,7 +259,10 @@ export class ClientesMenuComponent implements OnInit {
       this.ingredientes = [];
     }
   }
-
+  /**
+   * toggleExtra agrega o quita un extra de la lista de extras seleccionados.
+   * @param extra
+   */
   toggleExtra(extra: any): void {
     const index = this.selectedExtras.indexOf(extra);
     if (index >= 0) {
@@ -239,7 +272,7 @@ export class ClientesMenuComponent implements OnInit {
     }
     this.calcularPrecio();
   }
-
+  // Actualiza el precio total basado en las selecciones actuales
   calcularPrecio(): void {
     let base = parseFloat(this.selectedProduct.precio);
     if (this.selectedOpcion) {
@@ -250,7 +283,12 @@ export class ClientesMenuComponent implements OnInit {
     }
     this.precioTotal = base;
   }
-
+  // ==================== AGREGAR A CUENTA ====================
+  /**
+   * agregarACuenta agrega el producto seleccionado al pedido de la mesa, incluyendo
+   * las opciones, extras e ingredientes seleccionados. Muestra alertas de progreso
+   * y éxito/fallo durante el proceso.
+   */
   async agregarACuenta(): Promise<void> {
     try {
       Swal.fire({
@@ -296,7 +334,11 @@ export class ClientesMenuComponent implements OnInit {
   }
 
   // ==================== CATEGORÍAS Y SUBCATEGORÍAS ====================
-
+  /**
+   * cargarCategoriasYSubcategorias carga las categorías, subcategorías y productos
+   * desde los servicios correspondientes. Organiza los productos dentro de sus
+   * subcategorías y las subcategorías dentro de sus categorías.
+   */
   async cargarCategoriasYSubcategorias(): Promise<void> {
     try {
       const [categorias, subcategorias, productos] = await Promise.all([
@@ -326,7 +368,12 @@ export class ClientesMenuComponent implements OnInit {
   }
 
   // ==================== BÚSQUEDA Y FILTRADO ====================
-
+  /**
+   * Filtra los productos mostrados según el término de búsqueda ingresado. Actualiza
+   * la lista de categorías y subcategorías para mostrar solo aquellos productos que
+   * coinciden con el término de búsqueda.
+   * @returns
+   */
   filtrarProductos(): void {
     const filtro = this.searchTerm.trim().toLowerCase();
 
@@ -361,7 +408,10 @@ export class ClientesMenuComponent implements OnInit {
       });
     });
   }
-
+  /**
+   * Expande un elemento de colapso de Bootstrap dado su ID.
+   * @param id
+   */
   private expandirElemento(id: string): void {
     const elemento = document.getElementById(id);
     if (elemento) {
@@ -373,7 +423,11 @@ export class ClientesMenuComponent implements OnInit {
   }
 
   // ==================== LLAMAR MESERO ====================
-
+  /**
+   * llamarMesero envía una notificación para llamar al mesero de la mesa actual.
+   * Muestra alertas de progreso, éxito y error durante el proceso.
+   * @return void
+   */
   async llamarMesero(): Promise<void> {
     try {
       Swal.fire({

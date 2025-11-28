@@ -25,19 +25,25 @@ import { LogsDto } from '../../../interfaces/dtos';
 })
 export class CrudProductosComponent {
   @Output() cambiarComponente = new EventEmitter<string>();
+  /* LAS FUNCIONALIDADES DE AGREGAR Y EDITAR PRODUCTOS ESTÁN EN CRUD-AGREGAR-PRODUCTOS */
+
+  //Paginación
   pageSize: number = 7;
   currentPage: number = 0;
 
+  //Datos
   @Input() productos: Productos[] = [];
   @Input() categorias: Categorias[] = [];
   productosFiltrados: Productos[] = [];
   categoriasFiltradas: Categorias[] = [];
+
   constructor(
     private readonly adminComponente: AdministradorComponent,
     private readonly productosService: ProductosService,
     private readonly logsService: LogsService,
     private router: Router
   ) {
+    //Carga los datos desde el componente padre
     this.productos = adminComponente.productos;
     this.categorias = adminComponente.categorias;
     console.log(this.productos);
@@ -47,15 +53,18 @@ export class CrudProductosComponent {
     this.productosFiltrados = this.productos;
     this.categoriasFiltradas = this.categorias;
   }
-
+  //Reenvia al componente de CRUD-AGREGAR-PRODUCTOS en función de agregar un producto
   agregarProductosBoton() {
     this.router.navigate(['/Administrador/productos/agregar']);
   }
-
+  //Reenvia al componente de CRUD-AGREGAR-PRODUCTOS en función de editar un producto
   editarProducto(id_prod: number) {
     this.router.navigate(['/Administrador/productos/editar', id_prod]);
   }
-
+  /**
+   * Filtra los productos mostrados en función de la categoría seleccionada del select
+   * @param event
+   */
   filtrarProductosPorCategoria(event: any) {
     const categoriaSeleccionada = parseInt(event.target.value);
     if (categoriaSeleccionada) {
@@ -68,10 +77,11 @@ export class CrudProductosComponent {
     }
   }
 
+  //paginacion
   async onPageChange(page: number) {
     this.currentPage = page;
   }
-
+  //Visualiza la información de un producto en un modal
   async verProducto(id_producto: number) {
     try {
       Swal.fire({
@@ -87,13 +97,29 @@ export class CrudProductosComponent {
       const producto = this.productos.find(
         (producto) => producto.id_prod === id_producto
       );
+      /**
+       * Un tanto complejo, ya que un producto puede tener varios extras, ingredientes y opciones.
+       * Por lo que se obtienen todos los extras, ingredientes y opciones del producto y se muestran en tablas dentro del modal.
+       *
+       * de forma más técnica:
+       *   Son relaciones M:M de productos con extras, ingredientes y opciones, por lo que se construyen todas las relaciones
+       *   y luego se muestran en tablas.
+       *
+       * cada relación tiene su propio tipado:
+       *   P_H_E: Producto tiene muchos Extras
+       *   P_H_I: Producto tiene muchos Ingredientes
+       *   P_H_O: Producto tiene muchas Opciones
+       */
       const extrasP: P_H_E[] =
         await this.productosService.obtenerExtrasDeProducto(id_producto);
       const ingredientesP: P_H_I[] =
         await this.productosService.obtenerIngredientesDeProducto(id_producto);
       const opcionesP: P_H_O[] =
         await this.productosService.obtenerOpcionesDeProducto(id_producto);
-
+        /**
+         * Construcción de las tablas para mostrar los datos en el modal
+         */
+      //Extras seleccionados del producto
       const extrasRows = extrasP
         .map((extra) => {
           return `
@@ -104,7 +130,7 @@ export class CrudProductosComponent {
         `;
         })
         .join('');
-
+      //Ingredientes seleccionados del producto
       const ingrsRows = ingredientesP
         .map((ingrediente) => {
           return `
@@ -115,7 +141,7 @@ export class CrudProductosComponent {
           `;
         })
         .join('');
-
+      //Opciones seleccionadas del producto
       const opcsRows = opcionesP
         .map((opc) => {
           return `
@@ -210,7 +236,12 @@ export class CrudProductosComponent {
       });
     }
   }
-
+  /**
+   * Esta función elimina un producto después de confirmar la acción con el usuario.
+   * También elimina las relaciones del producto con extras, ingredientes y opciones.
+   * @param id_prod producto a eliminar
+   * @returns
+   */
   async eliminarProducto(id_prod: number) {
     const producto = this.productos.find(
       (producto) => producto.id_prod === id_prod

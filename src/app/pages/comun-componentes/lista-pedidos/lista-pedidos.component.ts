@@ -56,7 +56,9 @@ interface NotificacionConMesa extends Notificacion {
 })
 export class ListaPedidosComponent implements OnInit, OnDestroy {
   @Input() rol: string = 'mesero';
-
+  /**
+   * Variables principales del componente
+   */
   orders: Order[] = [];
   notificaciones = new Map<number, Notificacion[]>();
   allNotifications: NotificacionConMesa[] = [];
@@ -66,14 +68,17 @@ export class ListaPedidosComponent implements OnInit, OnDestroy {
   private nuevoProductoSub: Subscription | undefined;
   private estadoActualizadoSub: Subscription | undefined;
 
-  sidebarOpen = false;
-  notificationsOpen = false;
-  navOpen = false;
-  unreadNotifications = 0;
-  isLoading = true;
-  mesaSeleccionada: number | null = null;
-  mostrandoSoloMesa = false;
-  productosDelPedido: PedidoAgrupado[] = [];
+  /**
+   * Variables para el control de la interfaz de usuario
+   */
+  sidebarOpen = false; // Controla la visibilidad de la barra lateral de pedidos
+  notificationsOpen = false; // Controla la visibilidad del panel de notificaciones
+  navOpen = false; // Controla la visibilidad del menú de navegación
+  unreadNotifications = 0; // Cuenta de notificaciones no leídas
+  isLoading = true; // Indica si los datos están siendo cargados
+  mesaSeleccionada: number | null = null; // Mesa actualmente seleccionada
+  mostrandoSoloMesa = false; // Indica si se están mostrando solo los pedidos de una mesa específica
+  productosDelPedido: PedidoAgrupado[] = []; // Productos filtrados para la mesa seleccionada
 
   navItems: NavItem[] = [
     /**
@@ -103,6 +108,10 @@ export class ListaPedidosComponent implements OnInit, OnDestroy {
     private pedidosGatewayService: PedidosSocketService
   ) {}
 
+  /**
+   * Inicialización del componente
+   * Carga las mesas, íconos y establece la escucha de actualizaciones en vivo
+   */
   ngOnInit(): void {
     this.cargarMesas();
     this.loadIcons();
@@ -119,7 +128,9 @@ export class ListaPedidosComponent implements OnInit, OnDestroy {
     this.estadoActualizadoSub?.unsubscribe();
     this.pedidosGatewayService.disconnect();
   }
-
+  /**
+   * Cargar las mesas cargadas en la bd desde el servicio y manejar errores
+   */
   async cargarMesas(): Promise<void> {
     try {
       this.mesas = await this.mesasService.obtenerMesas();
@@ -133,7 +144,9 @@ export class ListaPedidosComponent implements OnInit, OnDestroy {
   }
 
 
-
+  /**
+   * Cargar íconos de Bootstrap si no están ya presentes en el documento
+   */
   loadIcons(): void {
     const links = [
       {
@@ -155,7 +168,10 @@ export class ListaPedidosComponent implements OnInit, OnDestroy {
       }
     });
   }
-
+  /**
+   * Cargar los pedidos activos con detalles según el rol del usuario (mesero)
+   * por medio del servicio de pedidos getPedidosActivosConDetalles y manejar errores
+   */
   loadOrders(): void {
     this.isLoading = true;
     this.pedidosService.getPedidosActivosConDetalles(this.rol).subscribe({
@@ -171,17 +187,24 @@ export class ListaPedidosComponent implements OnInit, OnDestroy {
       },
     });
   }
-
+  /**
+   * Escuchar actualizaciones en vivo de nuevos productos y cambios de estado
+   * mediante WebSockets y actualizar la vista en consecuencia
+   */
   private escucharActualizacionesEnVivo(): void {
     console.log('Mesero: Escuchando actualizaciones en vivo...');
-
+    // Conectar al servicio de WebSocket al detectar un nuevo producto
+    //agregado a un pedido
     this.nuevoProductoSub = this.pedidosGatewayService
       .onNuevoProducto()
       .subscribe((nuevoProducto) => {
         console.log('Socket (Mesero) recibió nuevoProducto:', nuevoProducto);
         this._actualizarVistaConProducto(nuevoProducto);
       });
-
+      /**
+       * Conectar al servicio de WebSocket al detectar una actualización
+       * de estado de un producto en un pedido
+      */
     this.estadoActualizadoSub = this.pedidosGatewayService
       .onEstadoActualizado()
       .subscribe((productoActualizado) => {
@@ -192,7 +215,12 @@ export class ListaPedidosComponent implements OnInit, OnDestroy {
         this._actualizarVistaConProducto(productoActualizado);
       });
   }
-
+  /**
+   * _actualizarVistaConProducto actualiza la vista de pedidos agrupados
+   * según el producto recibido, añadiendo, actualizando o eliminando
+   * productos según su estado.
+   * @param producto
+   */
   private _actualizarVistaConProducto(producto: Producto_extras_ingrSel): void {
     const pedidoId = producto.pedido_id.id_pedido;
     const productoId = producto.pedido_prod_id;
@@ -252,6 +280,10 @@ export class ListaPedidosComponent implements OnInit, OnDestroy {
     }
   }
 
+  /**
+   * cargarNotificaciones carga las notificaciones pendientes para cada mesa
+   * y actualiza las estructuras de datos correspondientes.
+   */
   async cargarNotificaciones(): Promise<void> {
     // Cargar todas las notificaciones primero en estructuras temporales
     const nuevasNotificacionesPorMesa = new Map<number, Notificacion[]>();
@@ -291,14 +323,20 @@ export class ListaPedidosComponent implements OnInit, OnDestroy {
   tieneNotificaciones(noMesa: number): boolean {
     return this.obtenerNotificacionesPorMesa(noMesa).length > 0;
   }
-
+  /**
+   * Notifica que una notificación ha sido atendida, actualiza las estructuras de datos
+   * y muestra alertas de éxito o error.
+   * @param notificacionId
+   * @param mesaId
+   */
   async atenderNotificacion(
     notificacionId: number,
     mesaId: number
   ): Promise<void> {
     try {
+      // Llamar al servicio para marcar la notificación como atendida
       await this.notificacionesService.atenderNotificacion(notificacionId);
-
+      // Actualizar las notificaciones locales
       const notifs = this.notificaciones.get(mesaId) || [];
       this.notificaciones.set(
         mesaId,
@@ -320,7 +358,12 @@ export class ListaPedidosComponent implements OnInit, OnDestroy {
       Swal.fire('Error', 'No se pudo atender la notificación', 'error');
     }
   }
-
+  /**
+   * cargarPedidosMesa carga y muestra los pedidos de una mesa específica.
+   * @param mesaNumber
+   * @param productosYaFiltrados
+   * @returns
+   */
   cargarPedidosMesa(
     mesaNumber: number,
     productosYaFiltrados?: PedidoAgrupado[]
@@ -658,7 +701,12 @@ export class ListaPedidosComponent implements OnInit, OnDestroy {
       minute: '2-digit',
     }).format(date);
   }
-
+  /**
+   * getOrderTotal calcula el total de un pedido sumando los precios
+   * de sus ítems, incluyendo extras e ingredientes.
+   * @param order
+   * @returns
+   */
   getOrderTotal(order: Order): number {
     return order.items.reduce((total, item) => {
       let precio = item.precio;
@@ -784,6 +832,13 @@ export class ListaPedidosComponent implements OnInit, OnDestroy {
     return producto.estado === EstadoPedidoHasProductos.sin_preparar;
   }
 
+  /**
+   * Elimina un producto de un pedido después de confirmar con el usuario SI y SOLO SI
+   * el producto está en estado "sin preparar".
+   * @param producto
+   * @param pedido
+   * @returns
+   */
   async eliminarProductoDelPedido(
     producto: Producto_extras_ingrSel,
     pedido: PedidoAgrupado
@@ -846,7 +901,11 @@ export class ListaPedidosComponent implements OnInit, OnDestroy {
       );
     }
   }
-
+  /**
+   * Marca todos los productos de un pedido como entregados
+   * @param pedido
+   * @returns
+   */
   async marcarPedidoCompleto(pedido: PedidoAgrupado): Promise<void> {
     const { isConfirmed } = await Swal.fire({
       title: '¿Confirmar entrega?',
