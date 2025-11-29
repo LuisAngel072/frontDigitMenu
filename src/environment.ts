@@ -1,5 +1,5 @@
 export const environment = {
-    production: false,
+    production: true,
     ApiIP: "http://18.191.20.158:3000/api/",
     ApiUp: "http://18.191.20.158:3000/uploads",
 
