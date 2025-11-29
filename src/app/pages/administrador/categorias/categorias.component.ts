@@ -45,13 +45,19 @@ export class CategoriasComponent {
     private adminComponente: AdministradorComponent
   ) {}
 
+  /**
+   * Inicialización del componente
+   * Carga las categorías y subcategorías desde el componente padre
+   */
   async ngOnInit() {
     this.categorias = this.adminComponente.categorias;
     this.subcategorias = this.adminComponente.subcategorias;
     this.subCategoriasFiltradas = this.subcategorias;
     this.categoriasFiltradas = this.categorias;
   }
-
+  /**
+   * Paginación
+   */
   async onPageChangeCat(page: number) {
     this.currentPageCat = page;
   }
@@ -127,7 +133,14 @@ export class CategoriasComponent {
       throw error;
     }
   }
-  // Eliminar categoría
+  /**
+   * Eliminar categoría
+   * Elimina una categoría si no tiene subcategorías asociadas, mostrando confirmaciones y
+   * mensajes de error según sea necesario.
+   * Esta acción es llevada a cabo mediante la llamada API del servicio de categorías.
+   * @param id_cat Id de la categoría a eliminar (viene de darle clic en el botón eliminar)
+   * @returns Categoria Eliminada
+   */
   async delCategoria(id_cat: number) {
     try {
       const categoria = this.categorias.find((cat) => cat.id_cat === id_cat);
@@ -186,7 +199,7 @@ export class CategoriasComponent {
                 localStorage.getItem('codigo') +
                 ' ' +
                 localStorage.getItem('nombres'),
-              accion: 'Crear categoría',
+              accion: 'Eliminar categoría',
               modulo: 'Categorías',
               descripcion: `Se eliminó la categoría ${categoria.nombre_cat}`,
             };
@@ -214,9 +227,20 @@ export class CategoriasComponent {
       throw error;
     }
   }
-
+  /**
+   * Crear categoría
+   * Muestra un formulario para crear una nueva categoría, maneja
+   * la carga de imágenes y envía los datos al servicio de categorías.
+   * Incluye validaciones y confirmaciones para asegurar que los datos sean correctos
+   * antes de enviarlos.
+   * @returns Nueva categoría creada Type Categorias
+   */
   async crearCategoria() {
     try {
+
+      /**
+       * PANTALLA MODAL PARA CREAR CATEGORÍA
+       */
       Swal.fire({
         title: 'Agregar categoría',
         html: `
@@ -236,35 +260,42 @@ export class CategoriasComponent {
           confirmButton: 'btn btn-prim',
           cancelButton: 'btn btn-peligro',
         },
+        /**
+         * OBTENCIÓN DE DATOS DEL FORMULARIO INGRESADOS POR EL USUARIO
+         * @returns
+         */
         preConfirm: () => {
           const nombre_cat = (
+            //En base al id del input obtiene el valor (como un html)
             document.getElementById('nombre_categoria') as HTMLInputElement
           ).value.trim();
           const fileInput = document.getElementById(
             'ruta_img'
           ) as HTMLInputElement;
-
+          //Obtiene el archivo seleccionado en el input file
           const ruta_img: File | null =
             fileInput?.files && fileInput.files[0] ? fileInput.files[0] : null;
+          //Variable auxiliar del archivo img seleccionado
           this.selectedFile =
             fileInput?.files && fileInput.files[0] ? fileInput.files[0] : null;
 
-          if (!nombre_cat) {
+          if (!nombre_cat || !fileInput) {
             Swal.showValidationMessage(
               'Por favor, complete todos los campos obligatorios.'
             );
             return;
           }
-
+          //Crea el cuerpo de la petición con los datos obtenidos
+          //CategoriasDTO viene del archivo dtos.ts, es la estructura que se enviará al backend
           const body: CategoriasDTO = {
             nombre_cat: nombre_cat,
             ruta_img: ruta_img ? ruta_img.name : '',
           };
           this.formData = body;
-
           return body;
         },
       }).then(async (result) => {
+        //Si la respuesta es confirmada (clic en el botón continuar)
         if (result.isConfirmed) {
           const formData: CategoriasDTO = result.value;
 
@@ -281,6 +312,7 @@ export class CategoriasComponent {
           });
           if (confirmacion.isConfirmed) {
             try {
+              //Pantalla de carga
               Swal.fire({
                 title: 'Cargando...',
                 html: 'Por favor, espere mientras se procesa la información.',
@@ -292,11 +324,11 @@ export class CategoriasComponent {
                 },
               });
               if (this.selectedFile) {
+                //Primero sube la imagen al servidor, este retorna la imagen subida.
                 this.catServices
                   .subirImg(this.selectedFile)
                   .pipe(
                     switchMap((res) => {
-
                       this.formData.ruta_img =
                         '/categorias/' + String(res.ruta_img);
 
@@ -305,6 +337,7 @@ export class CategoriasComponent {
                   )
                   .subscribe({
                     next: async (response) => {
+                      //Crea el log en la tabla logs
                       Swal.close();
                       const log: LogsDto = {
                         usuario:
@@ -354,7 +387,13 @@ export class CategoriasComponent {
       throw error;
     }
   }
-  // Editar categoría
+  /**
+   * Actualizar categoría
+   * Muestra un formulario para editar una categoría existente,
+   * maneja la carga de imágenes y envía los datos actualizados al servicio de categorías.
+   * @param id_cat Id de la categoría a editar
+   * @returns
+   */
   async actualizarCategoria(id_cat: number) {
     try {
       const categoria = this.categorias.find((cat) => cat.id_cat === id_cat);
@@ -368,7 +407,9 @@ export class CategoriasComponent {
         });
         return;
       }
-
+      /**
+       * PANTALLA MODAL PARA EDITAR CATEGORÍA
+       */
       Swal.fire({
         title: 'Editar categoría',
         html: `
@@ -389,13 +430,16 @@ export class CategoriasComponent {
           cancelButton: 'btn btn-peligro',
         },
         preConfirm: () => {
+          /**
+           * OBTENCIÓN DE DATOS DEL FORMULARIO INGRESADOS POR EL USUARIO
+           */
           const nombre_cat = (
             document.getElementById('nombre_cat') as HTMLInputElement
           ).value.trim();
           const fileInput = document.getElementById(
             'ruta_img'
           ) as HTMLInputElement;
-
+          //Obtiene el archivo seleccionado en el input file
           const ruta_img: File | null =
             fileInput?.files && fileInput.files[0] ? fileInput.files[0] : null;
           this.selectedFile =
@@ -428,6 +472,7 @@ export class CategoriasComponent {
             },
             icon: 'warning',
           });
+          //Si confirma la edición
           if (confirmacion.isConfirmed) {
             try {
               Swal.fire({
@@ -441,11 +486,11 @@ export class CategoriasComponent {
                 },
               });
               if (this.selectedFile) {
+                //Primero sube la imagen al servidor, este retorna la imagen subida.
                 this.catServices
                   .subirImg(this.selectedFile)
                   .pipe(
                     switchMap((res) => {
-
                       this.formData.ruta_img =
                         '/categorias/' + String(res.ruta_img);
 
@@ -456,6 +501,7 @@ export class CategoriasComponent {
                     })
                   )
                   .subscribe({
+                    //Categoria actualizada exitosamente
                     next: async (response) => {
                       Swal.close();
                       this.categorias = await this.catServices.getCategorias();
@@ -481,6 +527,7 @@ export class CategoriasComponent {
                   });
               }
               Swal.close();
+              //Creacion de Log
               const log: LogsDto = {
                 usuario:
                   localStorage.getItem('codigo') +
@@ -516,7 +563,11 @@ export class CategoriasComponent {
     }
   }
 
-  // Subcategorías
+  /**
+   * Retorna la subcategoría seleccionada en un modal
+   * @param id_subcat SubCategoria seleccionada
+   * @returns Subcategoría seleccionada
+   */
   async verSubcategoria(id_subcat: number) {
     try {
       const subcategoria = this.subcategorias.find(
@@ -562,7 +613,11 @@ export class CategoriasComponent {
       throw error;
     }
   }
-  // Editar subcategoría
+  /**
+   * Se muestra un formulario para editar una subcategoría existente
+   * @param id_subcat Subcategoria seleccionada
+   * @returns Subcategoria actualizada 204
+   */
   async actualizarSubcategoria(id_subcat: number) {
     try {
       const subcategoria = this.subcategorias.find(
@@ -578,7 +633,9 @@ export class CategoriasComponent {
         });
         return;
       }
-
+      /**
+       * MODAL PARA EDITAR SUBCATEGORÍA
+       */
       Swal.fire({
         title: 'Editar subcategoría',
         html: `
@@ -614,6 +671,7 @@ export class CategoriasComponent {
           confirmButton: 'btn btn-prim',
           cancelButton: 'btn btn-peligro',
         },
+        // Obtención de datos del formulario dados por el usuario
         preConfirm: () => {
           const nombre_subcat = (
             document.getElementById('nombre_subcat') as HTMLInputElement
@@ -637,7 +695,7 @@ export class CategoriasComponent {
             );
             return;
           }
-
+          //Crea el cuerpo de la petición con los datos obtenidos
           const body: SubcategoriasDTO = {
             nombre_subcat: nombre_subcat,
             categoria_id: categoria_id,
@@ -659,8 +717,10 @@ export class CategoriasComponent {
             },
             icon: 'warning',
           });
+          //Si confirma la edición
           if (confirmacion.isConfirmed) {
             try {
+              //pantalla de carga
               Swal.fire({
                 title: 'Cargando...',
                 html: 'Por favor, espere mientras se procesa la información.',
@@ -672,14 +732,15 @@ export class CategoriasComponent {
                 },
               });
               if (this.selectedFile) {
+                //Sube el archivo al servidor
                 this.subcatServices
                   .subirImg(this.selectedFile)
                   .pipe(
+                    //El Servidor retorna la ruta de la imagen
                     switchMap((res) => {
 
                       this.formData.ruta_img =
                         '/subcategorias/' + String(res.ruta_img);
-
                       return this.subcatServices.editarSubCategoria(
                         id_subcat,
                         this.formData
@@ -689,6 +750,7 @@ export class CategoriasComponent {
                   .subscribe({
                     next: async (response) => {
                       Swal.close();
+                      //Crea el Logs de la actualizacion
                       this.subcategorias =
                         await this.subcatServices.obtenerSubcategorias();
                       const log: LogsDto = {
@@ -700,6 +762,7 @@ export class CategoriasComponent {
                         modulo: 'Categorías',
                         descripcion: `Se actualizó la subcategoría ${subcategoria.nombre_subcat}`,
                       };
+                      //Subcategoria actualizada exitosamente
                       await this.logsServices.crearLog(log);
                       this.adminComponente.subcategorias = this.subcategorias;
                       Swal.fire({
@@ -740,7 +803,11 @@ export class CategoriasComponent {
     }
   }
 
-  // Eliminar subcategoría
+  /**
+   * Elimina una subcategoría existente por medio de su id y una llamada al servicio de subcategorías
+   * @param id_subcat Id de la subcategoria a eliminar
+   * @returns
+   */
   async delSubcategoria(id_subcat: number) {
     try {
       const subcategoria = this.subcategorias.find(
@@ -808,8 +875,19 @@ export class CategoriasComponent {
     }
   }
 
+  /**
+   * Crear subcategoría
+   * Muestra un formulario para crear una nueva subcategoría, maneja
+   * la carga de imágenes y envía los datos al servicio de subcategorías.
+   * Incluye validaciones y confirmaciones para asegurar que los datos sean correctos
+   * antes de enviarlos.
+   * @returns Nueva subcategoría creada Type Subcategorias
+   */
   async crearSubcategoria() {
     try {
+      /**
+       * PANTALLA MODAL PARA CREAR SUBCATEGORÍA
+       */
       Swal.fire({
         title: 'Agregar subcategoría',
         html: `
@@ -841,17 +919,23 @@ export class CategoriasComponent {
           confirmButton: 'btn btn-prim',
           cancelButton: 'btn btn-peligro',
         },
+        /**
+         * OBTENCIÓN DE DATOS DEL FORMULARIO INGRESADOS POR EL USUARIO
+         */
         preConfirm: () => {
           const nombre_subcategoria = (
             document.getElementById('nombre_subcategoria') as HTMLInputElement
           ).value.trim();
+          //Categoria a la que pertenece la subcategoría
           const categoria_id = (
             document.getElementById('categoria_select') as HTMLSelectElement
           ).value;
           const fileInput = document.getElementById(
             'ruta_img'
           ) as HTMLInputElement;
-
+          /**
+           * Obtiene el archivo seleccionado en el input file
+           */
           const ruta_img: File | null =
             fileInput?.files && fileInput.files[0] ? fileInput.files[0] : null;
           this.selectedFile =
@@ -860,7 +944,7 @@ export class CategoriasComponent {
             Swal.showValidationMessage('Por favor, complete todos los campos.');
             return;
           }
-
+          //Crea el cuerpo de la petición con los datos obtenidos
           const body: SubcategoriasDTO = {
             nombre_subcat: nombre_subcategoria,
             categoria_id: parseInt(categoria_id, 10), // Asociando con la categoría
@@ -872,6 +956,7 @@ export class CategoriasComponent {
         },
       }).then(async (result) => {
         if (result.isConfirmed) {
+          //Si la respuesta es confirmada (clic en el botón continuar)
           const confirmacion = await Swal.fire({
             title: '¿Estás seguro de agregar la subcategoría?',
             showDenyButton: true,
@@ -885,6 +970,7 @@ export class CategoriasComponent {
           });
           if (confirmacion.isConfirmed) {
             try {
+              //Pantalla de carga
               Swal.fire({
                 title: 'Cargando...',
                 html: 'Por favor, espere mientras se procesa la información.',
@@ -896,6 +982,7 @@ export class CategoriasComponent {
                 },
               });
               if (this.selectedFile) {
+                //Primero sube la imagen al servidor, este retorna la imagen subida.
                 this.subcatServices
                   .subirImg(this.selectedFile)
                   .pipe(
@@ -923,6 +1010,8 @@ export class CategoriasComponent {
                         modulo: 'Categorías',
                         descripcion: `Se creó la subcategoría ${response.nombre_subcat}`,
                       };
+
+                      //Subcategoria creada exitosamente
                       await this.logsServices.crearLog(log);
                       this.adminComponente.subcategorias = this.subcategorias;
                       Swal.fire({

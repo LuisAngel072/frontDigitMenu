@@ -2,7 +2,9 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { PedidosService } from '../../services/pedidos.service';
 import { Pedidos } from '../../interfaces/types';
-
+/**
+ * Componente de pantalla de clientes. Da primero un mensaje de bienvenida al sistema.
+ */
 @Component({
   selector: 'app-clientes',
   standalone: true,

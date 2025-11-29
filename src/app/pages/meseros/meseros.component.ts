@@ -8,7 +8,9 @@ import { MesasService, Mesa } from '../../services/mesas.service';
 import { NotificacionesService, Notificacion } from '../../services/notificaciones.service';
 import { PedidosService } from '../../services/pedidos.service';
 import { QRCodeModule } from 'angularx-qrcode';
-
+/**
+ * Componente de pantalla de meseros. Muestra las mesas y sus notificaciones.
+ */
 @Component({
     selector: 'app-meseros',
     templateUrl: './meseros.component.html',
@@ -45,7 +47,10 @@ export class MeserosComponent implements OnInit, OnDestroy {
       clearInterval(this.intervalId);
     }
   }
-
+  /**
+   * cargarMesas carga las mesas desde el servicio y maneja errores si ocurren.
+   * Además, inicia la carga de notificaciones para cada mesa.
+   */
   cargarMesas(): void {
     this.isLoading = true;
     this.errorMessage = '';
@@ -69,7 +74,10 @@ export class MeserosComponent implements OnInit, OnDestroy {
         this.isLoading = false;
       });
   }
-
+  /**
+   * cargarNotificaciones carga las notificaciones pendientes para cada mesa
+   * y actualiza las estructuras de datos correspondientes.
+   */
   async cargarNotificaciones(): Promise<void> {
     for (const mesa of this.mesas) {
       try {
@@ -93,7 +101,12 @@ export class MeserosComponent implements OnInit, OnDestroy {
   tieneNotificaciones(mesa: Mesa): boolean {
     return this.obtenerNotificacionesPorMesa(mesa.no_mesa).length > 0;
   }
-
+  /**
+   * atenderNotificacion Notifica que una notificación ha sido atendida, actualiza las
+   * estructuras de datos y muestra alertas de éxito o error.
+   * @param notificacionId
+   * @param mesaId
+   */
   async atenderNotificacion(notificacionId: number, mesaId: number): Promise<void> {
     try {
       await this.notificacionesService.atenderNotificacion(notificacionId);
@@ -114,7 +127,12 @@ export class MeserosComponent implements OnInit, OnDestroy {
       Swal.fire('Error', 'No se pudo atender la notificación', 'error');
     }
   }
-
+  /**
+   * mostrarNotificaciones muestra las notificaciones pendientes de una mesa en un modal.
+   *
+   * @param mesa
+   * @returns
+   */
   mostrarNotificaciones(mesa: Mesa): void {
     const notifs = this.obtenerNotificacionesPorMesa(mesa.no_mesa);
 
@@ -295,7 +313,11 @@ export class MeserosComponent implements OnInit, OnDestroy {
       return total + precio;
     }, 0);
   }
-
+  /**
+   * Crear un nuevo pedido para una mesa específica, navegando al componente de clientes-menu.
+   * Esto en caso que el cliente desee mejor darle instrucciones al mesero.
+   * @param mesa
+   */
   crearPedido(mesa: Mesa): void {
     Swal.fire({
       title: 'Crear Pedido',

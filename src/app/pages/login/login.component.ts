@@ -20,7 +20,11 @@ export class LoginComponent {
     private readonly authService: AuthService,
     private readonly router: Router
   ) {}
-
+  /**
+   * onSubmit maneja el envío del formulario de login,
+   * mostrando alertas de carga, éxito o error según corresponda.
+   * Esto es realizado por el servicio AuthService.
+   */
   async onSubmit() {
     const data = {
       codigo: this.codigo,

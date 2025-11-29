@@ -1,5 +1,16 @@
 import { EstadoPedido, Extras, Ingredientes, Opciones } from "./types";
-
+/**
+ * Data Transfer Objects (DTOs) para la comunicación con la API.
+ * Estos tipos definen la estructura de los datos que se envían y reciben
+ * entre el frontend y el backend.
+ * Cada DTO corresponde a una entidad o acción específica en el sistema.
+ * Por ejemplo, UsuariosDTO define la estructura de los datos de un usuario,
+ * incluyendo información personal, contacto, rol y estado.
+ * Estos DTOs facilitan la validación y manipulación de datos en la aplicación.
+ *
+ * Los DTOs deben coincidir con los DTOs establecidos en el backend para asegurar
+ * una comunicación correcta y evitar errores de desajuste de datos.
+ */
 export type UsuariosDTO = {
   codigo: string;
   nombres: string;

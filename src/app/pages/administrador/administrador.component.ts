@@ -54,6 +54,11 @@ export class AdministradorComponent implements OnInit {
   ) {}
 
   async ngOnInit() {
+    /**
+     * Inicializa los datos necesarios para el componente de administrador.
+     * Carga roles, ingredientes, extras, opciones, categorías, subcategorías y productos para
+     * todos los demás componentes hijo.
+     */
     this.roles = await this.rolesService.obtenerRoles();
     this.ingredientes = await this.ingredientesService.getIngredientes();
     this.extras = await this.extrasService.getExtras();

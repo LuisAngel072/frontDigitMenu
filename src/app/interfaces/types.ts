@@ -1,3 +1,15 @@
+/**
+ * Tipos de datos utilizados en la aplicación.
+ *
+ * Estos tipos definen la estructura de los datos que se manejan
+ * en la aplicación, facilitando la tipificación y validación.
+ * Cada tipo corresponde a una entidad o concepto específico
+ * dentro del sistema, como Usuarios, Productos, Pedidos, etc.
+ *
+ * Estos tipos deben coincidir con las entidades (o definicion el la bd)
+ * definidas en el backend para asegurar una comunicación correcta
+ * y evitar errores de desajuste de datos.
+ */
 export type Usuarios = {
   id_usuario: number;
   codigo: string;
