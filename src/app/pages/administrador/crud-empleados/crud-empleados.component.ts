@@ -50,7 +50,6 @@ export class CrudEmpleadosComponent implements OnInit {
     private readonly sharedService: SharedService,
     private readonly logsService: LogsService
   ) {
-    this.usuarios = this.adminComponente.usuarios;
     this.roles = this.adminComponente.roles;
     this.rolSeleccionado = 0;
     this.activo = 0;
@@ -94,8 +93,8 @@ export class CrudEmpleadosComponent implements OnInit {
    * @param event
    */
   filtrarUsuarios(event: any) {
-    const valor = event.target.lowerCase();
-    this.usuariosFiltrados = this.adminComponente.usuarios.filter((usuario) => {
+    const valor = event.target.value.toLowerCase();
+    this.usuariosFiltrados = this.usuarios.filter((usuario) => {
       const codigo = usuario.usuario_id.codigo.toLowerCase() || '';
       const nombres = usuario.usuario_id.nombres.toLowerCase() || '';
       const primer_apellido =
@@ -129,22 +128,22 @@ export class CrudEmpleadosComponent implements OnInit {
     this.activo = Number(element.value);
     switch (this.activo) {
       case 0:
-        this.usuariosFiltrados = this.adminComponente.usuarios;
+        this.usuariosFiltrados = this.usuarios;
         break;
       case 1:
-        this.usuarios = this.adminComponente.usuarios;
+        this.usuarios = this.usuarios;
         this.usuariosFiltrados = this.usuarios.filter(
           (usuario) => usuario.usuario_id.activo === true
         );
         break;
       case 2:
-        this.usuarios = this.adminComponente.usuarios;
+        this.usuarios = this.usuarios;
         this.usuariosFiltrados = this.usuarios.filter(
           (usuario) => usuario.usuario_id.activo === false
         );
         break;
       default:
-        this.usuariosFiltrados = this.adminComponente.usuarios;
+        this.usuariosFiltrados = this.usuarios;
         break;
     }
   }
@@ -155,8 +154,11 @@ export class CrudEmpleadosComponent implements OnInit {
   filtrarUsuariosPorRol(event: Event) {
     const element = event.target as HTMLSelectElement;
     this.rolSeleccionado = Number(element.value);
-    this.usuarios = this.adminComponente.usuarios;
-    this.usuarios = this.usuarios.filter(
+    if (this.rolSeleccionado === 0) {
+      this.usuariosFiltrados = this.usuarios;
+      return;
+    }
+    this.usuariosFiltrados = this.usuarios.filter(
       (usuario) => usuario.rol_id.id_rol === this.rolSeleccionado
     );
   }
@@ -539,7 +541,7 @@ export class CrudEmpleadosComponent implements OnInit {
                       .obtenerUsuariosYRoles()
                       .then((usuarios) => {
                         this.usuarios = usuarios;
-                        this.adminComponente.usuarios = this.usuarios;
+                        this.usuariosFiltrados = this.usuarios;
                         this.formData = {};
                       });
                   },
@@ -557,7 +559,7 @@ export class CrudEmpleadosComponent implements OnInit {
                     this.usuarios =
                       await this.usuariosService.obtenerUsuariosYRoles();
 
-                    this.adminComponente.usuarios = this.usuarios;
+                    this.usuariosFiltrados = this.usuarios;
                     this.cdr.detectChanges();
                   },
                 });
@@ -578,7 +580,7 @@ export class CrudEmpleadosComponent implements OnInit {
                     await this.usuariosService.obtenerUsuariosYRoles();
                   this.cdr.detectChanges();
 
-                  this.adminComponente.usuarios = this.usuarios;
+                  this.usuariosFiltrados = this.usuarios;
                 },
                 error: (err) => {
                   console.error('Error durante el registro del usuario:', err);
@@ -1135,7 +1137,7 @@ export class CrudEmpleadosComponent implements OnInit {
                       .obtenerUsuariosYRoles()
                       .then((usuarios) => {
                         this.usuarios = usuarios;
-                        this.adminComponente.usuarios = this.usuarios;
+                        this.usuariosFiltrados = this.usuarios;
                         this.formData = {};
                       });
 
@@ -1159,7 +1161,7 @@ export class CrudEmpleadosComponent implements OnInit {
                     this.usuarios =
                       await this.usuariosService.obtenerUsuariosYRoles();
 
-                    this.adminComponente.usuarios = this.usuarios;
+                    this.usuariosFiltrados = this.usuarios;
                   },
                 });
             } else {
@@ -1181,7 +1183,7 @@ export class CrudEmpleadosComponent implements OnInit {
                       await this.usuariosService.obtenerUsuariosYRoles();
                     this.sharedService;
                     this.cdr.detectChanges();
-                    this.adminComponente.usuarios = this.usuarios;
+                    this.usuariosFiltrados = this.usuarios;
                   },
                   error: (err) => {
                     console.error('Error al actualizar usuario:', err);
@@ -1270,11 +1272,11 @@ export class CrudEmpleadosComponent implements OnInit {
             await this.logsService.crearLog(log);
             this.usuarios = await this.usuariosService.obtenerUsuariosYRoles();
 
-            this.adminComponente.usuarios = this.usuarios;
+            this.usuariosFiltrados = this.usuarios;
           } catch (error) {
             this.usuarios = await this.usuariosService.obtenerUsuariosYRoles();
 
-            this.adminComponente.usuarios = this.usuarios;
+            this.usuariosFiltrados = this.usuarios;
             Swal.close();
             Swal.fire({
               icon: 'error',
@@ -1358,12 +1360,11 @@ export class CrudEmpleadosComponent implements OnInit {
             };
             await this.logsService.crearLog(log);
             this.usuarios = await this.usuariosService.obtenerUsuariosYRoles();
-
-            this.adminComponente.usuarios = this.usuarios;
+            this.usuariosFiltrados = this.usuarios;
           } catch (error) {
             this.usuarios = await this.usuariosService.obtenerUsuariosYRoles();
 
-            this.adminComponente.usuarios = this.usuarios;
+            this.usuariosFiltrados = this.usuarios;
             Swal.close();
             Swal.fire({
               icon: 'error',
